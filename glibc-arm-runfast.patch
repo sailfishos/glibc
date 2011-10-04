@@ -1,0 +1,31 @@
+# DP: Enable RunFast mode by default
+
+diff -Naur eglibc-2.10.orig/ports/sysdeps/arm/eabi/fpu_control.h eglibc-2.10/ports/sysdeps/arm/eabi/fpu_control.h
+--- eglibc-2.10.orig/ports/sysdeps/arm/eabi/fpu_control.h	2009-10-12 21:30:02.000000000 +0300
++++ eglibc-2.10/ports/sysdeps/arm/eabi/fpu_control.h	2010-12-10 14:05:34.211855205 +0200
+@@ -41,9 +41,10 @@
+ /* Some bits in the FPSCR are not yet defined.  They must be preserved when
+    modifying the contents.  */
+ #define _FPU_RESERVED	0x0e08e0e0
+-#define _FPU_DEFAULT    0x00000000
++/* The default mode is RunFast */
++#define _FPU_DEFAULT    (3 << 24)
+ /* Default + exceptions enabled. */
+-#define _FPU_IEEE	(_FPU_DEFAULT | 0x00001f00)
++#define _FPU_IEEE	0x00001f00
+ 
+ /* Type of the control word.  */
+ typedef unsigned int fpu_control_t;
+diff -Naur eglibc-2.10.orig/sysdeps/unix/sysv/linux/init-first.c eglibc-2.10/sysdeps/unix/sysv/linux/init-first.c
+--- eglibc-2.10.orig/sysdeps/unix/sysv/linux/init-first.c	2009-10-12 21:29:00.000000000 +0300
++++ eglibc-2.10/sysdeps/unix/sysv/linux/init-first.c	2010-12-10 14:04:24.364680564 +0200
+@@ -69,6 +69,9 @@
+ 	__setfpucw (__fpu_control);
+     }
+ 
++  /* Set the default FPU mode once again it is RunFast */
++  _FPU_SETCW(_FPU_DEFAULT);
++
+   /* Save the command-line arguments.  */
+   __libc_argc = argc;
+   __libc_argv = argv;

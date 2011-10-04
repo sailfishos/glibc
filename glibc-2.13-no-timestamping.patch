@@ -1,0 +1,27 @@
+diff -ru glibc-2.13/csu/Makefile glibc-2.13-no-timestamping/csu/Makefile
+--- glibc-2.13/csu/Makefile	2011-01-18 05:34:07.000000000 +0100
++++ glibc-2.13-no-timestamping/csu/Makefile	2011-08-23 17:07:34.363191368 +0200
+@@ -234,8 +234,8 @@
+ 		   if [ -z "$$os" ]; then \
+ 		     os=Linux; \
+ 		   fi; \
+-		   printf '"Compiled on a %s %s system on %s.\\n"\n' \
+-			  "$$os" "$$version" "`date +%Y-%m-%d`";; \
++		   printf '"Compiled on OBS, see rpm -q glibc for more information\\n"\n' \
++			  ;; \
+ 	   *) ;; \
+ 	 esac; \
+ 	 files="$(all-Banner-files)";				\
+Only in glibc-2.13-no-timestamping/csu: Makefile~
+diff -ru glibc-2.13/nscd/nscd_stat.c glibc-2.13-no-timestamping/nscd/nscd_stat.c
+--- glibc-2.13/nscd/nscd_stat.c	2011-08-24 07:43:18.419464199 +0200
++++ glibc-2.13-no-timestamping/nscd/nscd_stat.c	2011-08-24 07:43:52.837209224 +0200
+@@ -38,7 +38,7 @@
+ 
+ 
+ /* We use this to make sure the receiver is the same.  */
+-static const char compilation[21] = __DATE__ " " __TIME__;
++static const char compilation[21] = "built on OBS";
+ 
+ /* Statistic data for one database.  */
+ struct dbstat

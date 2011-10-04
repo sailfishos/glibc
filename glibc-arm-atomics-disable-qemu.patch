@@ -1,0 +1,12 @@
+diff -ru glibc-2.13/ports/sysdeps/unix/sysv/linux/arm/nptl/bits/atomic.h glibc-2.13-arm-qemu-atomics/ports/sysdeps/unix/sysv/linux/arm/nptl/bits/atomic.h
+--- glibc-2.13/ports/sysdeps/unix/sysv/linux/arm/nptl/bits/atomic.h	2011-01-25 22:00:16.000000000 +0100
++++ glibc-2.13-arm-qemu-atomics/ports/sysdeps/unix/sysv/linux/arm/nptl/bits/atomic.h	2011-06-23 12:44:45.051613056 +0200
+@@ -39,7 +39,7 @@
+ 
+ /* Use the atomic builtins provided by GCC in case the backend provides
+    a pattern to do this efficiently.  */
+-
++#undef __GCC_HAVE_SYNC_COMPARE_AND_SWAP_4
+ #ifdef __GCC_HAVE_SYNC_COMPARE_AND_SWAP_4
+ #define atomic_full_barrier() __sync_synchronize ()
+ #elif defined __thumb2__

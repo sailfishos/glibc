@@ -1,0 +1,125 @@
+* Thu Sep 15 2011 Carsten Munk <carsten@maemo.org> - 2.13
+- meego -> %{_vendor}
+
+* Tue Aug 23 2011 Carsten Munk <carsten@maemo.org> - 2.13
+- Don't timestamp glibc, wastes build power
+
+* Thu Jul 07 2011 Junfeng Dong <junfeng.dong@intel.com> -2.13
+- Add cve-2011-0536.patch, cve-2011-1089.patch and cve-2011-1659.patch to fix
+  three security issues.
+
+* Thu Jun 23 2011 Carsten Munk <carsten@maemo.org> - 2.13
+- New gcc atomics for ARM breaks some configure tests (gzip, m4)
+  when running inside qemu-arm.  Needed to make glibc 2.13 work 
+  properly on MeeGo 1.3. 
+
+* Wed Jun 22 2011 Chris Ferron <chris.e.ferron@linux.intel.com> - 2.13  
+- removed util-linux-ng as it has been replaced by util-linux  
+
+* Sat Jun 18 2011 Anas Nashif <anas.nashif@intel.com> - 2.13
+- Workaround to avoid problems with new debuginfo in upcoming rpm
+
+* Fri May 27 2011 Chris Ferron <chris.e.ferron@linux.intel.com> - 2.13
+- removed chkconfig and init for nscd. We should not use nscd or init scripts
+
+* Mon May 23 2011 Junfeng Dong <junfeng.dong@intel.com> - 2.13
+- Build the only needed locale archive to reduce the size.
+
+* Wed May 18 2011 Junfeng Dong <junfeng.dong@intel.com> - 2.13
+- Remove dependence on basesystem.
+
+* Thu Mar 10 2011 Junfeng Dong <junfeng.dong@intel.com> - 2.13
+- Update to 2.13.
+
+* Mon Jan 17 2011 Austin Zhang <austin.zhang@intel.com> - 2.11.90
+- Fix BMC#12213: CVE-2010-3847, ld.so insecure handling of $ORIGIN in
+  LD_AUDIT for setuid/setgid programs.
+- Fix BMC#12216: CVE-2010-3856, ld.so arbitrary DSO loading via LD_AUDIT
+  in setuid/setgid programs
+
+* Mon Jan 17 2011 Carsten Munk <carsten@maemo.org> - 2.11.90
+- BMC#12448 - ARM: glibc does not export neon hwcap
+- BMC#12517 - ARM: glibc wastes time checking for half-precision and fast-mult HWCAP libraries
+- BMC#12518 - ARM: default to FPU RunFast mode
+
+* Tue Jan 04 2011 Austin Zhang <austin.zhang@intel.com> - 2.11.90 
+- Fixed syntax error from using %install_info MACRO, BMC#11918. 
+
+* Wed Dec 29 2010 Austin Zhang <austin.zhang@intel.com> - 2.11.90 
+- BMC#10342: Error when installing glibc-devel with --excludedocs in .ks 
+
+* Fri Nov 26 2010 Brian Harring <brian.harring@intel.com> - 2.11.90 
+- BMC 10526; fix silent failure in building arm locale-archives.
+
+* Fri Aug 20 2010 Peter J Zhu <peter.j.zhu@intel.com> - 2.11.90
+- Revert to 2.11
+- Fix rpmlint errors
+
+* Tue Jul 27 2010 Austin Zhang <austin.zhang@intel.com> - 2.11.90
+- Fix BMC#2638: CVE-2010-0296, mount leads to DoS or privilege leak
+
+* Fri Apr 16 2010 Austin Zhang <austin.zhang@intel.com> - 2.11.90
+- Patch from H.J tree for bugfix in memory optimization -- fix
+  BMC#983 
+
+* Fri Mar 26 2010 Austin Zhang <austin.zhang@intel.com> - 2.11.90
+- Patches from upstream for workaround issue: prelink will lead
+  to SIGSEGV due to wrong hash table content in glibc.  
+
+* Fri Mar 19 2010 Austin Zhang <austin.zhang@intel.com> - 2.11.90
+- Patches from H.J. L x86 branch: 
+  Correct unwind info; update xmm3 when exit from loop
+  (sync to 20100318)
+
+* Fri Mar 12 2010 Anas Nashif <anas.nashif@intel.com> - 2.11.90
+- Added GCC ports
+
+* Fri Mar 05 2010 Anas Nashif <anas.nashif@intel.com> - 2.11.90
+- Set BuildFlags  according to architecture
+
+* Tue Mar 02 2010 Austin Zhang <austin.zhang@intel.com> - 2.11.90-20100226
+- For atom optimization:
+  Sync with hjl/release/2.11/x86 branch from upstream, which inlcude 
+  those memory operations optimization for atom (so remove old ones), and
+  also include str operation optimizations for atom;
+  Now, the up-to-date version is tillto 2010-02-26
+
+* Tue Jan 19 2010 Austin Zhang <austin.zhang@intel.com> - 2.11.90
+- Fixed CVE bug [MB#9120]: getpwnam shows shadow passwords of NIS 
+  users in GNU libc
+
+* Mon Dec 21 2009 Austin Zhang <austin.zhang@intel.com> - 2.11.90
+- Enable atom memory operations optimization.
+
+* Mon Nov 30 2009 Austin Zhang <austin.zhang@intel.com> - 2.11.90
+- Update to 2.11.90
+- Removed obseleted stuffs and removed Hardlink of locale-archive
+
+* Fri Nov 11 2009 Arjan van de Ven <arjan@linux.intel.com> - 2.10.90
+- add atom specific memcpy() functions
+- use -mtune=atom
+
+* Thu Sep 16 2009 Austin Zhang <austin.zhang@intel.com> - 2.10.90
+- Update to latest snapshot -335
+
+* Sat Aug 22 2009 Anas Nashif <anas.nashif@intel.com> - 2.10.90
+- Update to 2.10
+
+* Wed May 6 2009 Arjan van de Ven <arjan@linux.intel.com> 2.9
+- use -march=core2
+
+* Tue Jan 13 2009 Anas Nashif <anas.nashif@intel.com> 2.9
+- PreReq libgcc43
+
+* Thu Jan 08 2009 Anas Nashif <anas.nashif@intel.com> 2.9
+- Update to 2.9
+
+* Tue Dec 16 2008 Anas Nashif <anas.nashif@intel.com> 2.8
+- Fixed rpmlint errors in Summary tag
+
+* Thu Dec 11 2008 Anas Nashif <anas.nashif@intel.com> 2.8
+- remove dependency on util-linux and procps
+
+* Tue Aug 19 2008 Anas Nashif <anas.nashif@intel.com> 
+- exclude i586 from aux arches
+
