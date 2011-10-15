@@ -58,7 +58,11 @@ BuildRequires: gawk,  util-linux
 BuildRequires: gcc >= 3.2
 %define enablekernel 2.6.25
 %ifarch %{ix86}
+%ifarch i486
+%define _target_cpu	i486
+%else
 %define _target_cpu	i686
+%endif
 %endif
 %ifarch i386
 %define nptl_target_cpu i486
@@ -206,7 +210,11 @@ GCC=gcc
 GXX=g++
 echo %{ix86}
 %ifarch %{ix86}
+%ifarch i486
+BuildFlags="-march=i486"
+%else
 BuildFlags="-march=core2 -mtune=atom"
+%endif
 %endif
 
 %ifnarch %{arm}

@@ -1,3 +1,6 @@
+* Sat Sep 24 2011 Alistair Buxton <a.j.buxton@gmail.com> - 2.13
+- Add i486 conditionals to spec file.
+
 * Thu Sep 15 2011 Carsten Munk <carsten@maemo.org> - 2.13
 - meego -> %{_vendor}
 
