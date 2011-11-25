@@ -39,6 +39,7 @@ Patch7: cve-2011-1659.patch
 Patch8: glibc-2.13-locale.patch
 Patch9: glibc-arm-atomics-disable-qemu.patch
 Patch10: glibc-2.13-no-timestamping.patch
+Patch11: glibc-2.13-onlyenus.patch
 
 Provides: ldconfig
 # The dynamic linker supports DT_GNU_HASH
@@ -195,6 +196,7 @@ mv glibc-ports-2.13 ports
 %patch8 -p1
 %patch9 -p1
 %patch10 -p1
+%patch11 -p1
 
 cat > find_provides.sh <<EOF
 #!/bin/sh
