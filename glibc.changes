@@ -1,3 +1,11 @@
+* Fri Jan 06 2012 Carsten Munk <carsten@merproject.org> - 2.14
+- For SB2-OBS integration:
+   glibc-2.14.1-elf-rtld.c.1.diff
+   glibc-2.14.1-ldso-nodefaultdirs-option.5.diff
+   glibc-2.14.1-ldso-rpath-prefix-option.2.diff
+   glibc-2.14.1-nscd-socket-location.4.diff
+   glibc-2.14.1-nsswitchconf-location.3.diff
+
 * Fri Nov 25 2011 Carsten Munk <carsten@merproject.org> - 2.13
 - Add glibc-2.13-onlyenus.patch, we're only interested in en_US locales
   right now. For integrators, you can use localedef in your %post

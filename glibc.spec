@@ -41,6 +41,12 @@ Patch9: glibc-arm-atomics-disable-qemu.patch
 Patch10: glibc-2.13-no-timestamping.patch
 Patch11: glibc-2.13-onlyenus.patch
 
+Patch12: glibc-2.14.1-elf-rtld.c.1.diff
+Patch13: glibc-2.14.1-ldso-rpath-prefix-option.2.diff
+Patch14: glibc-2.14.1-nsswitchconf-location.3.diff
+Patch15: glibc-2.14.1-nscd-socket-location.4.diff
+Patch16: glibc-2.14.1-ldso-nodefaultdirs-option.5.diff
+
 Provides: ldconfig
 # The dynamic linker supports DT_GNU_HASH
 Provides: rtld(GNU_HASH)
@@ -197,6 +203,11 @@ mv glibc-ports-2.13 ports
 %patch9 -p1
 %patch10 -p1
 %patch11 -p1
+%patch12 -p1
+%patch13 -p1
+%patch14 -p1
+%patch15 -p1
+%patch16 -p1
 
 cat > find_provides.sh <<EOF
 #!/bin/sh
