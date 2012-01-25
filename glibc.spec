@@ -39,7 +39,7 @@ Patch7: cve-2011-1659.patch
 Patch8: glibc-2.13-locale.patch
 Patch9: glibc-arm-atomics-disable-qemu.patch
 Patch10: glibc-2.13-no-timestamping.patch
-Patch11: glibc-2.13-onlyenus.patch
+#Patch11: glibc-2.13-onlyenus.patch
 
 Patch12: glibc-2.14.1-elf-rtld.c.1.diff
 Patch13: glibc-2.14.1-ldso-rpath-prefix-option.2.diff
@@ -202,7 +202,7 @@ mv glibc-ports-2.13 ports
 %patch8 -p1
 %patch9 -p1
 %patch10 -p1
-%patch11 -p1
+#%patch11 -p1
 %patch12 -p1
 %patch13 -p1
 %patch14 -p1

@@ -1,3 +1,7 @@
+* Wed Jan 25 2012 Carsten Munk <carsten@merprojectorg> - 2.14
+- Drop onlyenus patch temporarily, it screws up file system ordering
+  during builds
+
 * Fri Jan 06 2012 Carsten Munk <carsten@merproject.org> - 2.14
 - For SB2-OBS integration:
    glibc-2.14.1-elf-rtld.c.1.diff
