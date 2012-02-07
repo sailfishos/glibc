@@ -47,6 +47,8 @@ Patch14: glibc-2.14.1-nsswitchconf-location.3.diff
 Patch15: glibc-2.14.1-nscd-socket-location.4.diff
 Patch16: glibc-2.14.1-ldso-nodefaultdirs-option.5.diff
 
+Patch17: tzdata-update.c.mips.patch
+
 Provides: ldconfig
 # The dynamic linker supports DT_GNU_HASH
 Provides: rtld(GNU_HASH)
@@ -189,8 +191,8 @@ mv glibc-ports-2.13 ports
 
 %patch0 -E -p1
 
-%ifarch %{arm}
 %patch1 -p1
+%ifarch %{arm}
 %patch2 -p1
 %patch3 -p1
 %endif
@@ -208,6 +210,7 @@ mv glibc-ports-2.13 ports
 %patch14 -p1
 %patch15 -p1
 %patch16 -p1
+%patch17 -p1
 
 cat > find_provides.sh <<EOF
 #!/bin/sh
@@ -238,7 +241,7 @@ EnableKernel="--enable-kernel=%{enablekernel}"
 echo "$GCC" > Gcc
 AddOns=`echo */configure | sed -e 's!/configure!!g;s!\(linuxthreads\|nptl\|rtkaio\|powerpc-cpu\)\( \|$\)!!g;s! \+$!!;s! !,!g;s!^!,!;/^,\*$/d'`
 
-%ifarch %{arm}
+%ifarch %{arm} mipsel
 AddOns=,ports$AddOns
 %endif
 
@@ -265,7 +268,7 @@ build_CFLAGS="$BuildFlags -g -O3 $*"
 	--enable-multi-arch \
 %endif
 	--disable-profile --enable-experimental-malloc --enable-nss-crypt
-make %{?_smp_mflags} -r CFLAGS="$build_CFLAGS" PARALLELMFLAGS=-s
+make %{?_smp_mflags} -r CFLAGS="$build_CFLAGS" 
 
 cd ..
 }
