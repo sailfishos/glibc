@@ -1,18 +1,17 @@
 # temporary needed for debuginfo change in rpm package
 %define _unpackaged_files_terminate_build 0
-%define glibcsrcdir glibc-2.13
-%define glibcversion 2.13
+%define glibcsrcdir eglibc-2.15
 ### glibc.spec.in follows:
 %define run_glibc_tests 0
 %define multiarcharches %{ix86} x86_64
 
 
-%define debuginfocommonarches alpha alphaev6 sparc sparcv9 sparcv9v sparc64 sparc64v
 
-Summary: The GNU libc libraries
+Summary: Embedded GLIBC (EGLIBC) is a variant of the GNU C Library (GLIBC)
 Name: glibc
-Version: 2.13
-Release: 12
+Version: 2.15
+Release: 1
+
 # GPLv2+ is used in a bunch of programs, LGPLv2+ is used for libraries.
 # Things that are linked directly into dynamically linked programs
 # and shared libraries (e.g. crt files, lib*_nonshared.a) have an additional
@@ -20,34 +19,19 @@ Release: 12
 # libraries without restrictions.
 License: LGPLv2+ and LGPLv2+ with exceptions and GPLv2+
 Group: System/Libraries
-URL: http://sources.redhat.com/glibc/
-Source0: glibc-2.13.tar.bz2
-Source1: %{glibcsrcdir}-fedora.tar.bz2
-Source2: glibc-ports-2.13.tar.bz2
-Patch0: %{name}-fedora.patch
-
-Patch1: tzdata-update.c.arm.patch
-Patch2: glibc-arm-alignment-fix.patch
-Patch3: glibc-arm-runfast.patch
-
-Patch4: cve-2010-3847.patch
-Patch5: cve-2011-0536.patch
-Patch6: cve-2011-1089.patch
-Patch7: cve-2011-1659.patch
-
-# Meego: Build the only needed locale-archive.
-Patch8: glibc-2.13-locale.patch
-Patch9: glibc-arm-atomics-disable-qemu.patch
-Patch10: glibc-2.13-no-timestamping.patch
-#Patch11: glibc-2.13-onlyenus.patch
-
-Patch12: glibc-2.14.1-elf-rtld.c.1.diff
-Patch13: glibc-2.14.1-ldso-rpath-prefix-option.2.diff
-Patch14: glibc-2.14.1-nsswitchconf-location.3.diff
-Patch15: glibc-2.14.1-nscd-socket-location.4.diff
-Patch16: glibc-2.14.1-ldso-nodefaultdirs-option.5.diff
-
-Patch17: tzdata-update.c.mips.patch
+URL: http://www.eglibc.org/
+Source0: http://archive.ubuntu.com/ubuntu/pool/main/e/eglibc/eglibc_2.15.orig.tar.gz
+Patch0: eglibc_2.15-0ubuntu2.diff.gz
+Patch1: glibc-arm-alignment-fix.patch
+Patch2: glibc-arm-runfast.patch
+Patch3: glibc-2.13-no-timestamping.patch
+Patch4: glibc-2.14.1-elf-rtld.c.1.diff
+Patch5: glibc-2.14.1-ldso-rpath-prefix-option.2.diff
+Patch6: eglibc-2.15-nsswitchconf-location.3.diff
+Patch7: glibc-2.14.1-nscd-socket-location.4.diff
+Patch8: glibc-2.14.1-ldso-nodefaultdirs-option.5.diff
+Patch9: eglibc-2.15-mips-async-unwind.patch
+Patch10: eglibc-2.15-mips-no-n32-n64.patch
 
 Provides: ldconfig
 # The dynamic linker supports DT_GNU_HASH
@@ -61,11 +45,11 @@ Requires(pre): libgcc
 BuildRequires:  zlib-devel texinfo
 BuildRequires: sed >= 3.95, libcap-devel, gettext, nss-devel
 #BuildRequires: /bin/ps, /bin/kill, /bin/awk, procps
-BuildRequires: gawk,  util-linux
-# This is to ensure that __frame_state_for is exported by glibc
+BuildRequires: gawk,  util-linux, quilt
+# This gcc >= 3.2 is to ensure that __frame_state_for is exported by glibc
 # will be compatible with egcs 1.x.y
 BuildRequires: gcc >= 3.2
-%define enablekernel 2.6.25
+%define enablekernel 2.6.32
 %ifarch %{ix86}
 %ifarch i486
 %define _target_cpu	i486
@@ -185,18 +169,13 @@ If unsure if you need this, don't install this package.
 
 
 %prep
-%setup -q -n %{glibcsrcdir} %{?glibc_release_unpack} -b1 -a2
-%{?glibc_release_setup}
-mv glibc-ports-2.13 ports
-
-%patch0 -E -p1
-
+%setup -q -n %{glibcsrcdir} %{?glibc_release_unpack}
+%patch0 -p1
 %patch1 -p1
 %ifarch %{arm}
 %patch2 -p1
-%patch3 -p1
 %endif
-
+%patch3 -p1
 %patch4 -p1
 %patch5 -p1
 %patch6 -p1
@@ -204,13 +183,12 @@ mv glibc-ports-2.13 ports
 %patch8 -p1
 %patch9 -p1
 %patch10 -p1
-#%patch11 -p1
-%patch12 -p1
-%patch13 -p1
-%patch14 -p1
-%patch15 -p1
-%patch16 -p1
-%patch17 -p1
+
+# Not well formatted locales --cvm
+sed -i "s|^localedata/locale-eo_EO.diff$||g" debian/patches/series
+sed -i "s|^localedata/locale-ia.diff$||g" debian/patches/series
+
+QUILT_PATCHES=debian/patches quilt push -a
 
 cat > find_provides.sh <<EOF
 #!/bin/sh
@@ -275,24 +253,12 @@ cd ..
 
 build_nptl linuxnptl
 
-cd build-%{nptl_target_cpu}-linuxnptl
-$GCC -static -L. -Os ../fedora/glibc_post_upgrade.c -o glibc_post_upgrade.%{_target_cpu} \
-  -DNO_SIZE_OPTIMIZATION \
-%ifarch i386 i486 i586
-  -DARCH_386 \
-%endif
-  '-DLIBTLS="/%{_lib}/tls/"' \
-  '-DGCONV_MODULES_DIR="%{_prefix}/%{_lib}/gconv"' \
-  '-DLD_SO_CONF="/etc/ld.so.conf"' \
-  '-DICONVCONFIG="%{_sbindir}/iconvconfig.%{_target_cpu}"'
-cd ..
-
 %install
 GCC=`cat Gcc`
 
 rm -rf $RPM_BUILD_ROOT
 mkdir -p $RPM_BUILD_ROOT
-make -j1 install_root=$RPM_BUILD_ROOT install -C build-%{nptl_target_cpu}-linuxnptl PARALLELMFLAGS=-s
+make -j1 install_root=$RPM_BUILD_ROOT install -C build-%{nptl_target_cpu}-linuxnptl PARALLELMFLAGS=
 %ifnarch %{auxarches}
 cd build-%{nptl_target_cpu}-linuxnptl && \
   make %{?_smp_mflags} install_root=$RPM_BUILD_ROOT install-locales -C ../localedata objdir=`pwd` && \
@@ -306,12 +272,6 @@ librtso=`basename $RPM_BUILD_ROOT/%{_lib}/librt.so.*`
 rm -f $RPM_BUILD_ROOT%{_prefix}/%{_lib}/libNoVersion*
 rm -f $RPM_BUILD_ROOT/%{_lib}/libNoVersion*
 
-# NPTL <bits/stdio-lock.h> is not usable outside of glibc, so include
-# the generic one (#162634)
-cp -a bits/stdio-lock.h $RPM_BUILD_ROOT%{_prefix}/include/bits/stdio-lock.h
-# And <bits/libc-lock.h> needs sanitizing as well.
-cp -a fedora/libc-lock.h $RPM_BUILD_ROOT%{_prefix}/include/bits/libc-lock.h
-
 if [ -d $RPM_BUILD_ROOT%{_prefix}/info -a "%{_infodir}" != "%{_prefix}/info" ]; then
   mkdir -p $RPM_BUILD_ROOT%{_infodir}
   mv -f $RPM_BUILD_ROOT%{_prefix}/info/* $RPM_BUILD_ROOT%{_infodir}
@@ -322,14 +282,10 @@ gzip -9nvf $RPM_BUILD_ROOT%{_infodir}/libc*
 
 ln -sf libbsd-compat.a $RPM_BUILD_ROOT%{_prefix}/%{_lib}/libbsd.a
 
-install -p -m 644 fedora/nsswitch.conf $RPM_BUILD_ROOT/etc/nsswitch.conf
+install -p -m 644 nss/nsswitch.conf $RPM_BUILD_ROOT/etc/nsswitch.conf
 
 mkdir -p $RPM_BUILD_ROOT/etc/default
 install -p -m 644 nis/nss $RPM_BUILD_ROOT/etc/default/nss
-
-# Take care of setuids
-# -- new security review sez that this shouldn't be needed anymore
-#chmod 755 $RPM_BUILD_ROOT%{_prefix}/libexec/pt_chown
 
 # This is for ncsd - in glibc 2.2
 install -m 644 nscd/nscd.conf $RPM_BUILD_ROOT/etc
@@ -349,10 +305,6 @@ mkdir -p $RPM_BUILD_ROOT/etc/sysconfig
 > $RPM_BUILD_ROOT%{_prefix}/%{_lib}/gconv/gconv-modules.cache
 chmod 644 $RPM_BUILD_ROOT%{_prefix}/%{_lib}/gconv/gconv-modules.cache
 
-# Install the upgrade program
-install -m 700 build-%{nptl_target_cpu}-linuxnptl/glibc_post_upgrade.%{_target_cpu} \
-  $RPM_BUILD_ROOT/usr/sbin/glibc_post_upgrade.%{_target_cpu}
-
 strip -g $RPM_BUILD_ROOT%{_prefix}/%{_lib}/*.o
 
 mkdir -p $RPM_BUILD_ROOT%{_prefix}/lib/debug%{_prefix}/%{_lib}
@@ -371,13 +323,9 @@ for i in *.a; do
 done
 popd
 
-# rquota.x and rquota.h are now provided by quota
-rm -f $RPM_BUILD_ROOT%{_prefix}/include/rpcsvc/rquota.[hx]
-
 # Hardlink identical locale files together
 %ifnarch %{auxarches}
 #From 2.11, removed hardlink
-#gcc -O2 -o build-%{nptl_target_cpu}-linuxnptl/hardlink fedora/hardlink.c
 olddir=`pwd`
 pushd ${RPM_BUILD_ROOT}%{_prefix}/lib/locale
 rm locale-archive || :
@@ -385,7 +333,7 @@ rm locale-archive || :
 # by build-locale-archive.
 # note that due to qemu-arm emulation behaviour, we need to break this up into multiple invocations.  
 # see BMC 10526.  
-find . -name '*_*' -maxdepth 1 | xargs -r -n10 -P1 \
+find . -name '*_*' -maxdepth 1 | xargs -r -n10 -P1 --verbose \
 $olddir/build-%{nptl_target_cpu}-linuxnptl/elf/ld.so \
   --library-path $olddir/build-%{nptl_target_cpu}-linuxnptl/ \
   $olddir/build-%{nptl_target_cpu}-linuxnptl/locale/localedef \
@@ -394,7 +342,6 @@ $olddir/build-%{nptl_target_cpu}-linuxnptl/elf/ld.so \
 rm -rf *_*
 mv locale-archive{,.tmpl}
 popd
-#build-%{nptl_target_cpu}-linuxnptl/hardlink -vc $RPM_BUILD_ROOT%{_prefix}/lib/locale
 %endif
 
 rm -f ${RPM_BUILD_ROOT}/%{_lib}/libnss1-*
@@ -482,8 +429,6 @@ sed -i -e '\|%{_prefix}/bin|d' \
 
 > nosegneg.filelist
 
-echo '%{_prefix}/sbin/build-locale-archive' >> common.filelist
-echo '%{_prefix}/sbin/tzdata-update' >> common.filelist
 echo '%{_prefix}/sbin/nscd' > nscd.filelist
 
 cat > utils.filelist <<EOF
@@ -504,21 +449,10 @@ cp -f $RPM_BUILD_ROOT%{_prefix}/share/zoneinfo/US/Eastern $RPM_BUILD_ROOT/etc/lo
 rm -rf $RPM_BUILD_ROOT%{_prefix}/share/zoneinfo
 
 # Make sure %config files have the same timestamp
-touch -r fedora/glibc.spec.in $RPM_BUILD_ROOT/etc/ld.so.conf
+touch -r timezone/northamerica $RPM_BUILD_ROOT/etc/ld.so.conf
 touch -r timezone/northamerica $RPM_BUILD_ROOT/etc/localtime
 touch -r sunrpc/etc.rpc $RPM_BUILD_ROOT/etc/rpc
 
-cd fedora
-$GCC -Os -static -o build-locale-archive build-locale-archive.c \
-  ../build-%{nptl_target_cpu}-linuxnptl/locale/locarchive.o \
-  ../build-%{nptl_target_cpu}-linuxnptl/locale/md5.o \
-  -DDATADIR=\"%{_datadir}\" -DPREFIX=\"%{_prefix}\" \
-  -L../build-%{nptl_target_cpu}-linuxnptl
-install -m 700 build-locale-archive $RPM_BUILD_ROOT/usr/sbin/build-locale-archive
-$GCC -Os -static -o tzdata-update tzdata-update.c \
-  -L../build-%{nptl_target_cpu}-linuxnptl
-install -m 700 tzdata-update $RPM_BUILD_ROOT/usr/sbin/tzdata-update
-cd ..
 
 # the last bit: more documentation
 rm -rf documentation
@@ -591,13 +525,7 @@ touch $RPM_BUILD_ROOT/var/run/nscd/{socket,nscd.pid}
 mkdir -p $RPM_BUILD_ROOT/var/cache/ldconfig
 > $RPM_BUILD_ROOT/var/cache/ldconfig/aux-cache
 
-%post -p /usr/sbin/glibc_post_upgrade.%{_target_cpu}
-
 %postun -p /sbin/ldconfig
-
-%post common -p /usr/sbin/build-locale-archive
-
-%triggerin common -p /usr/sbin/tzdata-update -- tzdata
 
 %post devel
 %install_info %{_infodir}/libc.info.gz %{_infodir}/dir
@@ -629,10 +557,6 @@ if [ "$1" -ge "1" ]; then
   service nscd condrestart > /dev/null 2>&1 || :
 fi
 
-
-%clean
-rm -rf "$RPM_BUILD_ROOT"
-rm -f *.filelist*
 
 %files -f rpm.filelist
 %defattr(-,root,root)
