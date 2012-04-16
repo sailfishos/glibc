@@ -43,7 +43,7 @@ Requires(pre): libgcc
 # For initial glibc bootstraps it can be commented out
 #BuildRequires: gd-devel libpng-devel zlib-devel texinfo
 BuildRequires:  zlib-devel texinfo
-BuildRequires: sed >= 3.95, libcap-devel, gettext, nss-devel
+BuildRequires: sed >= 3.95, libcap-devel, gettext
 #BuildRequires: /bin/ps, /bin/kill, /bin/awk, procps
 BuildRequires: gawk,  util-linux, quilt
 # This gcc >= 3.2 is to ensure that __frame_state_for is exported by glibc
@@ -245,7 +245,7 @@ build_CFLAGS="$BuildFlags -g -O3 $*"
 %ifarch %{multiarcharches}
 	--enable-multi-arch \
 %endif
-	--disable-profile --enable-experimental-malloc --enable-nss-crypt
+	--disable-profile --enable-experimental-malloc 
 make %{?_smp_mflags} -r CFLAGS="$build_CFLAGS" 
 
 cd ..

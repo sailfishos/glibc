@@ -1,3 +1,6 @@
+* Mon Apr 16 2012 Carsten Munk <carsten@merproject.org> - 2.15
+- Remove nss crypt usage.
+
 * Sat Mar 24 2012 Carsten Munk <carsten@merproject.org> - 2.15
 - Change to eglibc from ubuntu, 2.15
 
