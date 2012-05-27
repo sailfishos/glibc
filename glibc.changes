@@ -1,3 +1,6 @@
+* Sun May 27 2012 Carsten Munk <carsten@merproject.org> - 2.15
+- MER#295: Add back build-locale-archive and run it on postinstall
+
 * Mon Apr 16 2012 Carsten Munk <carsten@merproject.org> - 2.15
 - Remove nss crypt usage.
 

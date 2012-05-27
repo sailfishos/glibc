@@ -21,6 +21,7 @@ License: LGPLv2+ and LGPLv2+ with exceptions and GPLv2+
 Group: System/Libraries
 URL: http://www.eglibc.org/
 Source0: http://archive.ubuntu.com/ubuntu/pool/main/e/eglibc/eglibc_2.15.orig.tar.gz
+Source11: build-locale-archive.c
 Patch0: eglibc_2.15-0ubuntu2.diff.gz
 Patch1: glibc-arm-alignment-fix.patch
 Patch2: glibc-arm-runfast.patch
@@ -32,6 +33,7 @@ Patch7: glibc-2.14.1-nscd-socket-location.4.diff
 Patch8: glibc-2.14.1-ldso-nodefaultdirs-option.5.diff
 Patch9: eglibc-2.15-mips-async-unwind.patch
 Patch10: eglibc-2.15-mips-no-n32-n64.patch
+Patch11: glibc-2.14-locarchive-fedora.patch
 
 Provides: ldconfig
 # The dynamic linker supports DT_GNU_HASH
@@ -183,6 +185,7 @@ If unsure if you need this, don't install this package.
 %patch8 -p1
 %patch9 -p1
 %patch10 -p1
+%patch11 -p1
 
 # Not well formatted locales --cvm
 sed -i "s|^localedata/locale-eo_EO.diff$||g" debian/patches/series
@@ -252,6 +255,12 @@ cd ..
 }
 
 build_nptl linuxnptl
+
+$GCC -Os -static -o build-locale-archive %SOURCE11 \
+  ./build-%{nptl_target_cpu}-linuxnptl/locale/locarchive.o \
+  ./build-%{nptl_target_cpu}-linuxnptl/locale/md5.o \
+  -DDATADIR=\"%{_datadir}\" -DPREFIX=\"%{_prefix}\" \
+  -L./build-%{nptl_target_cpu}-linuxnptl -I./locale
 
 %install
 GCC=`cat Gcc`
@@ -429,6 +438,7 @@ sed -i -e '\|%{_prefix}/bin|d' \
 
 > nosegneg.filelist
 
+echo '%{_prefix}/sbin/build-locale-archive' >> common.filelist
 echo '%{_prefix}/sbin/nscd' > nscd.filelist
 
 cat > utils.filelist <<EOF
@@ -522,6 +532,8 @@ touch $RPM_BUILD_ROOT/var/run/nscd/{socket,nscd.pid}
 > $RPM_BUILD_ROOT/%{_prefix}/lib/locale/locale-archive
 %endif
 
+install -m 700 build-locale-archive $RPM_BUILD_ROOT/usr/sbin/build-locale-archive
+
 mkdir -p $RPM_BUILD_ROOT/var/cache/ldconfig
 > $RPM_BUILD_ROOT/var/cache/ldconfig/aux-cache
 
@@ -544,6 +556,8 @@ fi
 %post utils -p /sbin/ldconfig
 
 %postun utils -p /sbin/ldconfig
+
+%post common -p /usr/sbin/build-locale-archive
 
 %pre -n nscd
 /usr/sbin/useradd -M -o -r -d / -s /sbin/nologin \

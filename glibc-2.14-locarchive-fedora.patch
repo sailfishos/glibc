@@ -1,0 +1,34 @@
+diff -Nrup a/locale/programs/locarchive.c b/locale/programs/locarchive.c
+--- a/locale/programs/locarchive.c	2012-01-01 05:16:32.000000000 -0700
++++ b/locale/programs/locarchive.c	2012-04-05 15:41:04.332889619 -0600
+@@ -253,9 +253,9 @@ oldlocrecentcmp (const void *a, const vo
+ /* forward decls for below */
+ static uint32_t add_locale (struct locarhandle *ah, const char *name,
+ 			    locale_data_t data, bool replace);
+-static void add_alias (struct locarhandle *ah, const char *alias,
+-		       bool replace, const char *oldname,
+-		       uint32_t *locrec_offset_p);
++void add_alias (struct locarhandle *ah, const char *alias,
++		bool replace, const char *oldname,
++		uint32_t *locrec_offset_p);
+ 
+ 
+ static bool
+@@ -636,7 +636,7 @@ close_archive (struct locarhandle *ah)
+ #include "../../intl/explodename.c"
+ #include "../../intl/l10nflist.c"
+ 
+-static struct namehashent *
++struct namehashent *
+ insert_name (struct locarhandle *ah,
+ 	     const char *name, size_t name_len, bool replace)
+ {
+@@ -694,7 +694,7 @@ insert_name (struct locarhandle *ah,
+   return &namehashtab[idx];
+ }
+ 
+-static void
++void
+ add_alias (struct locarhandle *ah, const char *alias, bool replace,
+ 	   const char *oldname, uint32_t *locrec_offset_p)
+ {
