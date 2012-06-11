@@ -190,7 +190,10 @@ If unsure if you need this, don't install this package.
 # Not well formatted locales --cvm
 sed -i "s|^localedata/locale-eo_EO.diff$||g" debian/patches/series
 sed -i "s|^localedata/locale-ia.diff$||g" debian/patches/series
-
+# This screws up armv6, as it doesn't have ARMv7 instructions/Thumb2
+%ifarch armv6l
+sed -i "s|^arm/local-linaro-cortex-strings.diff$||g" debian/patches/series
+%endif
 QUILT_PATCHES=debian/patches quilt push -a
 
 cat > find_provides.sh <<EOF
