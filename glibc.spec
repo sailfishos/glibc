@@ -22,7 +22,7 @@ Group: System/Libraries
 URL: http://www.eglibc.org/
 Source0: http://archive.ubuntu.com/ubuntu/pool/main/e/eglibc/eglibc_2.15.orig.tar.gz
 Source11: build-locale-archive.c
-Patch0: eglibc_2.15-0ubuntu2.diff.gz
+Patch0: eglibc_2.15-0ubuntu17.diff.gz
 Patch1: glibc-arm-alignment-fix.patch
 Patch2: glibc-arm-runfast.patch
 Patch3: glibc-2.13-no-timestamping.patch
@@ -39,6 +39,13 @@ Provides: ldconfig
 # The dynamic linker supports DT_GNU_HASH
 Provides: rtld(GNU_HASH)
 Requires: glibc-common = %{version}-%{release}
+
+# This is a short term need until everything is rebuilt in armhf
+%ifarch armv7hl armv7nhl armv7tnhl
+Provides: ld-linux.so.3
+Provides: ld-linux.so.3(GLIBC_2.4)
+%endif
+
 # Require libgcc in case some program calls pthread_cancel in its %%post
 Requires(pre): libgcc
 # This is for building auxiliary programs like memusage, nscd
@@ -245,8 +252,13 @@ build_CFLAGS="$BuildFlags -g -O3 $*"
 	--build %{nptl_target_cpu}-%{_vendor}-linux \
 	--host %{nptl_target_cpu}-%{_vendor}-linux \
 %else
+%ifarch armv7hl armv7tnhl armv7nhl
+        --build %{nptl_target_cpu}-%{_vendor}-linux-gnueabihf \
+        --host %{nptl_target_cpu}-%{_vendor}-linux-gnueabihf \
+%else
         --build %{nptl_target_cpu}-%{_vendor}-linux-gnueabi \
         --host %{nptl_target_cpu}-%{_vendor}-linux-gnueabi \
+%endif
 %endif
 %ifarch %{multiarcharches}
 	--enable-multi-arch \
@@ -355,6 +367,11 @@ rm -rf *_*
 mv locale-archive{,.tmpl}
 popd
 %endif
+
+%ifarch armv7hl armv7tnhl armv7nhl
+ln -s /lib/ld-linux-armhf.so.3 ${RPM_BUILD_ROOT}/lib/ld-linux.so.3
+%endif
+
 
 rm -f ${RPM_BUILD_ROOT}/%{_lib}/libnss1-*
 rm -f ${RPM_BUILD_ROOT}/%{_lib}/libnss-*.so.1
@@ -580,6 +597,9 @@ fi
 %verify(not md5 size mtime) %config(noreplace) /etc/localtime
 %verify(not md5 size mtime) %config(noreplace) /etc/nsswitch.conf
 %verify(not md5 size mtime) %config(noreplace) /etc/ld.so.conf
+%ifarch armv7hl armv7tnhl armv7nhl 
+/lib/ld-linux.so.3
+%endif
 %dir /etc/ld.so.conf.d
 %dir %{_prefix}/libexec/getconf
 %dir %{_prefix}/%{_lib}/gconv

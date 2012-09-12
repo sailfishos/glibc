@@ -1,3 +1,6 @@
+* Wed Sep 12 2012 Carsten Munk <carsten@jollamobile.com> - 2.15
+- Upgrade to 2.15-0ubuntu17
+
 * Mon Jun 11 2012 Carsten Munk <carsten@merproject.org> - 2.15
 - MER#377: Do not add arm/local-linaro-cortex-strings.diff on armv6, no ARMv7/Thumb2 there
 
