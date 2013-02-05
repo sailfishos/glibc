@@ -34,6 +34,7 @@ Patch8: glibc-2.14.1-ldso-nodefaultdirs-option.5.diff
 Patch9: eglibc-2.15-mips-async-unwind.patch
 Patch10: eglibc-2.15-mips-no-n32-n64.patch
 Patch11: glibc-2.14-locarchive-fedora.patch
+Patch12: eglibc-2.15-disable-multilib.patch
 
 Provides: ldconfig
 # The dynamic linker supports DT_GNU_HASH
@@ -193,6 +194,7 @@ If unsure if you need this, don't install this package.
 %patch9 -p1
 %patch10 -p1
 %patch11 -p1
+%patch12 -p1
 
 # Not well formatted locales --cvm
 sed -i "s|^localedata/locale-eo_EO.diff$||g" debian/patches/series
@@ -242,6 +244,9 @@ builddir=build-%{nptl_target_cpu}-$1
 shift
 rm -rf $builddir
 mkdir $builddir ; cd $builddir
+echo libdir=/usr/lib > configparms
+echo slibdir=/lib >> configparms
+echo BUILD_CC=gcc >> configparms
 build_CFLAGS="$BuildFlags -g -O3 $*"
 ../configure CC="$GCC" CXX="$GXX" CFLAGS="$build_CFLAGS" \
 	--prefix=%{_prefix} \

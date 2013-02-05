@@ -1,3 +1,6 @@
+* Sat Jan 26 2013 Oleg Girko <ol+mer@infoserver.ru> - 2.15
+- Disable multilib for 64-bit architectures.
+
 * Wed Sep 12 2012 Carsten Munk <carsten@jollamobile.com> - 2.15
 - Upgrade to 2.15-0ubuntu17
 
