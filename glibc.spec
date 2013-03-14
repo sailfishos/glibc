@@ -238,6 +238,11 @@ AddOns=`echo */configure | sed -e 's!/configure!!g;s!\(linuxthreads\|nptl\|rtkai
 AddOns=,ports$AddOns
 %endif
 
+%ifarch armv7tnhl
+# workaround for a potential compiler bug using -mfpu=neon (gcc 4.6 2013.01)
+BuildFlags="$BuildFlags -mfpu=vfpv3-d16"
+%endif
+
 build_nptl()
 {
 builddir=build-%{nptl_target_cpu}-$1

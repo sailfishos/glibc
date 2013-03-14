@@ -1,3 +1,6 @@
+* Thu Mar 14 2013 Juha Kallioinen <juha.kallioinen@jollamobile.com> - 2.15
+- Force -mfpu=vfpv3-d16 for armv7tnhl
+
 * Sat Jan 26 2013 Oleg Girko <ol+mer@infoserver.ru> - 2.15
 - Disable multilib for 64-bit architectures.
 
