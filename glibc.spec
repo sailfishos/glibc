@@ -35,6 +35,7 @@ Patch9: eglibc-2.15-mips-async-unwind.patch
 Patch10: eglibc-2.15-mips-no-n32-n64.patch
 Patch11: glibc-2.14-locarchive-fedora.patch
 Patch12: eglibc-2.15-disable-multilib.patch
+Patch13: eglibc-2.15-use-usrbin-localedef.patch
 
 Provides: ldconfig
 # The dynamic linker supports DT_GNU_HASH
@@ -195,6 +196,9 @@ If unsure if you need this, don't install this package.
 %patch10 -p1
 %patch11 -p1
 %patch12 -p1
+%if 0%{?qemu_user_space_build}
+%patch13 -p1
+%endif
 
 # Not well formatted locales --cvm
 sed -i "s|^localedata/locale-eo_EO.diff$||g" debian/patches/series
@@ -366,12 +370,17 @@ rm locale-archive || :
 # Intentionally we do not pass --alias-file=, aliases will be added
 # by build-locale-archive.
 # note that due to qemu-arm emulation behaviour, we need to break this up into multiple invocations.  
-# see BMC 10526.  
-find . -name '*_*' -maxdepth 1 | xargs -r -n10 -P1 --verbose \
-$olddir/build-%{nptl_target_cpu}-linuxnptl/elf/ld.so \
-  --library-path $olddir/build-%{nptl_target_cpu}-linuxnptl/ \
-  $olddir/build-%{nptl_target_cpu}-linuxnptl/locale/localedef \
-    --prefix ${RPM_BUILD_ROOT} --add-to-archive 
+# see BMC 10526.
+
+localedef_bin="$olddir/build-%{nptl_target_cpu}-linuxnptl/elf/ld.so --library-path $olddir/build-%{nptl_target_cpu}-linuxnptl/ $olddir/build-%{nptl_target_cpu}-linuxnptl/locale/localedef"
+
+%if 0%{?qemu_user_space_build}
+if [ -f /usr/bin/localedef ]; then
+    localedef_bin=/usr/bin/localedef
+fi
+%endif
+
+find . -name '*_*' -maxdepth 1 | xargs -r -n10 -P1 --verbose $localedef_bin --prefix ${RPM_BUILD_ROOT} --add-to-archive
 
 rm -rf *_*
 mv locale-archive{,.tmpl}

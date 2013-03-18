@@ -1,0 +1,31 @@
+diff -Naur eglibc-2.15.old/localedata/Makefile eglibc-2.15/localedata/Makefile
+--- eglibc-2.15.old/localedata/Makefile	2011-11-17 21:56:08.000000000 +0000
++++ eglibc-2.15/localedata/Makefile	2013-03-18 15:25:40.078955980 +0000
+@@ -159,7 +159,11 @@
+ # Dependency for the locale files.  We actually make it depend only on
+ # one of the files.
+ $(addprefix $(objpfx),$(CTYPE_FILES)): %: \
+-  gen-locale.sh $(common-objpfx)locale/localedef Makefile \
++  if [ -f /usr/bin/localedef ]; then \
++    gen-locale.sh /usr/bin/localedef Makefile \
++  else \
++    gen-locale.sh $(common-objpfx)locale/localedef Makefile \
++  fi\
+   $(addprefix charmaps/,$(CHARMAPS)) $(addprefix locales/,$(LOCALE_SRCS))
+ 	@$(SHELL) -e gen-locale.sh $(common-objpfx)	\
+ 		 '$(if $(cross-localedef), 		\
+@@ -235,8 +239,12 @@
+ INSTALL-SUPPORTED-LOCALES=$(addprefix install-, $(SUPPORTED-LOCALES))
+ 
+ # Sometimes the whole collection of locale files should be installed.
+-LOCALEDEF=I18NPATH=. GCONV_PATH=$(common-objpfx)iconvdata LC_ALL=C \
+-$(common-objpfx)elf/ld.so --library-path $(rpath-link) $(common-objpfx)locale/localedef
++ifeq (,$(wildcard /usr/bin/localedef))
++LOCALEDEF=I18NPATH=. GCONV_PATH=$(common-objpfx)iconvdata LC_ALL=C $(common-objpfx)elf/ld.so --library-path $(rpath-link) $(common-objpfx)locale/localedef
++else
++LOCALEDEF=I18NPATH=. GCONV_PATH=$(common-objpfx)iconvdata LC_ALL=C /usr/bin/localedef
++endif
++
+ install-locales: $(INSTALL-SUPPORTED-LOCALES)
+ 
+ install-locales-dir:
