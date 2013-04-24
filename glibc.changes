@@ -1,3 +1,7 @@
+* Wed Apr 24 2013 David Greaves <david@dgreaves.com> - 2.15
+- ld.so.conf must use absolute paths when being called using -r
+  This happens when using scratchbox2 with x86 targets.
+
 * Mon Mar 18 2013 Juha Kallioinen <juha.kallioinen@jollamobile.com> - 2.15
 - If available, use /usr/bin/localedef in qemu builds
 

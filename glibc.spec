@@ -332,7 +332,7 @@ install -m 644 nscd/nscd.conf $RPM_BUILD_ROOT/etc
 rm -f $RPM_BUILD_ROOT/etc/ld.so.cache
 
 # Include ld.so.conf
-echo 'include ld.so.conf.d/*.conf' > $RPM_BUILD_ROOT/etc/ld.so.conf
+echo 'include /etc/ld.so.conf.d/*.conf' > $RPM_BUILD_ROOT/etc/ld.so.conf
 > $RPM_BUILD_ROOT/etc/ld.so.cache
 chmod 644 $RPM_BUILD_ROOT/etc/ld.so.conf
 mkdir -p $RPM_BUILD_ROOT/etc/ld.so.conf.d
