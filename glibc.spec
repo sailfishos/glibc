@@ -36,6 +36,7 @@ Patch10: eglibc-2.15-mips-no-n32-n64.patch
 Patch11: glibc-2.14-locarchive-fedora.patch
 Patch12: eglibc-2.15-disable-multilib.patch
 Patch13: eglibc-2.15-use-usrbin-localedef.patch
+Patch14: eglibc-2.15-neon-fix.patch
 
 Provides: ldconfig
 # The dynamic linker supports DT_GNU_HASH
@@ -198,6 +199,7 @@ If unsure if you need this, don't install this package.
 %patch12 -p1
 %if 0%{?qemu_user_space_build}
 %patch13 -p1
+%patch14 -p1
 %endif
 
 # Not well formatted locales --cvm
@@ -242,10 +244,10 @@ AddOns=`echo */configure | sed -e 's!/configure!!g;s!\(linuxthreads\|nptl\|rtkai
 AddOns=,ports$AddOns
 %endif
 
-%ifarch armv7tnhl
+#%ifarch armv7tnhl
 # workaround for a potential compiler bug using -mfpu=neon (gcc 4.6 2013.01)
-BuildFlags="$BuildFlags -mfpu=vfpv3-d16"
-%endif
+#BuildFlags="$BuildFlags -mfpu=vfpv3-d16"
+#%endif
 
 build_nptl()
 {

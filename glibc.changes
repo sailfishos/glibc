@@ -1,3 +1,7 @@
+* Wed Jun 26 2013 Richard Braakman <richard.braakman@jollamobile.com> - 2.15
+- Fix crash when linking with libdl on arm with NEON
+  eglibc-2.15-fix-neon-libdl.patch
+
 * Wed Apr 24 2013 David Greaves <david@dgreaves.com> - 2.15
 - ld.so.conf must use absolute paths when being called using -r
   This happens when using scratchbox2 with x86 targets.

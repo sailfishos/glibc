@@ -1,0 +1,39 @@
+When compiled for arm with -mfpu=neon, the .init_array section declared
+here becomes 64-bit aligned. Since the dynamic linker expects an array of
+32-bit function pointers with no gaps, this causes an immediate SIGSEGV
+for any application linked with libdl.
+
+I suspect the default array alignment becomes 64 bits because the neon
+has 64-bit registers, but I'm not sure. The explicit aligned attribute
+does not help because it can only increase the alignment.
+
+Fortunately, the whole declaration can be replaced with a constructor
+attribute on the init function, which also adds it to the init_array
+table and does the right thing with alignment.
+
+(Why wasn't it this way already? I don't know, but maybe the constructor
+attribute wasn't available yet when this code was written.)
+
+Richard Braakman
+richard.braakman@jollamobile.com
+
+--- eglibc-2.15/dlfcn/dlfcn.c	2006-08-17 04:18:26.000000000 +0300
++++ glibc-fixed/dlfcn/dlfcn.c	2013-06-10 13:20:34.846885906 +0300
+@@ -24,16 +24,9 @@
+ char **__dlfcn_argv attribute_hidden;
+ 
+ 
+-static void
++static void __attribute ((constructor))
+ init (int argc, char *argv[])
+ {
+   __dlfcn_argc = argc;
+   __dlfcn_argv = argv;
+ }
+-
+-static void (*const init_array []) (int argc, char *argv[])
+-     __attribute__ ((section (".init_array"), aligned (sizeof (void *))))
+-     __attribute_used__ =
+-{
+-  init
+-};
