@@ -36,7 +36,7 @@ Patch10: eglibc-2.15-mips-no-n32-n64.patch
 Patch11: glibc-2.14-locarchive-fedora.patch
 Patch12: eglibc-2.15-disable-multilib.patch
 Patch13: eglibc-2.15-use-usrbin-localedef.patch
-Patch14: eglibc-2.15-neon-fix.patch
+Patch14: eglibc-2.15-fix-neon-libdl.patch
 
 Provides: ldconfig
 # The dynamic linker supports DT_GNU_HASH
