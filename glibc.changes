@@ -1,3 +1,7 @@
+* Tue Jul 16 2013 Mikko Hurskainen <mikko.hurskainen@nomovok.com> - 2.15
+- Fix shlib.lds generation with make 3.81
+  eglibc-2.15-shlib-make.patch
+
 * Wed Jun 26 2013 Richard Braakman <richard.braakman@jollamobile.com> - 2.15
 - Fix crash when linking with libdl on arm with NEON
   eglibc-2.15-fix-neon-libdl.patch

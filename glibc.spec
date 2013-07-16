@@ -37,6 +37,7 @@ Patch11: glibc-2.14-locarchive-fedora.patch
 Patch12: eglibc-2.15-disable-multilib.patch
 Patch13: eglibc-2.15-use-usrbin-localedef.patch
 Patch14: eglibc-2.15-fix-neon-libdl.patch
+Patch15: eglibc-2.15-shlib-make.patch
 
 Provides: ldconfig
 # The dynamic linker supports DT_GNU_HASH
@@ -201,6 +202,7 @@ If unsure if you need this, don't install this package.
 %patch13 -p1
 %patch14 -p1
 %endif
+%patch15 -p1
 
 # Not well formatted locales --cvm
 sed -i "s|^localedata/locale-eo_EO.diff$||g" debian/patches/series
