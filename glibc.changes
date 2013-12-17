@@ -1,3 +1,6 @@
+* Tue Dec 17 2013 Carsten Munk <carsten.munk@jollamobile.com> - 2.15
+- Add patch to sort out GCC 4.7/4.8 getconf breakage.
+
 * Tue Jul 16 2013 Mikko Hurskainen <mikko.hurskainen@nomovok.com> - 2.15
 - Fix shlib.lds generation with make 3.81
   eglibc-2.15-shlib-make.patch
