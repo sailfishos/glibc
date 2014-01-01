@@ -1,17 +1,18 @@
-diff -ur glibc-2.14.1+p4/elf/dl-load.c glibc-2.14.1/elf/dl-load.c
---- glibc-2.14.1+p4/elf/dl-load.c	2011-11-16 17:07:07.000000000 +0200
-+++ glibc-2.14.1/elf/dl-load.c	2011-11-16 17:26:58.000000000 +0200
-@@ -2252,7 +2252,8 @@
+diff -ru eglibc-2.18/elf/dl-load.c eglibc-2.18-nodefaultdirs/elf/dl-load.c
+--- eglibc-2.18/elf/dl-load.c	2014-01-01 10:24:04.000000000 +0000
++++ eglibc-2.18-nodefaultdirs/elf/dl-load.c	2014-01-01 10:25:39.000000000 +0000
+@@ -2280,7 +2280,9 @@
  		  /* 'l' is always != NULL for dynamically linked objects.  */
  		  l != NULL &&
- #endif
+ # endif
 -		  __builtin_expect (l->l_flags_1 & DF_1_NODEFLIB, 0))
-+		  __builtin_expect (((l->l_flags_1 & DF_1_NODEFLIB) ||
-+			GLRO(dl_no_default_dirs)), 0))
++                  __builtin_expect (((l->l_flags_1 & DF_1_NODEFLIB) ||
++                       GLRO(dl_no_default_dirs)), 0))
++
  		{
  		  const char *dirp = system_dirs;
  		  unsigned int cnt = 0;
-@@ -2293,7 +2294,8 @@
+@@ -2322,7 +2324,8 @@
        /* Finally, try the default path.  */
        if (fd == -1
  	  && ((l = loader ?: GL(dl_ns)[nsid]._ns_loaded) == NULL
@@ -21,7 +22,7 @@ diff -ur glibc-2.14.1+p4/elf/dl-load.c glibc-2.14.1/elf/dl-load.c
  	  && rtld_search_dirs.dirs != (void *) -1)
  	fd = open_path (name, namelen, mode & __RTLD_SECURE, &rtld_search_dirs,
  			&realname, &fb, l, LA_SER_DEFAULT, &found_other_class);
-@@ -2459,7 +2461,7 @@
+@@ -2488,7 +2491,7 @@
       a way to indicate that in the results for Dl_serinfo.  */
  
    /* Finally, try the default path.  */
@@ -30,10 +31,127 @@ diff -ur glibc-2.14.1+p4/elf/dl-load.c glibc-2.14.1/elf/dl-load.c
      add_path (&rtld_search_dirs, XXX_default);
  
    if (counting)
-diff -ur glibc-2.14.1+p4/elf/dl-support.c glibc-2.14.1/elf/dl-support.c
---- glibc-2.14.1+p4/elf/dl-support.c	2011-11-16 17:07:07.000000000 +0200
-+++ glibc-2.14.1/elf/dl-support.c	2011-11-16 17:26:58.000000000 +0200
-@@ -60,6 +60,9 @@
+diff -ru eglibc-2.18/elf/dl-load.c.orig eglibc-2.18-nodefaultdirs/elf/dl-load.c.orig
+--- eglibc-2.18/elf/dl-load.c.orig	2013-07-02 00:11:45.000000000 +0000
++++ eglibc-2.18-nodefaultdirs/elf/dl-load.c.orig	2014-01-01 10:24:04.000000000 +0000
+@@ -481,7 +481,8 @@
+ 
+ static struct r_search_path_elem **
+ fillin_rpath (char *rpath, struct r_search_path_elem **result, const char *sep,
+-	      int check_trusted, const char *what, const char *where)
++	      int check_trusted, const char *what, const char *where,
++	      const char *rpath_prefix)
+ {
+   char *cp;
+   size_t nelems = 0;
+@@ -512,9 +513,23 @@
+ 	continue;
+ 
+       /* See if this directory is already known.  */
+-      for (dirp = GL(dl_all_dirs); dirp != NULL; dirp = dirp->next)
+-	if (dirp->dirnamelen == len && memcmp (cp, dirp->dirname, len) == 0)
+-	  break;
++      if (__builtin_expect (rpath_prefix != NULL, 0))
++	{
++	  /* has rpath_prefix */
++	  size_t rpath_prefix_len = strlen (rpath_prefix);
++
++	  for (dirp = GL(dl_all_dirs); dirp != NULL; dirp = dirp->next)
++	    if (dirp->dirnamelen == (rpath_prefix_len+len) &&
++		(memcmp (cp, rpath_prefix, rpath_prefix_len) == 0) &&
++		(memcmp (cp+rpath_prefix_len, dirp->dirname, len) == 0))
++	      break;
++	}
++      else
++	{
++	  for (dirp = GL(dl_all_dirs); dirp != NULL; dirp = dirp->next)
++	    if (dirp->dirnamelen == len && memcmp (cp, dirp->dirname, len) == 0)
++	      break;
++	}
+ 
+       if (dirp != NULL)
+ 	{
+@@ -532,22 +547,43 @@
+ 	  size_t cnt;
+ 	  enum r_dir_status init_val;
+ 	  size_t where_len = where ? strlen (where) + 1 : 0;
++	  size_t rpath_prefix_len = 0;
++
++	  if (__builtin_expect (rpath_prefix != NULL, 0)
++	      && !INTUSE(__libc_enable_secure))
++	    {
++		rpath_prefix_len = strlen (rpath_prefix);
++		if (*cp != '/') rpath_prefix_len++; /* need to add a '/' */
++	    }
+ 
+ 	  /* It's a new directory.  Create an entry and add it.  */
+ 	  dirp = (struct r_search_path_elem *)
+ 	    malloc (sizeof (*dirp) + ncapstr * sizeof (enum r_dir_status)
+-		    + where_len + len + 1);
++		    + where_len + rpath_prefix_len + len + 1);
+ 	  if (dirp == NULL)
+ 	    _dl_signal_error (ENOMEM, NULL, NULL,
+ 			      N_("cannot create cache for search path"));
+ 
+ 	  dirp->dirname = ((char *) dirp + sizeof (*dirp)
+ 			   + ncapstr * sizeof (enum r_dir_status));
+-	  *((char *) __mempcpy ((char *) dirp->dirname, cp, len)) = '\0';
+-	  dirp->dirnamelen = len;
++	  if (rpath_prefix_len == 0)
++	    {
++		  *((char *) __mempcpy ((char *) dirp->dirname, cp, len)) = '\0';
++	    }
++	  else
++	    {
++		char *prefixend;
++
++		prefixend = (char *) __mempcpy ((char *) dirp->dirname,
++				rpath_prefix, rpath_prefix_len);
++		if (*cp != '/')
++		  prefixend[-1] = '/'; /* replace \0 */
++		*((char *) __mempcpy (prefixend, cp, len)) = '\0';
++	    }
++	  dirp->dirnamelen = len + rpath_prefix_len;
+ 
+-	  if (len > max_dirnamelen)
+-	    max_dirnamelen = len;
++	  if ((len + rpath_prefix_len) > max_dirnamelen)
++	    max_dirnamelen = len + rpath_prefix_len;
+ 
+ 	  /* We have to make sure all the relative directories are
+ 	     never ignored.  The current directory might change and
+@@ -558,7 +594,8 @@
+ 
+ 	  dirp->what = what;
+ 	  if (__builtin_expect (where != NULL, 1))
+-	    dirp->where = memcpy ((char *) dirp + sizeof (*dirp) + len + 1
++	    dirp->where = memcpy ((char *) dirp + sizeof (*dirp)
++				  + rpath_prefix_len + len + 1
+ 				  + (ncapstr * sizeof (enum r_dir_status)),
+ 				  where, where_len);
+ 	  else
+@@ -660,7 +697,7 @@
+       _dl_signal_error (ENOMEM, NULL, NULL, errstring);
+     }
+ 
+-  fillin_rpath (copy, result, ":", 0, what, where);
++  fillin_rpath (copy, result, ":", 0, what, where, GLRO(dl_rpath_prefix));
+ 
+   /* Free the copied RPATH string.  `fillin_rpath' make own copies if
+      necessary.  */
+@@ -865,7 +902,7 @@
+ 
+       (void) fillin_rpath (llp_tmp, env_path_list.dirs, ":;",
+ 			   INTUSE(__libc_enable_secure), "LD_LIBRARY_PATH",
+-			   NULL);
++			   NULL, NULL/*no prefix*/);
+ 
+       if (env_path_list.dirs[0] == NULL)
+ 	{
+diff -ru eglibc-2.18/elf/dl-support.c eglibc-2.18-nodefaultdirs/elf/dl-support.c
+--- eglibc-2.18/elf/dl-support.c	2014-01-01 10:24:04.000000000 +0000
++++ eglibc-2.18-nodefaultdirs/elf/dl-support.c	2014-01-01 10:25:39.000000000 +0000
+@@ -64,6 +64,9 @@
  /* prefix to be added to all RUNPATHs and RPATHs */
  const char *_dl_rpath_prefix = NULL;
  
@@ -43,10 +161,23 @@ diff -ur glibc-2.14.1+p4/elf/dl-support.c glibc-2.14.1/elf/dl-support.c
  /* The map for the object we will profile.  */
  struct link_map *_dl_profile_map;
  
-diff -ur glibc-2.14.1+p4/elf/rtld.c glibc-2.14.1/elf/rtld.c
---- glibc-2.14.1+p4/elf/rtld.c	2011-11-16 17:08:18.000000000 +0200
-+++ glibc-2.14.1/elf/rtld.c	2011-11-16 17:28:14.000000000 +0200
-@@ -969,6 +969,15 @@
+diff -ru eglibc-2.18/elf/dl-support.c.orig eglibc-2.18-nodefaultdirs/elf/dl-support.c.orig
+--- eglibc-2.18/elf/dl-support.c.orig	2013-07-02 00:11:45.000000000 +0000
++++ eglibc-2.18-nodefaultdirs/elf/dl-support.c.orig	2014-01-01 10:24:04.000000000 +0000
+@@ -61,6 +61,9 @@
+    ignored.  */
+ const char *_dl_inhibit_rpath;
+ 
++/* prefix to be added to all RUNPATHs and RPATHs */
++const char *_dl_rpath_prefix = NULL;
++
+ /* The map for the object we will profile.  */
+ struct link_map *_dl_profile_map;
+ 
+diff -ru eglibc-2.18/elf/rtld.c eglibc-2.18-nodefaultdirs/elf/rtld.c
+--- eglibc-2.18/elf/rtld.c	2014-01-01 10:24:04.000000000 +0000
++++ eglibc-2.18-nodefaultdirs/elf/rtld.c	2014-01-01 10:26:13.000000000 +0000
+@@ -978,6 +978,15 @@
  	    --_dl_argc;
  	    ++INTUSE(_dl_argv);
  	  }
@@ -62,23 +193,51 @@ diff -ur glibc-2.14.1+p4/elf/rtld.c glibc-2.14.1/elf/rtld.c
  	else if (! strcmp (INTUSE(_dl_argv)[1], "--library-path")
  		 && _dl_argc > 2)
  	  {
-@@ -1035,6 +1044,7 @@
-   --list                list all dependencies and how they are resolved\n\
-   --verify              verify that given object really is a dynamically linked\n\
- 			object we can handle\n\
+@@ -1051,6 +1060,7 @@
+   --inhibit-rpath LIST  ignore RUNPATH and RPATH information in object names\n\
+ 			in LIST\n\
+   --argv0 STRING        use STRING as argv[0]\n\
 +  --nodefaultdirs       Do not search from default directories or cache\n\
+   --audit LIST          use objects named in LIST as auditors\n");
+ 
+       ++_dl_skip_args;
+diff -ru eglibc-2.18/elf/rtld.c.orig eglibc-2.18-nodefaultdirs/elf/rtld.c.orig
+--- eglibc-2.18/elf/rtld.c.orig	2014-01-01 10:23:45.000000000 +0000
++++ eglibc-2.18-nodefaultdirs/elf/rtld.c.orig	2014-01-01 10:24:04.000000000 +0000
+@@ -996,6 +996,15 @@
+ 	    _dl_argc -= 2;
+ 	    INTUSE(_dl_argv) += 2;
+ 	  }
++	else if (! strcmp (INTUSE(_dl_argv)[1], "--rpath-prefix")
++		 && _dl_argc > 2)
++	  {
++	    GLRO(dl_rpath_prefix) = INTUSE(_dl_argv)[2];
++
++	    _dl_skip_args += 2;
++	    _dl_argc -= 2;
++	    INTUSE(_dl_argv) += 2;
++	  }
+ 	else if (! strcmp (INTUSE(_dl_argv)[1], "--audit") && _dl_argc > 2)
+ 	  {
+ 	    process_dl_audit (INTUSE(_dl_argv)[2]);
+@@ -1038,6 +1047,7 @@
+   --inhibit-cache       Do not use " LD_SO_CACHE "\n\
    --library-path PATH   use given PATH instead of content of the environment\n\
  			variable LD_LIBRARY_PATH\n\
-   --rpath-prefix PREFIX add PREFIX to every RUNPATH and RPATH component\n\
-diff -ur glibc-2.14.1+p4/sysdeps/generic/ldsodefs.h glibc-2.14.1/sysdeps/generic/ldsodefs.h
---- glibc-2.14.1+p4/sysdeps/generic/ldsodefs.h	2011-11-16 17:07:07.000000000 +0200
-+++ glibc-2.14.1/sysdeps/generic/ldsodefs.h	2011-11-16 17:26:58.000000000 +0200
-@@ -692,6 +692,8 @@
-   /* prefix for RPATH + RUNPATH components.  */
-   EXTERN const char *_dl_rpath_prefix;
++  --rpath-prefix PREFIX add PREFIX to every RUNPATH and RPATH component\n\
+   --inhibit-rpath LIST  ignore RUNPATH and RPATH information in object names\n\
+ 			in LIST\n\
+   --argv0 STRING        use STRING as argv[0]\n\
+Only in eglibc-2.18-nodefaultdirs/elf: rtld.c.rej
+diff -ru eglibc-2.18/sysdeps/generic/ldsodefs.h eglibc-2.18-nodefaultdirs/sysdeps/generic/ldsodefs.h
+--- eglibc-2.18/sysdeps/generic/ldsodefs.h	2014-01-01 10:24:04.000000000 +0000
++++ eglibc-2.18-nodefaultdirs/sysdeps/generic/ldsodefs.h	2014-01-01 10:25:39.000000000 +0000
+@@ -566,6 +566,8 @@
+      platforms.  */
+   EXTERN uint64_t _dl_hwcap2;
  
 +  EXTERN int _dl_no_default_dirs;
 +
  #ifdef SHARED
- };
- # define __rtld_global_attribute__
+   /* We add a function table to _rtld_global which is then used to
+      call the function instead of going through the PLT.  The result

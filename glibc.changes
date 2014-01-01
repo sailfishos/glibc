@@ -1,5 +1,9 @@
-* Tue Dec 17 2013 Carsten Munk <carsten.munk@jollamobile.com> - 2.15
-- Add patch to sort out GCC 4.7/4.8 getconf breakage.
+* Wed Jan 01 2014 Carsten Munk <carsten.munk@jollamobile.com> - 2.18
+- Upgrade to 2.18
+
+* Fri Aug 16 2013 Davide Bettio <davide.bettio@ispirata.com> - 2.17
+- Update to Ubuntu eglibc 2.17
+- Apply some Linaro optimizations to aarch64 and armv7
 
 * Tue Jul 16 2013 Mikko Hurskainen <mikko.hurskainen@nomovok.com> - 2.15
 - Fix shlib.lds generation with make 3.81

@@ -1,0 +1,28 @@
+diff -ru eglibc-2.18/ports/sysdeps/aarch64/nptl/pthread_spin_lock.c eglibc-2.18-sb2-workaround/ports/sysdeps/aarch64/nptl/pthread_spin_lock.c
+--- eglibc-2.18/ports/sysdeps/aarch64/nptl/pthread_spin_lock.c	2013-01-10 00:28:48.000000000 +0000
++++ eglibc-2.18-sb2-workaround/ports/sysdeps/aarch64/nptl/pthread_spin_lock.c	2013-12-27 08:56:08.000000000 +0000
+@@ -21,4 +21,4 @@
+ /* We can't use the normal "#include <nptl/pthread_spin_lock.c>" because
+    it will resolve to this very file.  Using "sysdeps/.." as reference to the
+    top level directory does the job.  */
+-#include <sysdeps/../nptl/pthread_spin_lock.c>
++#include <sysdeps/../../eglibc-2.18/nptl/pthread_spin_lock.c>
+diff -ru eglibc-2.18/ports/sysdeps/arm/nptl/pthread_spin_lock.c eglibc-2.18-sb2-workaround/ports/sysdeps/arm/nptl/pthread_spin_lock.c
+--- eglibc-2.18/ports/sysdeps/arm/nptl/pthread_spin_lock.c	2013-01-10 00:28:48.000000000 +0000
++++ eglibc-2.18-sb2-workaround/ports/sysdeps/arm/nptl/pthread_spin_lock.c	2013-12-27 08:55:03.000000000 +0000
+@@ -20,4 +20,4 @@
+ /* We can't use the normal "#include <nptl/pthread_spin_lock.c>" because
+    it will resolve to this very file.  Using "sysdeps/.." as reference to the
+    top level directory does the job.  */
+-#include <sysdeps/../nptl/pthread_spin_lock.c>
++#include <sysdeps/../../eglibc-2.18/nptl/pthread_spin_lock.c>
+diff -ru eglibc-2.18/ports/sysdeps/mips/nptl/pthread_spin_lock.c eglibc-2.18-sb2-workaround/ports/sysdeps/mips/nptl/pthread_spin_lock.c
+--- eglibc-2.18/ports/sysdeps/mips/nptl/pthread_spin_lock.c	2013-01-10 00:28:48.000000000 +0000
++++ eglibc-2.18-sb2-workaround/ports/sysdeps/mips/nptl/pthread_spin_lock.c	2013-12-27 08:56:28.000000000 +0000
+@@ -20,4 +20,5 @@
+ /* We can't use the normal "#include <nptl/pthread_spin_lock.c>" because
+    it will resolve to this very file.  Using "sysdeps/.." as reference to the
+    top level directory does the job.  */
+-#include <sysdeps/../nptl/pthread_spin_lock.c>
++#include <sysdeps/../../eglibc-2.18/nptl/pthread_spin_lock.c>
++

@@ -1,15 +1,14 @@
 # temporary needed for debuginfo change in rpm package
 %define _unpackaged_files_terminate_build 0
-%define glibcsrcdir eglibc-2.15
+%define glibcsrcdir eglibc-2.18
 ### glibc.spec.in follows:
 %define run_glibc_tests 0
 %define multiarcharches %{ix86} x86_64
 
 
-
 Summary: Embedded GLIBC (EGLIBC) is a variant of the GNU C Library (GLIBC)
 Name: glibc
-Version: 2.15
+Version: 2.18
 Release: 1
 
 # GPLv2+ is used in a bunch of programs, LGPLv2+ is used for libraries.
@@ -20,9 +19,9 @@ Release: 1
 License: LGPLv2+ and LGPLv2+ with exceptions and GPLv2+
 Group: System/Libraries
 URL: http://www.eglibc.org/
-Source0: http://archive.ubuntu.com/ubuntu/pool/main/e/eglibc/eglibc_2.15.orig.tar.gz
+Source0: https://launchpad.net/ubuntu/+archive/primary/+files/eglibc_2.18.orig.tar.xz
+Source1: eglibc_2.18-0ubuntu2.debian.tar.xz
 Source11: build-locale-archive.c
-Patch0: eglibc_2.15-0ubuntu17.diff.gz
 Patch1: glibc-arm-alignment-fix.patch
 Patch2: glibc-arm-runfast.patch
 Patch3: glibc-2.13-no-timestamping.patch
@@ -31,14 +30,15 @@ Patch5: glibc-2.14.1-ldso-rpath-prefix-option.2.diff
 Patch6: eglibc-2.15-nsswitchconf-location.3.diff
 Patch7: glibc-2.14.1-nscd-socket-location.4.diff
 Patch8: glibc-2.14.1-ldso-nodefaultdirs-option.5.diff
-Patch9: eglibc-2.15-mips-async-unwind.patch
-Patch10: eglibc-2.15-mips-no-n32-n64.patch
+#Patch9: eglibc-2.15-mips-async-unwind.patch
+#Patch10: eglibc-2.15-mips-no-n32-n64.patch
 Patch11: glibc-2.14-locarchive-fedora.patch
-Patch12: eglibc-2.15-disable-multilib.patch
+#Patch12: eglibc-2.15-disable-multilib.patch
 Patch13: eglibc-2.15-use-usrbin-localedef.patch
 Patch14: eglibc-2.15-fix-neon-libdl.patch
-Patch15: eglibc-2.15-shlib-make.patch
-Patch16: glibc-2.15-confstr-strdup.patch
+#Patch15: eglibc-2.15-shlib-make.patch
+#Patch16: eglibc-2.17-linaro-optimizations.diff
+Patch17: eglibc-2.18-sb2-workaround.patch
 
 Provides: ldconfig
 # The dynamic linker supports DT_GNU_HASH
@@ -184,7 +184,8 @@ If unsure if you need this, don't install this package.
 
 %prep
 %setup -q -n %{glibcsrcdir} %{?glibc_release_unpack}
-%patch0 -p1
+xz -dc %SOURCE1 | tar xf -
+#%patch0 -p1
 %patch1 -p1
 %ifarch %{arm}
 %patch2 -p1
@@ -195,16 +196,17 @@ If unsure if you need this, don't install this package.
 %patch6 -p1
 %patch7 -p1
 %patch8 -p1
-%patch9 -p1
-%patch10 -p1
+#%patch9 -p1
+#%patch10 -p1
 %patch11 -p1
-%patch12 -p1
+#%patch12 -p1
 %if 0%{?qemu_user_space_build}
 %patch13 -p1
 %patch14 -p1
 %endif
-%patch15 -p1
-%patch16 -p2 -R 
+#%patch15 -p1
+#%patch16 -p2
+%patch17 -p1
 
 # Not well formatted locales --cvm
 sed -i "s|^localedata/locale-eo_EO.diff$||g" debian/patches/series
@@ -213,6 +215,8 @@ sed -i "s|^localedata/locale-ia.diff$||g" debian/patches/series
 %ifarch armv6l
 sed -i "s|^arm/local-linaro-cortex-strings.diff$||g" debian/patches/series
 %endif
+sed -i "s|^kfreebsd.*$||g" debian/patches/series
+
 QUILT_PATCHES=debian/patches quilt push -a
 
 cat > find_provides.sh <<EOF
@@ -244,7 +248,7 @@ EnableKernel="--enable-kernel=%{enablekernel}"
 echo "$GCC" > Gcc
 AddOns=`echo */configure | sed -e 's!/configure!!g;s!\(linuxthreads\|nptl\|rtkaio\|powerpc-cpu\)\( \|$\)!!g;s! \+$!!;s! !,!g;s!^!,!;/^,\*$/d'`
 
-%ifarch %{arm} mipsel
+%ifarch %{arm} mipsel aarch64
 AddOns=,ports$AddOns
 %endif
 
@@ -263,11 +267,12 @@ echo libdir=/usr/lib > configparms
 echo slibdir=/lib >> configparms
 echo BUILD_CC=gcc >> configparms
 build_CFLAGS="$BuildFlags -g -O3 $*"
+export MAKEINFO=:
 ../configure CC="$GCC" CXX="$GXX" CFLAGS="$build_CFLAGS" \
 	--prefix=%{_prefix} \
-	--enable-add-ons=nptl$AddOns --without-cvs $EnableKernel \
-	--with-headers=%{_prefix}/include --enable-bind-now \
-	--with-tls --with-__thread  \
+	--enable-pt_chown "--enable-add-ons=libidn,ports,nptl" --without-cvs $EnableKernel \
+	--enable-bind-now --with-tls --with-__thread  \
+	--with-headers=%{_prefix}/include \
 %ifnarch %{arm}
 	--build %{nptl_target_cpu}-%{_vendor}-linux \
 	--host %{nptl_target_cpu}-%{_vendor}-linux \
@@ -283,7 +288,8 @@ build_CFLAGS="$BuildFlags -g -O3 $*"
 %ifarch %{multiarcharches}
 	--enable-multi-arch \
 %endif
-	--disable-profile --enable-experimental-malloc 
+	--disable-profile --enable-experimental-malloc --enable-obsolete-rpc
+
 make %{?_smp_mflags} -r CFLAGS="$build_CFLAGS" 
 
 cd ..
@@ -322,7 +328,7 @@ if [ -d $RPM_BUILD_ROOT%{_prefix}/info -a "%{_infodir}" != "%{_prefix}/info" ]; 
   rm -rf $RPM_BUILD_ROOT%{_prefix}/info
 fi
 
-gzip -9nvf $RPM_BUILD_ROOT%{_infodir}/libc*
+#gzip -9nvf $RPM_BUILD_ROOT%{_infodir}/libc*
 
 ln -sf libbsd-compat.a $RPM_BUILD_ROOT%{_prefix}/%{_lib}/libbsd.a
 
@@ -442,7 +448,6 @@ rm -f $RPM_BUILD_ROOT%{_sbindir}/rpcinfo
 mkdir -p $RPM_BUILD_ROOT%{_prefix}/%{_lib}
 mv -f $RPM_BUILD_ROOT/%{_lib}/lib{pcprofile,memusage}.so $RPM_BUILD_ROOT%{_prefix}/%{_lib}
 
-grep '%{_infodir}' < rpm.filelist | grep -v '%{_infodir}/dir' > devel.filelist
 grep '%{_prefix}/include/gnu/stubs-[32164]\+\.h' < rpm.filelist >> devel.filelist || :
 
 grep '%{_prefix}/include' < rpm.filelist |
@@ -498,14 +503,14 @@ EOF
 
 # /etc/localtime
 rm -f $RPM_BUILD_ROOT/etc/localtime
-cp -f $RPM_BUILD_ROOT%{_prefix}/share/zoneinfo/US/Eastern $RPM_BUILD_ROOT/etc/localtime
-#ln -sf ..%{_prefix}/share/zoneinfo/US/Eastern $RPM_BUILD_ROOT/etc/localtime
+#ls -al $RPM_BUILD_ROOT%{_prefix}/share/zoneinfo/
+#cp -f $RPM_BUILD_ROOT%{_prefix}/share/zoneinfo/US/Eastern $RPM_BUILD_ROOT/etc/localtime
+ln -sf %{_prefix}/share/zoneinfo/US/Eastern $RPM_BUILD_ROOT/etc/localtime
 
 rm -rf $RPM_BUILD_ROOT%{_prefix}/share/zoneinfo
 
 # Make sure %config files have the same timestamp
 touch -r timezone/northamerica $RPM_BUILD_ROOT/etc/ld.so.conf
-touch -r timezone/northamerica $RPM_BUILD_ROOT/etc/localtime
 touch -r sunrpc/etc.rpc $RPM_BUILD_ROOT/etc/rpc
 
 
@@ -555,7 +560,6 @@ rm libpthread.o
 popd
 
 
-rm -f $RPM_BUILD_ROOT%{_infodir}/dir
 
 %ifarch %{auxarches}
 
@@ -584,18 +588,10 @@ mkdir -p $RPM_BUILD_ROOT/var/cache/ldconfig
 
 %postun -p /sbin/ldconfig
 
-%post devel
-%install_info %{_infodir}/libc.info.gz %{_infodir}/dir
-
 %pre headers
 # this used to be a link and it is causing nightmares now
 if [ -L %{_prefix}/include/scsi ] ; then
   rm -f %{_prefix}/include/scsi
-fi
-
-%preun devel
-if [ "$1" = 0 ]; then
-  %install_info --delete %{_infodir}/libc.info.gz %{_infodir}/dir
 fi
 
 %post utils -p /sbin/ldconfig
@@ -631,8 +627,8 @@ fi
 %dir %attr(0700,root,root) /var/cache/ldconfig
 %attr(0600,root,root) %verify(not md5 size mtime) %ghost %config(missingok,noreplace) /var/cache/ldconfig/aux-cache
 %attr(0644,root,root) %verify(not md5 size mtime) %ghost %config(missingok,noreplace) /etc/ld.so.cache
-%doc README NEWS INSTALL FAQ BUGS NOTES PROJECTS CONFORMANCE
-%doc COPYING COPYING.LIB README.libm LICENSES
+%doc README NEWS INSTALL BUGS PROJECTS CONFORMANCE
+%doc COPYING COPYING.LIB LICENSES
 %doc hesiod/README.hesiod
 
 
