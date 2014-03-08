@@ -1,3 +1,6 @@
+* Sat Mar 08 2014 Davide Bettio <davide.bettio@ispirata.com> - 2.18
+- Do not build glibc for mipsel with -O3 enabled
+
 * Wed Jan 01 2014 Carsten Munk <carsten.munk@jollamobile.com> - 2.18
 - Upgrade to 2.18
 
