@@ -1,0 +1,49 @@
+diff --git a/Makerules b/Makerules
+index b46b09b..297e605 100644
+--- a/Makerules
++++ b/Makerules
+@@ -454,25 +454,19 @@ shlib-lds-flags =
+ else
+ # binutils only position loadable notes into the first page for binaries,
+ # not for shared objects
+-$(common-objpfx)shlib.lds: $(common-objpfx)config.make $(..)Makerules
+-	$(LINK.o) -shared -Wl,-O1 \
+-		  -nostdlib -nostartfiles \
+-		  $(sysdep-LDFLAGS) $(rtld-LDFLAGS) $(LDFLAGS.so) \
+-		  -Wl,--verbose 2>&1 | \
+-	  sed > $@T \
+-	      -e '/^=========/,/^=========/!d;/^=========/d' \
++shlib-lds-hash = -e '/^=========/,/^=========/!d;/^=========/d' \
+ 	      $(if $(filter yes,$(have-hash-style)), \
+ 		   -e 's/^.*\.gnu\.hash[ 	]*:.*$$/  .note.ABI-tag : { *(.note.ABI-tag) } &/' \
+ 		   -e '/^[ 	]*\.hash[ 	]*:.*$$/{h;d;}' \
+ 		   -e '/DATA_SEGMENT_ALIGN/{H;g}' \
+ 		, \
+ 		   -e 's/^.*\.hash[ 	]*:.*$$/  .note.ABI-tag : { *(.note.ABI-tag) } &/' \
+-	       ) \
+-	      -e 's/^.*\*(\.dynbss).*$$/& \
++	       )
++shlib-lds-dynbss = -e 's/^.*\*(\.dynbss).*$$/& \
+ 		 PROVIDE(__start___libc_freeres_ptrs = .); \
+ 		 *(__libc_freeres_ptrs) \
+-		 PROVIDE(__stop___libc_freeres_ptrs = .);/'\
+-	      -e 's@^.*\*(\.jcr).*$$@& \
++		 PROVIDE(__stop___libc_freeres_ptrs = .);/'
++shlib-lds-jcr = -e 's@^.*\*(\.jcr).*$$@& \
+ 		 PROVIDE(__start___libc_subfreeres = .);\
+ 		 __libc_subfreeres : { *(__libc_subfreeres) }\
+ 		 PROVIDE(__stop___libc_subfreeres = .);\
+@@ -483,6 +477,13 @@ $(common-objpfx)shlib.lds: $(common-objpfx)config.make $(..)Makerules
+ 		 __libc_thread_subfreeres : { *(__libc_thread_subfreeres) }\
+ 		 PROVIDE(__stop___libc_thread_subfreeres = .);\
+ 		 /DISCARD/ : { *(.gnu.glibc-stub.*) }@'
++$(common-objpfx)shlib.lds: $(common-objpfx)config.make $(..)Makerules
++	$(LINK.o) -shared -Wl,-O1 \
++		  -nostdlib -nostartfiles \
++		  $(sysdep-LDFLAGS) $(rtld-LDFLAGS) $(LDFLAGS.so) \
++		  -Wl,--verbose 2>&1 | \
++	  sed > $@T \
++	      $(shlib-lds-hash) $(shlib-lds-dynbss) $(shlib-lds-jcr)
+ 	test -s $@T
+ 	mv -f $@T $@
+ common-generated += shlib.lds

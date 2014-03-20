@@ -1,6 +1,6 @@
 # temporary needed for debuginfo change in rpm package
 %define _unpackaged_files_terminate_build 0
-%define glibcsrcdir eglibc-2.18
+%define glibcsrcdir eglibc-2.19
 ### glibc.spec.in follows:
 %define run_glibc_tests 0
 %define multiarcharches %{ix86} x86_64
@@ -8,7 +8,7 @@
 
 Summary: Embedded GLIBC (EGLIBC) is a variant of the GNU C Library (GLIBC)
 Name: glibc
-Version: 2.18
+Version: 2.19
 Release: 1
 
 # GPLv2+ is used in a bunch of programs, LGPLv2+ is used for libraries.
@@ -19,26 +19,34 @@ Release: 1
 License: LGPLv2+ and LGPLv2+ with exceptions and GPLv2+
 Group: System/Libraries
 URL: http://www.eglibc.org/
-Source0: https://launchpad.net/ubuntu/+archive/primary/+files/eglibc_2.18.orig.tar.xz
-Source1: eglibc_2.18-0ubuntu2.debian.tar.xz
+Source0: https://launchpad.net/ubuntu/+archive/primary/+files/eglibc_2.19.orig.tar.xz
+Source1: eglibc_2.19-0ubuntu2.debian.tar.xz
 Source11: build-locale-archive.c
+
+# glibc-arm-alignment-fix.patch: safe but probably not needed anymore
 Patch1: glibc-arm-alignment-fix.patch
+# glibc-arm-runfast.patch: performance improvement patch
 Patch2: glibc-arm-runfast.patch
+# glibc-2.19-ldso-rpath-prefix-option.2.diff: required for OBS
 Patch3: glibc-2.13-no-timestamping.patch
 Patch4: glibc-2.14.1-elf-rtld.c.1.diff
-Patch5: glibc-2.14.1-ldso-rpath-prefix-option.2.diff
+# glibc-2.19-ldso-rpath-prefix-option.2.diff: required from scratchbox2
+Patch5: glibc-2.19-ldso-rpath-prefix-option.2.diff
+# eglibc-2.15-nsswitchconf-location.3.diff: TODO review required
 Patch6: eglibc-2.15-nsswitchconf-location.3.diff
+# glibc-2.14.1-nscd-socket-location.4.diff: TODO review required
 Patch7: glibc-2.14.1-nscd-socket-location.4.diff
-Patch8: glibc-2.14.1-ldso-nodefaultdirs-option.5.diff
-#Patch9: eglibc-2.15-mips-async-unwind.patch
-#Patch10: eglibc-2.15-mips-no-n32-n64.patch
-Patch11: glibc-2.14-locarchive-fedora.patch
-#Patch12: eglibc-2.15-disable-multilib.patch
-Patch13: eglibc-2.15-use-usrbin-localedef.patch
-Patch14: eglibc-2.15-fix-neon-libdl.patch
-#Patch15: eglibc-2.15-shlib-make.patch
-#Patch16: eglibc-2.17-linaro-optimizations.diff
-Patch17: eglibc-2.18-sb2-workaround.patch
+# glibc-2.19-ldso-nodefaultdirs-option.5.diff: required from scratchbox2
+Patch8: glibc-2.19-ldso-nodefaultdirs-option.5.diff
+Patch9: glibc-2.14-locarchive-fedora.patch
+# eglibc-2.15-use-usrbin-localedef.patch: TODO review required
+Patch10: eglibc-2.15-use-usrbin-localedef.patch
+# eglibc-2.15-fix-neon-libdl.patch: fix crash
+Patch11: eglibc-2.15-fix-neon-libdl.patch
+# eglibc-2.19-shlib-make.patch: fix build fail
+Patch12: eglibc-2.19-shlib-make.patch
+# eglibc-2.19-sb2-workaround.patch: fix build fail
+Patch13: eglibc-2.19-sb2-workaround.patch
 
 Provides: ldconfig
 # The dynamic linker supports DT_GNU_HASH
@@ -185,28 +193,37 @@ If unsure if you need this, don't install this package.
 %prep
 %setup -q -n %{glibcsrcdir} %{?glibc_release_unpack}
 xz -dc %SOURCE1 | tar xf -
-#%patch0 -p1
+
+# glibc-arm-alignment-fix.patch
 %patch1 -p1
 %ifarch %{arm}
+# glibc-arm-runfast.patch
 %patch2 -p1
 %endif
+# glibc-2.13-no-timestamping.patch
 %patch3 -p1
+# glibc-2.14.1-elf-rtld.c.1.diff
 %patch4 -p1
+# glibc-2.19-ldso-rpath-prefix-option.2.diff
 %patch5 -p1
+# eglibc-2.15-nsswitchconf-location.3.diff
 %patch6 -p1
+# glibc-2.14.1-nscd-socket-location.4.diff
 %patch7 -p1
+# glibc-2.19-ldso-nodefaultdirs-option.5.diff
 %patch8 -p1
-#%patch9 -p1
-#%patch10 -p1
-%patch11 -p1
-#%patch12 -p1
+# glibc-2.14-locarchive-fedora.patch
+%patch9 -p1
 %if 0%{?qemu_user_space_build}
-%patch13 -p1
-%patch14 -p1
+# eglibc-2.15-use-usrbin-localedef.patch
+%patch10 -p1
+# eglibc-2.15-fix-neon-libdl.patch
+%patch11 -p1
 %endif
-#%patch15 -p1
-#%patch16 -p2
-%patch17 -p1
+# eglibc-2.19-shlib-make.patch
+%patch12 -p1
+# eglibc-2.19-sb2-workaround.patch
+%patch13 -p1
 
 # Not well formatted locales --cvm
 sed -i "s|^localedata/locale-eo_EO.diff$||g" debian/patches/series
@@ -246,16 +263,12 @@ BuildFlags="$BuildFlags -fasynchronous-unwind-tables"
 
 EnableKernel="--enable-kernel=%{enablekernel}"
 echo "$GCC" > Gcc
-AddOns=`echo */configure | sed -e 's!/configure!!g;s!\(linuxthreads\|nptl\|rtkaio\|powerpc-cpu\)\( \|$\)!!g;s! \+$!!;s! !,!g;s!^!,!;/^,\*$/d'`
 
 %ifarch %{arm} mipsel aarch64
-AddOns=,ports$AddOns
+EnablePorts="ports,"
+%else
+EnablePorts=""
 %endif
-
-#%ifarch armv7tnhl
-# workaround for a potential compiler bug using -mfpu=neon (gcc 4.6 2013.01)
-#BuildFlags="$BuildFlags -mfpu=vfpv3-d16"
-#%endif
 
 build_nptl()
 {
@@ -274,7 +287,7 @@ build_CFLAGS="$BuildFlags -g -O3 $*"
 export MAKEINFO=:
 ../configure CC="$GCC" CXX="$GXX" CFLAGS="$build_CFLAGS" \
 	--prefix=%{_prefix} \
-	--enable-pt_chown "--enable-add-ons=libidn,ports,nptl" --without-cvs $EnableKernel \
+	--enable-pt_chown "--enable-add-ons=libidn,"$EnablePorts"nptl" --without-cvs $EnableKernel \
 	--enable-bind-now --with-tls --with-__thread  \
 	--with-headers=%{_prefix}/include \
 %ifnarch %{arm}
@@ -292,7 +305,7 @@ export MAKEINFO=:
 %ifarch %{multiarcharches}
 	--enable-multi-arch \
 %endif
-	--disable-profile --enable-experimental-malloc --enable-obsolete-rpc
+	--disable-profile --enable-obsolete-rpc
 
 make %{?_smp_mflags} -r CFLAGS="$build_CFLAGS" 
 
@@ -331,8 +344,6 @@ if [ -d $RPM_BUILD_ROOT%{_prefix}/info -a "%{_infodir}" != "%{_prefix}/info" ]; 
   mv -f $RPM_BUILD_ROOT%{_prefix}/info/* $RPM_BUILD_ROOT%{_infodir}
   rm -rf $RPM_BUILD_ROOT%{_prefix}/info
 fi
-
-#gzip -9nvf $RPM_BUILD_ROOT%{_infodir}/libc*
 
 ln -sf libbsd-compat.a $RPM_BUILD_ROOT%{_prefix}/%{_lib}/libbsd.a
 
