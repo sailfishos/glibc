@@ -1,5 +1,6 @@
 * Sat Dec 13 2014 Carsten Munk <carsten.munk@jolla.com> - 2.19
 - Disable special -march=i486 for glibc
+- Use correct release. Release is mungled on OBS 
 
 * Fri Dec 5 2014 Davide Bettio <davide.bettio@ispirata.com> - 2.19
 - Upgrade to eglibc_2.19-0ubuntu6.4 (security fixes)

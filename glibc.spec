@@ -20,7 +20,7 @@ License: LGPLv2+ and LGPLv2+ with exceptions and GPLv2+
 Group: System/Libraries
 URL: http://www.eglibc.org/
 Source0: https://launchpad.net/ubuntu/+archive/primary/+files/eglibc_2.19.orig.tar.xz
-Source1: http://archive.ubuntu.com/ubuntu/pool/main/e/eglibc/eglibc_2.19-0ubuntu%{release}.debian.tar.xz
+Source1: http://archive.ubuntu.com/ubuntu/pool/main/e/eglibc/eglibc_2.19-0ubuntu6.4.debian.tar.xz
 Source11: build-locale-archive.c
 
 # glibc-arm-alignment-fix.patch: safe but probably not needed anymore
