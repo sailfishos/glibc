@@ -250,9 +250,7 @@ GCC=gcc
 GXX=g++
 echo %{ix86}
 %ifarch %{ix86}
-%ifarch i486
-BuildFlags="-march=i486"
-%else
+%ifnarch i486
 BuildFlags="-march=core2 -mtune=atom"
 %endif
 %endif
