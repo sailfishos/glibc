@@ -1,3 +1,6 @@
+* Fri Dec 5 2014 Davide Bettio <davide.bettio@ispirata.com> - 2.19
+- Upgrade to eglibc_2.19-0ubuntu6.4 (security fixes)
+
 * Thu Mar 20 2014 Davide Bettio <davide.bettio@ispirata.com> - 2.19
 - Upgrade to 2.19
 
