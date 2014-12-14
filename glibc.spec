@@ -82,7 +82,11 @@ BuildRequires: gcc >= 3.2
 %ifarch i386
 %define nptl_target_cpu i486
 %else
+%ifarch i486
+%define nptl_target_cpu i686
+%else
 %define nptl_target_cpu %{_target_cpu}
+%endif
 %endif
 
 # Need AS_NEEDED directive
