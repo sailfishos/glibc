@@ -328,11 +328,6 @@ GCC=`cat Gcc`
 rm -rf $RPM_BUILD_ROOT
 mkdir -p $RPM_BUILD_ROOT
 make -j1 install_root=$RPM_BUILD_ROOT install -C build-%{nptl_target_cpu}-linuxnptl PARALLELMFLAGS=
-%ifnarch %{auxarches}
-cd build-%{nptl_target_cpu}-linuxnptl && \
-  make %{?_smp_mflags} install_root=$RPM_BUILD_ROOT install-locales -C ../localedata objdir=`pwd` && \
-  cd ..
-%endif
 
 librtso=`basename $RPM_BUILD_ROOT/%{_lib}/librt.so.*`
 
@@ -390,36 +385,12 @@ for i in *.a; do
 done
 popd
 
-# Hardlink identical locale files together
-%ifnarch %{auxarches}
-#From 2.11, removed hardlink
-olddir=`pwd`
-pushd ${RPM_BUILD_ROOT}%{_prefix}/lib/locale
-rm locale-archive || :
-# Intentionally we do not pass --alias-file=, aliases will be added
-# by build-locale-archive.
-# note that due to qemu-arm emulation behaviour, we need to break this up into multiple invocations.  
-# see BMC 10526.
-
-localedef_bin="$olddir/build-%{nptl_target_cpu}-linuxnptl/elf/ld.so --library-path $olddir/build-%{nptl_target_cpu}-linuxnptl/ $olddir/build-%{nptl_target_cpu}-linuxnptl/locale/localedef"
-
-%if 0%{?qemu_user_space_build}
-if [ -f /usr/bin/localedef ]; then
-    localedef_bin=/usr/bin/localedef
-fi
-%endif
-
-find . -name '*_*' -maxdepth 1 | xargs -r -n10 -P1 --verbose $localedef_bin --prefix ${RPM_BUILD_ROOT} --add-to-archive
-
-rm -rf *_*
-mv locale-archive{,.tmpl}
-popd
-%endif
+mkdir -p $RPM_BUILD_ROOT/%{_prefix}/lib/locale/
+> $RPM_BUILD_ROOT/%{_prefix}/lib/locale/locale-archive
 
 %ifarch armv7hl armv7tnhl armv7nhl
 ln -s /lib/ld-linux-armhf.so.3 ${RPM_BUILD_ROOT}/lib/ld-linux.so.3
 %endif
-
 
 rm -f ${RPM_BUILD_ROOT}/%{_lib}/libnss1-*
 rm -f ${RPM_BUILD_ROOT}/%{_lib}/libnss-*.so.1
@@ -594,10 +565,6 @@ touch $RPM_BUILD_ROOT/var/{db,run}/nscd/{passwd,group,hosts,services}
 touch $RPM_BUILD_ROOT/var/run/nscd/{socket,nscd.pid}
 %endif
 
-%ifnarch %{auxarches}
-> $RPM_BUILD_ROOT/%{_prefix}/lib/locale/locale-archive
-%endif
-
 install -m 700 build-locale-archive $RPM_BUILD_ROOT/usr/sbin/build-locale-archive
 
 mkdir -p $RPM_BUILD_ROOT/var/cache/ldconfig
@@ -614,8 +581,6 @@ fi
 %post utils -p /sbin/ldconfig
 
 %postun utils -p /sbin/ldconfig
-
-%post common -p /usr/sbin/build-locale-archive
 
 %pre -n nscd
 /usr/sbin/useradd -M -o -r -d / -s /sbin/nologin \
@@ -653,7 +618,6 @@ fi
 %files -f common.filelist common
 %defattr(-,root,root)
 %dir %{_prefix}/lib/locale
-%attr(0644,root,root) %verify(not md5 size mtime) %{_prefix}/lib/locale/locale-archive.tmpl
 %attr(0644,root,root) %verify(not md5 size mtime mode) %ghost %config(missingok,noreplace) %{_prefix}/lib/locale/locale-archive
 %dir %attr(755,root,root) /etc/default
 %verify(not md5 size mtime) %config(noreplace) /etc/default/nss

@@ -1,3 +1,7 @@
+* Sun Dec 21 2014 Islam Amer <islam.amer@jolla.com> - 2.19
+- Remove locale-archive.tmpl generation during build time to save ~100Mb disk space
+- Remove build-locale-archive invocation in %post to save a lot of time and disk burn
+
 * Sat Dec 13 2014 Carsten Munk <carsten.munk@jolla.com> - 2.19
 - Disable special -march=i486 for glibc
 - Use correct release. Release is mungled on OBS 
