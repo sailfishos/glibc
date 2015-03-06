@@ -1,3 +1,8 @@
+* Wed Mar 04 2015 Pasi Sjöholm <pasi.sjoholm@jollamobile.com> - 2.19
+- Upgrade to eglibc_2.19-0ubuntu6.6
+- Fixes CVE-2013-7423, CVE-2014-9402, CVE-2015-1472,
+  CVE-2015-1473
+
 * Sun Dec 21 2014 Islam Amer <islam.amer@jolla.com> - 2.19
 - Remove locale-archive.tmpl generation during build time to save ~100Mb disk space
 - Remove build-locale-archive invocation in %post to save a lot of time and disk burn
