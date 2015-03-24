@@ -1,3 +1,6 @@
+* Tue Mar 24 2015 Islam Amer <islam.amer@jolla.com> - 2.19
+- Remove locale-archive %ghost which is no longer owned by this package. MER#858
+
 * Wed Mar 04 2015 Pasi Sjöholm <pasi.sjoholm@jollamobile.com> - 2.19
 - Upgrade to eglibc_2.19-0ubuntu6.6
 - Fixes CVE-2013-7423, CVE-2014-9402, CVE-2015-1472,

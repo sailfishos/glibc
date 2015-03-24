@@ -618,7 +618,6 @@ fi
 %files -f common.filelist common
 %defattr(-,root,root)
 %dir %{_prefix}/lib/locale
-%attr(0644,root,root) %verify(not md5 size mtime mode) %ghost %config(missingok,noreplace) %{_prefix}/lib/locale/locale-archive
 %dir %attr(755,root,root) /etc/default
 %verify(not md5 size mtime) %config(noreplace) /etc/default/nss
 %attr(4711,root,root) %{_prefix}/libexec/pt_chown
