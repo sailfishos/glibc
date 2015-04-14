@@ -199,21 +199,21 @@
 * Sat Aug 22 2009 Anas Nashif <anas.nashif@intel.com> - 2.10.90
 - Update to 2.10
 
-* Wed May 6 2009 Arjan van de Ven <arjan@linux.intel.com> 2.9
+* Wed May 6 2009 Arjan van de Ven <arjan@linux.intel.com> - 2.9
 - use -march=core2
 
-* Tue Jan 13 2009 Anas Nashif <anas.nashif@intel.com> 2.9
+* Tue Jan 13 2009 Anas Nashif <anas.nashif@intel.com> - 2.9
 - PreReq libgcc43
 
-* Thu Jan 08 2009 Anas Nashif <anas.nashif@intel.com> 2.9
+* Thu Jan 08 2009 Anas Nashif <anas.nashif@intel.com> - 2.9
 - Update to 2.9
 
-* Tue Dec 16 2008 Anas Nashif <anas.nashif@intel.com> 2.8
+* Tue Dec 16 2008 Anas Nashif <anas.nashif@intel.com> - 2.8
 - Fixed rpmlint errors in Summary tag
 
-* Thu Dec 11 2008 Anas Nashif <anas.nashif@intel.com> 2.8
+* Thu Dec 11 2008 Anas Nashif <anas.nashif@intel.com> - 2.8
 - remove dependency on util-linux and procps
 
-* Tue Aug 19 2008 Anas Nashif <anas.nashif@intel.com> 
+* Tue Aug 19 2008 Anas Nashif <anas.nashif@intel.com> - 2.8
 - exclude i586 from aux arches
 
