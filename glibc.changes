@@ -1,3 +1,6 @@
+* Fri Feb 19 2016 Niels Breet <niels.breet@jolla.com> - 2.19
+- Fixes CVE-2015-7547. MER#1515
+
 * Tue Mar 24 2015 Islam Amer <islam.amer@jolla.com> - 2.19
 - Remove locale-archive %ghost which is no longer owned by this package. MER#858
 
