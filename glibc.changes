@@ -1,3 +1,10 @@
+* Sun Aug 28 2016 Pasi Sjöholm <pasi.sjoholm@siirappi.com> - 2.19+6.9
+- Upgrade to eglibc_2.19-0ubuntu6.9 and apply Debian/Ubuntu patches
+  before Mer specific ones.
+- Fixes CVE-2015-1781, CVE-2014-8121, CVE-2015-5277, CVE-2015-8776,
+  CVE-2015-8777, CVE-2015-8778, CVE-2015-8779, CVE-2016-3075, CVE-2016-2856,
+  CVE-2013-2207. MER#1633
+
 * Fri Feb 26 2016 Niels Breet <niels.breet@jolla.com> - 2.19+6.7
 - Packaging fix. Contributes MER#1515
 
