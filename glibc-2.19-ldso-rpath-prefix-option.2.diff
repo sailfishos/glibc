@@ -1,7 +1,7 @@
-diff --git a/elf/dl-load.c b/elf/dl-load.c
-index 1be7a3c..49f070f 100644
---- a/elf/dl-load.c
-+++ b/elf/dl-load.c
+Index: eglibc-2.19/elf/dl-load.c
+===================================================================
+--- eglibc-2.19.orig/elf/dl-load.c
++++ eglibc-2.19/elf/dl-load.c
 @@ -482,7 +482,7 @@ static size_t max_dirnamelen;
  static struct r_search_path_elem **
  fillin_rpath (char *rpath, struct r_search_path_elem **result, const char *sep,
@@ -11,7 +11,7 @@ index 1be7a3c..49f070f 100644
  {
    char *cp;
    size_t nelems = 0;
-@@ -520,9 +520,23 @@ fillin_rpath (char *rpath, struct r_search_path_elem **result, const char *sep,
+@@ -520,9 +520,23 @@ fillin_rpath (char *rpath, struct r_sear
  	}
  
        /* See if this directory is already known.  */
@@ -38,7 +38,7 @@ index 1be7a3c..49f070f 100644
  
        if (dirp != NULL)
  	{
-@@ -540,22 +554,43 @@ fillin_rpath (char *rpath, struct r_search_path_elem **result, const char *sep,
+@@ -540,22 +554,43 @@ fillin_rpath (char *rpath, struct r_sear
  	  size_t cnt;
  	  enum r_dir_status init_val;
  	  size_t where_len = where ? strlen (where) + 1 : 0;
@@ -87,7 +87,7 @@ index 1be7a3c..49f070f 100644
  
  	  /* We have to make sure all the relative directories are
  	     never ignored.  The current directory might change and
-@@ -566,7 +601,8 @@ fillin_rpath (char *rpath, struct r_search_path_elem **result, const char *sep,
+@@ -566,7 +601,8 @@ fillin_rpath (char *rpath, struct r_sear
  
  	  dirp->what = what;
  	  if (__builtin_expect (where != NULL, 1))
@@ -97,7 +97,7 @@ index 1be7a3c..49f070f 100644
  				  + (ncapstr * sizeof (enum r_dir_status)),
  				  where, where_len);
  	  else
-@@ -668,7 +704,7 @@ decompose_rpath (struct r_search_path_struct *sps,
+@@ -668,7 +704,7 @@ decompose_rpath (struct r_search_path_st
        _dl_signal_error (ENOMEM, NULL, NULL, errstring);
      }
  
@@ -115,11 +115,11 @@ index 1be7a3c..49f070f 100644
  
        if (env_path_list.dirs[0] == NULL)
  	{
-diff --git a/elf/dl-support.c b/elf/dl-support.c
-index e435436..723814a 100644
---- a/elf/dl-support.c
-+++ b/elf/dl-support.c
-@@ -58,6 +58,9 @@ const char *_dl_profile_output;
+Index: eglibc-2.19/elf/dl-support.c
+===================================================================
+--- eglibc-2.19.orig/elf/dl-support.c
++++ eglibc-2.19/elf/dl-support.c
+@@ -61,6 +61,9 @@ const char *_dl_profile_output;
     ignored.  */
  const char *_dl_inhibit_rpath;
  
@@ -129,11 +129,11 @@ index e435436..723814a 100644
  /* The map for the object we will profile.  */
  struct link_map *_dl_profile_map;
  
-diff --git a/elf/rtld.c b/elf/rtld.c
-index 6dcbabc..ea3af55 100644
---- a/elf/rtld.c
-+++ b/elf/rtld.c
-@@ -994,6 +994,15 @@ dl_main (const ElfW(Phdr) *phdr,
+Index: eglibc-2.19/elf/rtld.c
+===================================================================
+--- eglibc-2.19.orig/elf/rtld.c
++++ eglibc-2.19/elf/rtld.c
+@@ -991,6 +991,15 @@ dl_main (const ElfW(Phdr) *phdr,
  	    _dl_argc -= 2;
  	    INTUSE(_dl_argv) += 2;
  	  }
@@ -149,7 +149,7 @@ index 6dcbabc..ea3af55 100644
  	else if (! strcmp (INTUSE(_dl_argv)[1], "--audit") && _dl_argc > 2)
  	  {
  	    process_dl_audit (INTUSE(_dl_argv)[2]);
-@@ -1028,6 +1037,7 @@ of this helper program; chances are you did not intend to run this program.\n\
+@@ -1025,6 +1034,7 @@ of this helper program; chances are you
    --inhibit-cache       Do not use " LD_SO_CACHE "\n\
    --library-path PATH   use given PATH instead of content of the environment\n\
  			variable LD_LIBRARY_PATH\n\
@@ -157,14 +157,14 @@ index 6dcbabc..ea3af55 100644
    --inhibit-rpath LIST  ignore RUNPATH and RPATH information in object names\n\
  			in LIST\n\
    --audit LIST          use objects named in LIST as auditors\n");
-diff --git a/sysdeps/generic/ldsodefs.h b/sysdeps/generic/ldsodefs.h
-index ffeb093..3116188 100644
---- a/sysdeps/generic/ldsodefs.h
-+++ b/sysdeps/generic/ldsodefs.h
-@@ -593,6 +593,12 @@ struct rtld_global_ro
- 
-   /* 0 if internal pointer values should not be guarded, 1 if they should.  */
-   EXTERN int _dl_pointer_guard;
+Index: eglibc-2.19/sysdeps/generic/ldsodefs.h
+===================================================================
+--- eglibc-2.19.orig/sysdeps/generic/ldsodefs.h
++++ eglibc-2.19/sysdeps/generic/ldsodefs.h
+@@ -600,6 +600,12 @@ struct rtld_global_ro
+   /* List of auditing interfaces.  */
+   struct audit_ifaces *_dl_audit;
+   unsigned int _dl_naudit;
 +#endif
 +
 +  /* prefix for RPATH + RUNPATH components.  */

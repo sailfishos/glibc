@@ -8,7 +8,7 @@
 
 Summary: Embedded GLIBC (EGLIBC) is a variant of the GNU C Library (GLIBC)
 Name: glibc
-Version: 2.19+6.7
+Version: 2.19+6.9
 Release: 1
 
 # GPLv2+ is used in a bunch of programs, LGPLv2+ is used for libraries.
@@ -20,7 +20,7 @@ License: LGPLv2+ and LGPLv2+ with exceptions and GPLv2+
 Group: System/Libraries
 URL: http://www.eglibc.org/
 Source0: https://launchpad.net/ubuntu/+archive/primary/+files/eglibc_2.19.orig.tar.xz
-Source1: http://archive.ubuntu.com/ubuntu/pool/main/e/eglibc/eglibc_2.19-0ubuntu6.7.debian.tar.xz
+Source1: http://archive.ubuntu.com/ubuntu/pool/main/e/eglibc/eglibc_2.19-0ubuntu6.9.debian.tar.xz
 Source11: build-locale-archive.c
 
 # glibc-arm-alignment-fix.patch: safe but probably not needed anymore
@@ -198,6 +198,17 @@ If unsure if you need this, don't install this package.
 %setup -q -n %{glibcsrcdir} %{?glibc_release_unpack}
 xz -dc %SOURCE1 | tar xf -
 
+# Not well formatted locales --cvm
+sed -i "s|^localedata/locale-eo_EO.diff$||g" debian/patches/series
+sed -i "s|^localedata/locale-ia.diff$||g" debian/patches/series
+# This screws up armv6, as it doesn't have ARMv7 instructions/Thumb2
+%ifarch armv6l
+sed -i "s|^arm/local-linaro-cortex-strings.diff$||g" debian/patches/series
+%endif
+sed -i "s|^kfreebsd.*$||g" debian/patches/series
+
+QUILT_PATCHES=debian/patches quilt push -a
+
 # glibc-arm-alignment-fix.patch
 %patch1 -p1
 %ifarch %{arm}
@@ -228,17 +239,6 @@ xz -dc %SOURCE1 | tar xf -
 %patch12 -p1
 # eglibc-2.19-sb2-workaround.patch
 %patch13 -p1
-
-# Not well formatted locales --cvm
-sed -i "s|^localedata/locale-eo_EO.diff$||g" debian/patches/series
-sed -i "s|^localedata/locale-ia.diff$||g" debian/patches/series
-# This screws up armv6, as it doesn't have ARMv7 instructions/Thumb2
-%ifarch armv6l
-sed -i "s|^arm/local-linaro-cortex-strings.diff$||g" debian/patches/series
-%endif
-sed -i "s|^kfreebsd.*$||g" debian/patches/series
-
-QUILT_PATCHES=debian/patches quilt push -a
 
 cat > find_provides.sh <<EOF
 #!/bin/sh
