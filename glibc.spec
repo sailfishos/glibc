@@ -8,7 +8,7 @@
 
 Summary: Embedded GLIBC (EGLIBC) is a variant of the GNU C Library (GLIBC)
 Name: glibc
-Version: 2.19+6.9
+Version: 2.19+6.13
 Release: 1
 
 # GPLv2+ is used in a bunch of programs, LGPLv2+ is used for libraries.
@@ -20,7 +20,7 @@ License: LGPLv2+ and LGPLv2+ with exceptions and GPLv2+
 Group: System/Libraries
 URL: http://www.eglibc.org/
 Source0: https://launchpad.net/ubuntu/+archive/primary/+files/eglibc_2.19.orig.tar.xz
-Source1: http://archive.ubuntu.com/ubuntu/pool/main/e/eglibc/eglibc_2.19-0ubuntu6.9.debian.tar.xz
+Source1: http://archive.ubuntu.com/ubuntu/pool/main/e/eglibc/eglibc_2.19-0ubuntu6.13.debian.tar.xz
 Source11: build-locale-archive.c
 
 # glibc-arm-alignment-fix.patch: safe but probably not needed anymore
