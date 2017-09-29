@@ -570,6 +570,8 @@ install -m 700 build-locale-archive $RPM_BUILD_ROOT/usr/sbin/build-locale-archiv
 mkdir -p $RPM_BUILD_ROOT/var/cache/ldconfig
 > $RPM_BUILD_ROOT/var/cache/ldconfig/aux-cache
 
+%post -p /sbin/ldconfig
+
 %postun -p /sbin/ldconfig
 
 %pre headers
