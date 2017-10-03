@@ -1,3 +1,7 @@
+* Tue Oct 3 2017 Pekka Vuorela <pekka.vuorela@jolla.com> - 2.19+6.13.1
+- Add ldconfig to %post. Fixes JB#39841
+- Move docs out of main package.
+
 * Thu Jun 29 2017 Niels Breet <niels.breet@jolla.com> - 2.19+6.13
 - Upgrade to eglibc_2.19-0ubuntu6.13
 - Fixes CVE-2017-1000366, CVE-2015-8982, CVE-2015-8983, CVE-2015-8984,
