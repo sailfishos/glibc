@@ -570,6 +570,8 @@ install -m 700 build-locale-archive $RPM_BUILD_ROOT/usr/sbin/build-locale-archiv
 mkdir -p $RPM_BUILD_ROOT/var/cache/ldconfig
 > $RPM_BUILD_ROOT/var/cache/ldconfig/aux-cache
 
+%post -p /sbin/ldconfig
+
 %postun -p /sbin/ldconfig
 
 %pre headers
@@ -609,9 +611,7 @@ fi
 %dir %attr(0700,root,root) /var/cache/ldconfig
 %attr(0600,root,root) %verify(not md5 size mtime) %ghost %config(missingok,noreplace) /var/cache/ldconfig/aux-cache
 %attr(0644,root,root) %verify(not md5 size mtime) %ghost %config(missingok,noreplace) /etc/ld.so.cache
-%doc README NEWS INSTALL BUGS PROJECTS CONFORMANCE
 %doc COPYING COPYING.LIB LICENSES
-%doc hesiod/README.hesiod
 
 
 %ifnarch %{auxarches}
@@ -625,6 +625,8 @@ fi
 
 %files -f devel.filelist devel
 %defattr(-,root,root)
+%doc README NEWS INSTALL BUGS PROJECTS CONFORMANCE
+%doc hesiod/README.hesiod
 
 %files -f static.filelist static
 %defattr(-,root,root)
