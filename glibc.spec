@@ -8,7 +8,7 @@
 
 Summary: Embedded GLIBC (EGLIBC) is a variant of the GNU C Library (GLIBC)
 Name: glibc
-Version: 2.19+6.13
+Version: 2.19+6.13.1
 Release: 1
 
 # GPLv2+ is used in a bunch of programs, LGPLv2+ is used for libraries.
