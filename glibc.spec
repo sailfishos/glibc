@@ -1,52 +1,27 @@
-# temporary needed for debuginfo change in rpm package
-%define _unpackaged_files_terminate_build 0
-%define glibcsrcdir eglibc-2.19
-### glibc.spec.in follows:
-%define run_glibc_tests 0
-%define multiarcharches %{ix86} x86_64
-
-
-Summary: Embedded GLIBC (EGLIBC) is a variant of the GNU C Library (GLIBC)
 Name: glibc
-Version: 2.19+6.13.1
-Release: 1
 
-# GPLv2+ is used in a bunch of programs, LGPLv2+ is used for libraries.
-# Things that are linked directly into dynamically linked programs
-# and shared libraries (e.g. crt files, lib*_nonshared.a) have an additional
-# exception which allows linking it into any kind of programs or shared
-# libraries without restrictions.
+Summary: GNU C library shared libraries
+Version: 2.25
+Release: 1
 License: LGPLv2+ and LGPLv2+ with exceptions and GPLv2+
 Group: System/Libraries
-URL: http://www.eglibc.org/
-Source0: https://launchpad.net/ubuntu/+archive/primary/+files/eglibc_2.19.orig.tar.xz
-Source1: http://archive.ubuntu.com/ubuntu/pool/main/e/eglibc/eglibc_2.19-0ubuntu6.13.debian.tar.xz
+URL: http://www.gnu.org/software/libc/
+Source0: glibc-2.25.tar.xz
 Source11: build-locale-archive.c
 
-# glibc-arm-alignment-fix.patch: safe but probably not needed anymore
 Patch1: glibc-arm-alignment-fix.patch
-# glibc-arm-runfast.patch: performance improvement patch
-Patch2: glibc-arm-runfast.patch
-# glibc-2.19-ldso-rpath-prefix-option.2.diff: required for OBS
-Patch3: glibc-2.13-no-timestamping.patch
-Patch4: glibc-2.14.1-elf-rtld.c.1.diff
-# glibc-2.19-ldso-rpath-prefix-option.2.diff: required from scratchbox2
-Patch5: glibc-2.19-ldso-rpath-prefix-option.2.diff
-# eglibc-2.15-nsswitchconf-location.3.diff: TODO review required
-Patch6: eglibc-2.15-nsswitchconf-location.3.diff
-# glibc-2.14.1-nscd-socket-location.4.diff: TODO review required
-Patch7: glibc-2.14.1-nscd-socket-location.4.diff
-# glibc-2.19-ldso-nodefaultdirs-option.5.diff: required from scratchbox2
-Patch8: glibc-2.19-ldso-nodefaultdirs-option.5.diff
+Patch2: glibc-2.25-arm-runfast.patch
+Patch3: glibc-2.25-no-timestamping.patch
+Patch4: glibc-2.25-elf-rtld.diff
+Patch5: glibc-2.25-ldso-rpath-prefix-option.diff
+Patch6: glibc-2.25-nsswitchconf-location.diff
+Patch7: glibc-2.25-nscd-socket-location.diff
+Patch8: glibc-2.25-ldso-nodefaultdirs-option.diff
 Patch9: glibc-2.14-locarchive-fedora.patch
-# eglibc-2.15-use-usrbin-localedef.patch: TODO review required
-Patch10: eglibc-2.15-use-usrbin-localedef.patch
-# eglibc-2.15-fix-neon-libdl.patch: fix crash
-Patch11: eglibc-2.15-fix-neon-libdl.patch
-# eglibc-2.19-shlib-make.patch: fix build fail
-Patch12: eglibc-2.19-shlib-make.patch
-# eglibc-2.19-sb2-workaround.patch: fix build fail
-Patch13: eglibc-2.19-sb2-workaround.patch
+Patch10: eglibc-2.15-fix-neon-libdl.patch
+Patch11: eglibc-2.19-shlib-make.patch
+Patch12: glibc-2.25-bits.patch
+Patch13: glibc-2.25-posix-spawn-fix.patch
 
 Provides: ldconfig
 # The dynamic linker supports DT_GNU_HASH
@@ -59,14 +34,11 @@ Provides: ld-linux.so.3
 Provides: ld-linux.so.3(GLIBC_2.4)
 %endif
 
+BuildRequires: xz tar
 # Require libgcc in case some program calls pthread_cancel in its %%post
 Requires(pre): libgcc
-# This is for building auxiliary programs like memusage, nscd
-# For initial glibc bootstraps it can be commented out
-#BuildRequires: gd-devel libpng-devel zlib-devel texinfo
 BuildRequires:  zlib-devel texinfo
 BuildRequires: sed >= 3.95, libcap-devel, gettext
-#BuildRequires: /bin/ps, /bin/kill, /bin/awk, procps
 BuildRequires: gawk,  util-linux, quilt
 # This gcc >= 3.2 is to ensure that __frame_state_for is exported by glibc
 # will be compatible with egcs 1.x.y
@@ -98,6 +70,7 @@ BuildRequires: rpm >= 4.2-0.56
 
 %define __find_provides %{_builddir}/%{glibcsrcdir}/find_provides.sh
 %define _filter_GLIBC_PRIVATE 1
+%define run_glibc_tests 0
 
 %description
 The glibc package contains standard libraries which are used by
@@ -193,69 +166,46 @@ which can be helpful during program debugging.
 
 If unsure if you need this, don't install this package.
 
+%package debug
+Summary: Debug libraries from GNU C library
+Group: Development/Libraries
+Requires: %{name} = %{version}-%{release}
+
+%description debug
+The glibc-debug package contains debug libraries.
+
+If unsure if you need this, don't install this package.
 
 %prep
-%setup -q -n %{glibcsrcdir} %{?glibc_release_unpack}
-xz -dc %SOURCE1 | tar xf -
+rm -rf glibc-2.25
+xz -dc %SOURCE0 | tar -x
 
-# Not well formatted locales --cvm
-sed -i "s|^localedata/locale-eo_EO.diff$||g" debian/patches/series
-sed -i "s|^localedata/locale-ia.diff$||g" debian/patches/series
-# This screws up armv6, as it doesn't have ARMv7 instructions/Thumb2
-%ifarch armv6l
-sed -i "s|^arm/local-linaro-cortex-strings.diff$||g" debian/patches/series
-%endif
-sed -i "s|^kfreebsd.*$||g" debian/patches/series
-
-QUILT_PATCHES=debian/patches quilt push -a
-
-# glibc-arm-alignment-fix.patch
-%patch1 -p1
+cd glibc-2.25
+%patch1 -p2
 %ifarch %{arm}
-# glibc-arm-runfast.patch
 %patch2 -p1
 %endif
-# glibc-2.13-no-timestamping.patch
 %patch3 -p1
-# glibc-2.14.1-elf-rtld.c.1.diff
 %patch4 -p1
-# glibc-2.19-ldso-rpath-prefix-option.2.diff
 %patch5 -p1
-# eglibc-2.15-nsswitchconf-location.3.diff
 %patch6 -p1
-# glibc-2.14.1-nscd-socket-location.4.diff
 %patch7 -p1
-# glibc-2.19-ldso-nodefaultdirs-option.5.diff
 %patch8 -p1
-# glibc-2.14-locarchive-fedora.patch
 %patch9 -p1
 %if 0%{?qemu_user_space_build}
-# eglibc-2.15-use-usrbin-localedef.patch
 %patch10 -p1
-# eglibc-2.15-fix-neon-libdl.patch
-%patch11 -p1
 %endif
-# eglibc-2.19-shlib-make.patch
+%patch11 -p1
 %patch12 -p1
-# eglibc-2.19-sb2-workaround.patch
 %patch13 -p1
-
-cat > find_provides.sh <<EOF
-#!/bin/sh
-/usr/lib/rpm/find-provides | grep -v GLIBC_PRIVATE
-exit 0
-EOF
-chmod +x find_provides.sh
-touch `find . -name configure`
-touch locale/programs/*-kw.h
 
 %build
 GCC=gcc
 GXX=g++
-echo %{ix86}
+BuildFlags="-g"
 %ifarch %{ix86}
 %ifnarch i486
-BuildFlags="-march=core2 -mtune=atom"
+BuildFlags="$BuildFlags -march=core2 -mtune=atom"
 %endif
 %endif
 
@@ -266,94 +216,53 @@ BuildFlags="$BuildFlags -fasynchronous-unwind-tables"
 EnableKernel="--enable-kernel=%{enablekernel}"
 echo "$GCC" > Gcc
 
-%ifarch %{arm} mipsel aarch64
-EnablePorts="ports,"
-%else
-EnablePorts=""
-%endif
-
-build_nptl()
-{
-builddir=build-%{nptl_target_cpu}-$1
-shift
-rm -rf $builddir
+builddir=build-%{name}-%{version}
+rm -rf build-%{name}-*
 mkdir $builddir ; cd $builddir
+
 echo libdir=/usr/lib > configparms
 echo slibdir=/lib >> configparms
 echo BUILD_CC=gcc >> configparms
+
 %ifarch mipsel
-build_CFLAGS="$BuildFlags -g -O1 $*"
+build_CFLAGS="$BuildFlags -O1"
 %else
-build_CFLAGS="$BuildFlags -g -O3 $*"
+build_CFLAGS="$BuildFlags -O3"
 %endif
+
 export MAKEINFO=:
-../configure CC="$GCC" CXX="$GXX" CFLAGS="$build_CFLAGS" \
+
+../glibc-2.25/configure CC="$GCC" CXX="$GXX" CFLAGS="$build_CFLAGS" \
 	--prefix=%{_prefix} \
-	--enable-pt_chown "--enable-add-ons=libidn,"$EnablePorts"nptl" --without-cvs $EnableKernel \
+	--enable-pt_chown "--enable-add-ons=libidn" --without-cvs $EnableKernel \
 	--enable-bind-now --with-tls --with-__thread  \
 	--with-headers=%{_prefix}/include \
-%ifnarch %{arm}
-	--build %{nptl_target_cpu}-%{_vendor}-linux \
-	--host %{nptl_target_cpu}-%{_vendor}-linux \
-%else
-%ifarch armv7hl armv7tnhl armv7nhl
-        --build %{nptl_target_cpu}-%{_vendor}-linux-gnueabihf \
-        --host %{nptl_target_cpu}-%{_vendor}-linux-gnueabihf \
-%else
-        --build %{nptl_target_cpu}-%{_vendor}-linux-gnueabi \
-        --host %{nptl_target_cpu}-%{_vendor}-linux-gnueabi \
-%endif
-%endif
 %ifarch %{multiarcharches}
 	--enable-multi-arch \
 %endif
 	--disable-profile --enable-obsolete-rpc
 
-make %{?_smp_mflags} -r CFLAGS="$build_CFLAGS" 
+make %{?_smp_mflags} -r CFLAGS="$build_CFLAGS"
 
 cd ..
-}
-
-build_nptl linuxnptl
 
 $GCC -Os -static -o build-locale-archive %SOURCE11 \
-  ./build-%{nptl_target_cpu}-linuxnptl/locale/locarchive.o \
-  ./build-%{nptl_target_cpu}-linuxnptl/locale/md5.o \
+  ./build-%{name}-%{version}/locale/locarchive.o \
+  ./build-%{name}-%{version}/locale/md5.o \
   -DDATADIR=\"%{_datadir}\" -DPREFIX=\"%{_prefix}\" \
-  -L./build-%{nptl_target_cpu}-linuxnptl -I./locale
+  -L./build-%{name}-%{version} -Iglibc-2.25
 
 %install
-GCC=`cat Gcc`
+rm -rf ${RPM_BUILD_ROOT}
+cd build-%{name}-%{version}
+make -j1 install_root=${RPM_BUILD_ROOT} install
 
-rm -rf $RPM_BUILD_ROOT
-mkdir -p $RPM_BUILD_ROOT
-make -j1 install_root=$RPM_BUILD_ROOT install -C build-%{nptl_target_cpu}-linuxnptl PARALLELMFLAGS=
-
-librtso=`basename $RPM_BUILD_ROOT/%{_lib}/librt.so.*`
-
-
-# Remove the files we don't want to distribute
-rm -f $RPM_BUILD_ROOT%{_prefix}/%{_lib}/libNoVersion*
-rm -f $RPM_BUILD_ROOT/%{_lib}/libNoVersion*
-
-if [ -d $RPM_BUILD_ROOT%{_prefix}/info -a "%{_infodir}" != "%{_prefix}/info" ]; then
-  mkdir -p $RPM_BUILD_ROOT%{_infodir}
-  mv -f $RPM_BUILD_ROOT%{_prefix}/info/* $RPM_BUILD_ROOT%{_infodir}
-  rm -rf $RPM_BUILD_ROOT%{_prefix}/info
-fi
-
-ln -sf libbsd-compat.a $RPM_BUILD_ROOT%{_prefix}/%{_lib}/libbsd.a
-
-install -p -m 644 nss/nsswitch.conf $RPM_BUILD_ROOT/etc/nsswitch.conf
+install -p -m 644 ../glibc-2.25/nss/nsswitch.conf $RPM_BUILD_ROOT/etc/nsswitch.conf
 
 mkdir -p $RPM_BUILD_ROOT/etc/default
-install -p -m 644 nis/nss $RPM_BUILD_ROOT/etc/default/nss
+install -p -m 644 ../glibc-2.25/nis/nss $RPM_BUILD_ROOT/etc/default/nss
 
-# This is for ncsd - in glibc 2.2
-install -m 644 nscd/nscd.conf $RPM_BUILD_ROOT/etc
-
-# Don't include ld.so.cache
-rm -f $RPM_BUILD_ROOT/etc/ld.so.cache
+install -m 644 ../glibc-2.25/nscd/nscd.conf $RPM_BUILD_ROOT/etc
 
 # Include ld.so.conf
 echo 'include /etc/ld.so.conf.d/*.conf' > $RPM_BUILD_ROOT/etc/ld.so.conf
@@ -386,7 +295,6 @@ done
 popd
 
 mkdir -p $RPM_BUILD_ROOT/%{_prefix}/lib/locale/
-> $RPM_BUILD_ROOT/%{_prefix}/lib/locale/locale-archive
 
 %ifarch armv7hl armv7tnhl armv7nhl
 ln -s /lib/ld-linux-armhf.so.3 ${RPM_BUILD_ROOT}/lib/ld-linux.so.3
@@ -497,19 +405,25 @@ ln -sf %{_prefix}/share/zoneinfo/US/Eastern $RPM_BUILD_ROOT/etc/localtime
 
 rm -rf $RPM_BUILD_ROOT%{_prefix}/share/zoneinfo
 
-# Make sure %config files have the same timestamp
-touch -r timezone/northamerica $RPM_BUILD_ROOT/etc/ld.so.conf
-touch -r sunrpc/etc.rpc $RPM_BUILD_ROOT/etc/rpc
-
-
 # the last bit: more documentation
-rm -rf documentation
-mkdir documentation
-cp crypt/README.ufc-crypt documentation/README.ufc-crypt
-cp timezone/README documentation/README.timezone
-cp ChangeLog{,.15,.16} documentation
-bzip2 -9 documentation/ChangeLog*
-cp posix/gai.conf documentation/
+rm -rf ../documentation
+mkdir ../documentation
+cp ../glibc-2.25/crypt/README.ufc-crypt ../documentation/README.ufc-crypt
+cp ../glibc-2.25/timezone/README ../documentation/README.timezone
+cp ../glibc-2.25/ChangeLog{,.15,.16} ../documentation
+bzip2 -9 ../documentation/ChangeLog*
+cp ../glibc-2.25/posix/gai.conf ../documentation/
+
+# Docs
+cp ../glibc-2.25/COPYING ..
+cp ../glibc-2.25/LICENSES ..
+cp ../glibc-2.25/COPYING.LIB ..
+cp ../glibc-2.25/README ..
+cp ../glibc-2.25/NEWS ..
+cp ../glibc-2.25/INSTALL ..
+cp ../glibc-2.25/BUGS ..
+cp ../glibc-2.25/CONFORMANCE ..
+install -D ../glibc-2.25/hesiod/README.hesiod ../hesiod/README.hesiod
 
 %if 0%{run_glibc_tests}
 
@@ -541,7 +455,7 @@ echo ====================PLT RELOCS END==================
 %endif
 
 pushd $RPM_BUILD_ROOT/usr/%{_lib}/
-$GCC -r -nostdlib -o libpthread.o -Wl,--whole-archive ./libpthread.a
+gcc -r -nostdlib -o libpthread.o -Wl,--whole-archive ./libpthread.a
 rm libpthread.a
 ar rcs libpthread.a libpthread.o
 rm libpthread.o
@@ -565,7 +479,7 @@ touch $RPM_BUILD_ROOT/var/{db,run}/nscd/{passwd,group,hosts,services}
 touch $RPM_BUILD_ROOT/var/run/nscd/{socket,nscd.pid}
 %endif
 
-install -m 700 build-locale-archive $RPM_BUILD_ROOT/usr/sbin/build-locale-archive
+install -m 700 ../build-locale-archive $RPM_BUILD_ROOT/usr/sbin/build-locale-archive
 
 mkdir -p $RPM_BUILD_ROOT/var/cache/ldconfig
 > $RPM_BUILD_ROOT/var/cache/ldconfig/aux-cache
@@ -597,14 +511,11 @@ if [ "$1" -ge "1" ]; then
 fi
 
 
-%files -f rpm.filelist
+%files -f build-%{name}-%{version}/rpm.filelist
 %defattr(-,root,root)
 %verify(not md5 size mtime) %config(noreplace) /etc/localtime
 %verify(not md5 size mtime) %config(noreplace) /etc/nsswitch.conf
 %verify(not md5 size mtime) %config(noreplace) /etc/ld.so.conf
-%ifarch armv7hl armv7tnhl armv7nhl 
-/lib/ld-linux.so.3
-%endif
 %dir /etc/ld.so.conf.d
 %dir %{_prefix}/libexec/getconf
 %dir %{_prefix}/%{_lib}/gconv
@@ -615,7 +526,7 @@ fi
 
 
 %ifnarch %{auxarches}
-%files -f common.filelist common
+%files -f build-%{name}-%{version}/common.filelist common
 %defattr(-,root,root)
 %dir %{_prefix}/lib/locale
 %dir %attr(755,root,root) /etc/default
@@ -623,21 +534,21 @@ fi
 %attr(4711,root,root) %{_prefix}/libexec/pt_chown
 %doc documentation/*
 
-%files -f devel.filelist devel
+%files -f build-%{name}-%{version}/devel.filelist devel
 %defattr(-,root,root)
-%doc README NEWS INSTALL BUGS PROJECTS CONFORMANCE
+%doc README NEWS INSTALL BUGS CONFORMANCE
 %doc hesiod/README.hesiod
 
-%files -f static.filelist static
+%files -f build-%{name}-%{version}/static.filelist static
 %defattr(-,root,root)
 
-%files -f headers.filelist headers
+%files -f build-%{name}-%{version}/headers.filelist headers
 %defattr(-,root,root)
 
-%files -f utils.filelist utils
+%files -f build-%{name}-%{version}/utils.filelist utils
 %defattr(-,root,root)
 
-%files -f nscd.filelist -n nscd
+%files -f build-%{name}-%{version}/nscd.filelist -n nscd
 %defattr(-,root,root)
 %config(noreplace) /etc/nscd.conf
 %dir %attr(0755,root,root) /var/run/nscd
@@ -655,3 +566,6 @@ fi
 %ghost %config(missingok,noreplace) /etc/sysconfig/nscd
 %endif
 
+%files debug
+%defattr(-,root,root)
+%{_prefix}/%{_lib}/debug/usr/lib/*

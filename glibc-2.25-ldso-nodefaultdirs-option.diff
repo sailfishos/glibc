@@ -1,0 +1,88 @@
+diff --git a/elf/dl-load.c b/elf/dl-load.c
+index 49f070f..621b5a3 100644
+--- a/elf/dl-load.c
++++ b/elf/dl-load.c
+@@ -2279,7 +2279,8 @@ _dl_map_object (struct link_map *loader, const char *name,
+
+ 	      /* If the loader has the DF_1_NODEFLIB flag set we must not
+ 		 use a cache entry from any of these directories.  */
+-	      if (__glibc_unlikely (l->l_flags_1 & DF_1_NODEFLIB))
++	      if (__glibc_unlikely (l->l_flags_1 & DF_1_NODEFLIB) ||
++                       GLRO(dl_no_default_dirs))
+ 		{
+ 		  const char *dirp = system_dirs;
+ 		  unsigned int cnt = 0;
+@@ -2321,7 +2322,8 @@ _dl_map_object (struct link_map *loader, const char *name,
+       /* Finally, try the default path.  */
+       if (fd == -1
+ 	  && ((l = loader ?: GL(dl_ns)[nsid]._ns_loaded) == NULL
+-	      || __glibc_likely (!(l->l_flags_1 & DF_1_NODEFLIB)))
++	      || __glibc_likely (!(l->l_flags_1 & DF_1_NODEFLIB)) ||
++		GLRO(dl_no_default_dirs))
+ 	  && rtld_search_dirs.dirs != (void *) -1)
+ 	fd = open_path (name, namelen, mode & __RTLD_SECURE, &rtld_search_dirs,
+ 			&realname, &fb, l, LA_SER_DEFAULT, &found_other_class);
+@@ -2487,7 +2489,7 @@ _dl_rtld_di_serinfo (struct link_map *loader, Dl_serinfo *si, bool counting)
+      a way to indicate that in the results for Dl_serinfo.  */
+
+   /* Finally, try the default path.  */
+-  if (!(loader->l_flags_1 & DF_1_NODEFLIB))
++  if (!((loader->l_flags_1 & DF_1_NODEFLIB) || GLRO(dl_no_default_dirs)))
+     add_path (&p, &rtld_search_dirs, XXX_default);
+
+   if (counting)
+diff --git a/elf/dl-support.c b/elf/dl-support.c
+index 723814a..fccc1d4 100644
+--- a/elf/dl-support.c
++++ b/elf/dl-support.c
+@@ -61,6 +61,9 @@ const char *_dl_inhibit_rpath;
+ /* prefix to be added to all RUNPATHs and RPATHs */
+ const char *_dl_rpath_prefix = NULL;
+
++/* flag: don't search default directories if set. */
++int _dl_no_default_dirs = 0;
++
+ /* The map for the object we will profile.  */
+ struct link_map *_dl_profile_map;
+
+diff --git a/elf/rtld.c b/elf/rtld.c
+index ea3af55..75a2415 100644
+--- a/elf/rtld.c
++++ b/elf/rtld.c
+@@ -976,6 +976,15 @@ dl_main (const ElfW(Phdr) *phdr,
+ 	    --_dl_argc;
+ 	    ++_dl_argv;
+ 	  }
++	else if (! strcmp (_dl_argv[1], "--nodefaultdirs")
++		 && _dl_argc > 2)
++	  {
++	    GLRO(dl_no_default_dirs) = 1;
++
++	    ++_dl_skip_args;
++	    --_dl_argc;
++	    ++_dl_argv;
++	  }
+ 	else if (! strcmp (_dl_argv[1], "--library-path")
+ 		 && _dl_argc > 2)
+ 	  {
+@@ -1034,6 +1043,7 @@ of this helper program; chances are you did not intend to run this program.\n\
+   --list                list all dependencies and how they are resolved\n\
+   --verify              verify that given object really is a dynamically linked\n\
+ 			object we can handle\n\
++  --nodefaultdirs       Do not search from default directories or cache\n\
+   --inhibit-cache       Do not use " LD_SO_CACHE "\n\
+   --library-path PATH   use given PATH instead of content of the environment\n\
+ 			variable LD_LIBRARY_PATH\n\
+diff --git a/sysdeps/generic/ldsodefs.h b/sysdeps/generic/ldsodefs.h
+index 3116188..0759694 100644
+--- a/sysdeps/generic/ldsodefs.h
++++ b/sysdeps/generic/ldsodefs.h
+@@ -559,6 +559,8 @@ struct rtld_global_ro
+      platforms.  */
+   EXTERN uint64_t _dl_hwcap2;
+
++  EXTERN int _dl_no_default_dirs;
++
+ #ifdef SHARED
+   /* We add a function table to _rtld_global which is then used to
+      call the function instead of going through the PLT.  The result

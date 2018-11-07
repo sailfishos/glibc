@@ -1,0 +1,39 @@
+diff -ru eglibc-2.18/csu/init-first.c eglibc-2.18-runfast/csu/init-first.c
+--- eglibc-2.18/csu/init-first.c	2013-01-10 00:28:48.000000000 +0000
++++ eglibc-2.18-runfast/csu/init-first.c	2014-01-01 10:46:24.000000000 +0000
+@@ -69,6 +69,9 @@
+ 	__setfpucw (__fpu_control);
+     }
+
++  /* Set the default FPU mode once again it is RunFast */
++  _FPU_SETCW(_FPU_DEFAULT);
++
+   /* Save the command-line arguments.  */
+   __libc_argc = argc;
+   __libc_argv = argv;
+--- eglibc-2.18/ports/sysdeps/arm/fpu_control.h	2013-06-24 22:42:26.000000000 +0000
++++ eglibc-2.18-runfast/sysdeps/arm/fpu_control.h	2014-01-01 11:06:13.000000000 +0000
+@@ -22,7 +22,8 @@
+ #if !(defined(_LIBC) && !defined(_LIBC_TEST)) && defined(__SOFTFP__)
+
+ #define _FPU_RESERVED 0xffffffff
+-#define _FPU_DEFAULT  0x00000000
++#define _FPU_DEFAULT    (3 << 24)
++
+ typedef unsigned int fpu_control_t;
+ #define _FPU_GETCW(cw) (cw) = 0
+ #define _FPU_SETCW(cw) (void) (cw)
+@@ -44,10 +45,11 @@ extern fpu_control_t __fpu_control;
+ /* Some bits in the FPSCR are not yet defined.  They must be preserved when
+    modifying the contents.  */
+ #define _FPU_RESERVED	0x00086060
+-#define _FPU_DEFAULT    0x00000000
++/* The default mode is RunFast */
++#define _FPU_DEFAULT   (3 << 24)
+
+ /* Default + exceptions enabled.  */
+-#define _FPU_IEEE	(_FPU_DEFAULT | 0x00001f00)
++#define _FPU_IEEE	0x00001f00
+
+ /* Type of the control word.  */
+ typedef unsigned int fpu_control_t;
