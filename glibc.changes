@@ -1,4 +1,4 @@
-* Mon Nov 12 2018 Marko Kenttälä <marko.kenttala@jolla.com> - 2.25.1
+* Mon Nov 12 2018 Marko Kenttälä <marko.kenttala@jolla.com> - 2.25+git1
 - Upgrade to glibc-2.25, fixes jb#36174
 
 * Tue Oct 3 2017 Pekka Vuorela <pekka.vuorela@jolla.com> - 2.19+6.13.1
