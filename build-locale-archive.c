@@ -12,10 +12,10 @@
 #include <sys/mman.h>
 #include <sys/stat.h>
 #include <unistd.h>
-#include "../locale/hashval.h"
+#include "locale/hashval.h"
 #define __LC_LAST 13
-#include "../locale/locarchive.h"
-#include "../crypt/md5.h"
+#include "locale/locarchive.h"
+#include "crypt/md5.h"
 
 const char *alias_file = DATADIR "/locale/locale.alias";
 const char *locar_file = PREFIX "/lib/locale/locale-archive";
@@ -36,7 +36,7 @@ static const char *locnames[] =
   {
 #define DEFINE_CATEGORY(category, category_name, items, a) \
   [category] = category_name,
-#include "../locale/categories.def"
+#include "locale/categories.def"
 #undef  DEFINE_CATEGORY
   };
 
@@ -147,7 +147,7 @@ extern void add_alias (struct locarhandle *ah, const char *alias,
 		       bool replace, const char *oldname,
 		       uint32_t *locrec_offset_p);
 
-extern struct namehashent *
+static struct namehashent *
 insert_name (struct locarhandle *ah,
 	     const char *name, size_t name_len, bool replace);
 

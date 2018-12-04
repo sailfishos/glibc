@@ -1,3 +1,6 @@
+* Mon Nov 12 2018 Marko Kenttälä <marko.kenttala@jolla.com> - 2.25.1
+- Upgrade to glibc-2.25, fixes jb#36174
+
 * Tue Oct 3 2017 Pekka Vuorela <pekka.vuorela@jolla.com> - 2.19+6.13.1
 - Add ldconfig to %post. Fixes JB#39841
 - Move docs out of main package.
@@ -37,7 +40,7 @@
 
 * Sat Dec 13 2014 Carsten Munk <carsten.munk@jolla.com> - 2.19
 - Disable special -march=i486 for glibc
-- Use correct release. Release is mungled on OBS 
+- Use correct release. Release is mungled on OBS
 - Build for i686 for accelerated functions goodness
 
 * Fri Dec 5 2014 Davide Bettio <davide.bettio@ispirata.com> - 2.19
@@ -110,7 +113,7 @@
 * Fri Nov 25 2011 Carsten Munk <carsten@merproject.org> - 2.13
 - Add glibc-2.13-onlyenus.patch, we're only interested in en_US locales
   right now. For integrators, you can use localedef in your %post
-  sections in kickstart files to generate the locales you need. This 
+  sections in kickstart files to generate the locales you need. This
   shaves 3 minutes (at least) off cross builds of glibc and reduces
   basic Mer footprint (uncompressed) with 34 mb.
 
@@ -129,11 +132,11 @@
 
 * Thu Jun 23 2011 Carsten Munk <carsten@maemo.org> - 2.13
 - New gcc atomics for ARM breaks some configure tests (gzip, m4)
-  when running inside qemu-arm.  Needed to make glibc 2.13 work 
-  properly on MeeGo 1.3. 
+  when running inside qemu-arm.  Needed to make glibc 2.13 work
+  properly on MeeGo 1.3.
 
-* Wed Jun 22 2011 Chris Ferron <chris.e.ferron@linux.intel.com> - 2.13  
-- removed util-linux-ng as it has been replaced by util-linux  
+* Wed Jun 22 2011 Chris Ferron <chris.e.ferron@linux.intel.com> - 2.13
+- removed util-linux-ng as it has been replaced by util-linux
 
 * Sat Jun 18 2011 Anas Nashif <anas.nashif@intel.com> - 2.13
 - Workaround to avoid problems with new debuginfo in upcoming rpm
@@ -161,13 +164,13 @@
 - BMC#12517 - ARM: glibc wastes time checking for half-precision and fast-mult HWCAP libraries
 - BMC#12518 - ARM: default to FPU RunFast mode
 
-* Tue Jan 04 2011 Austin Zhang <austin.zhang@intel.com> - 2.11.90 
-- Fixed syntax error from using %install_info MACRO, BMC#11918. 
+* Tue Jan 04 2011 Austin Zhang <austin.zhang@intel.com> - 2.11.90
+- Fixed syntax error from using %install_info MACRO, BMC#11918.
 
-* Wed Dec 29 2010 Austin Zhang <austin.zhang@intel.com> - 2.11.90 
-- BMC#10342: Error when installing glibc-devel with --excludedocs in .ks 
+* Wed Dec 29 2010 Austin Zhang <austin.zhang@intel.com> - 2.11.90
+- BMC#10342: Error when installing glibc-devel with --excludedocs in .ks
 
-* Fri Nov 26 2010 Brian Harring <brian.harring@intel.com> - 2.11.90 
+* Fri Nov 26 2010 Brian Harring <brian.harring@intel.com> - 2.11.90
 - BMC 10526; fix silent failure in building arm locale-archives.
 
 * Fri Aug 20 2010 Peter J Zhu <peter.j.zhu@intel.com> - 2.11.90
@@ -179,14 +182,14 @@
 
 * Fri Apr 16 2010 Austin Zhang <austin.zhang@intel.com> - 2.11.90
 - Patch from H.J tree for bugfix in memory optimization -- fix
-  BMC#983 
+  BMC#983
 
 * Fri Mar 26 2010 Austin Zhang <austin.zhang@intel.com> - 2.11.90
 - Patches from upstream for workaround issue: prelink will lead
-  to SIGSEGV due to wrong hash table content in glibc.  
+  to SIGSEGV due to wrong hash table content in glibc.
 
 * Fri Mar 19 2010 Austin Zhang <austin.zhang@intel.com> - 2.11.90
-- Patches from H.J. L x86 branch: 
+- Patches from H.J. L x86 branch:
   Correct unwind info; update xmm3 when exit from loop
   (sync to 20100318)
 
@@ -198,13 +201,13 @@
 
 * Tue Mar 02 2010 Austin Zhang <austin.zhang@intel.com> - 2.11.90-20100226
 - For atom optimization:
-  Sync with hjl/release/2.11/x86 branch from upstream, which inlcude 
+  Sync with hjl/release/2.11/x86 branch from upstream, which inlcude
   those memory operations optimization for atom (so remove old ones), and
   also include str operation optimizations for atom;
   Now, the up-to-date version is tillto 2010-02-26
 
 * Tue Jan 19 2010 Austin Zhang <austin.zhang@intel.com> - 2.11.90
-- Fixed CVE bug [MB#9120]: getpwnam shows shadow passwords of NIS 
+- Fixed CVE bug [MB#9120]: getpwnam shows shadow passwords of NIS
   users in GNU libc
 
 * Mon Dec 21 2009 Austin Zhang <austin.zhang@intel.com> - 2.11.90
@@ -241,4 +244,3 @@
 
 * Tue Aug 19 2008 Anas Nashif <anas.nashif@intel.com> - 2.8
 - exclude i586 from aux arches
-
