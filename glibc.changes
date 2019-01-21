@@ -1,3 +1,6 @@
+* Mon Jan 21 2019 Marko Kenttälä <marko.kenttala@jolla.com> - 2.25-git3
+- Added gnu target, contributes to jb#36174
+
 * Mon Nov 12 2018 Marko Kenttälä <marko.kenttala@jolla.com> - 2.25+git1
 - Upgrade to glibc-2.25, fixes jb#36174
 
@@ -217,11 +220,11 @@
 - Update to 2.11.90
 - Removed obseleted stuffs and removed Hardlink of locale-archive
 
-* Fri Nov 11 2009 Arjan van de Ven <arjan@linux.intel.com> - 2.10.90
+* Wed Nov 11 2009 Arjan van de Ven <arjan@linux.intel.com> - 2.10.90
 - add atom specific memcpy() functions
 - use -mtune=atom
 
-* Thu Sep 16 2009 Austin Zhang <austin.zhang@intel.com> - 2.10.90
+* Wed Sep 16 2009 Austin Zhang <austin.zhang@intel.com> - 2.10.90
 - Update to latest snapshot -335
 
 * Sat Aug 22 2009 Anas Nashif <anas.nashif@intel.com> - 2.10.90
