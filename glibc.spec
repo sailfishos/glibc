@@ -1,8 +1,8 @@
 Name: glibc
 
 Summary: GNU C library shared libraries
-Version: 2.25+git1
-Release: 1
+Version: 2.25+git3
+Release: 0
 License: LGPLv2+ and LGPLv2+ with exceptions and GPLv2+
 Group: System/Libraries
 URL: http://www.gnu.org/software/libc/
@@ -60,6 +60,7 @@ BuildRequires: gcc >= 3.2
 %define nptl_target_cpu %{_target_cpu}
 %endif
 %endif
+%define target %{nptl_target_cpu}-meego-linux-gnu
 
 # Need AS_NEEDED directive
 # Need --hash-style=* support
@@ -240,7 +241,9 @@ export MAKEINFO=:
 %ifarch %{multiarcharches}
 	--enable-multi-arch \
 %endif
-	--disable-profile --enable-obsolete-rpc
+	--disable-profile --enable-obsolete-rpc \
+    --enable-stack-protector=strong \
+    --build=%{target}
 
 make %{?_smp_mflags} -r CFLAGS="$build_CFLAGS"
 
