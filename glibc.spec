@@ -1,7 +1,7 @@
 Name: glibc
 
 Summary: GNU C library shared libraries
-Version: 2.25+git3
+Version: 2.25+git2
 Release: 0
 License: LGPLv2+ and LGPLv2+ with exceptions and GPLv2+
 Group: System/Libraries
@@ -235,8 +235,8 @@ export MAKEINFO=:
 
 ../glibc-2.25/configure CC="$GCC" CXX="$GXX" CFLAGS="$build_CFLAGS" \
 	--prefix=%{_prefix} \
-	--enable-pt_chown "--enable-add-ons=libidn" --without-cvs $EnableKernel \
-	--enable-bind-now --with-tls --with-__thread  \
+	"--enable-add-ons=libidn" --without-cvs $EnableKernel \
+	--enable-bind-now --with-tls \
 	--with-headers=%{_prefix}/include \
 %ifarch %{multiarcharches}
 	--enable-multi-arch \
@@ -381,7 +381,6 @@ grep '%{_prefix}/share' < rpm.filelist | \
 
 sed -i -e '\|%{_prefix}/bin|d' \
        -e '\|%{_prefix}/lib/locale|d' \
-       -e '\|%{_prefix}/libexec/pt_chown|d' \
        -e '\|%{_prefix}/sbin/[^gi]|d' \
        -e '\|%{_prefix}/share|d' rpm.filelist
 
@@ -534,7 +533,6 @@ fi
 %dir %{_prefix}/lib/locale
 %dir %attr(755,root,root) /etc/default
 %verify(not md5 size mtime) %config(noreplace) /etc/default/nss
-%attr(4711,root,root) %{_prefix}/libexec/pt_chown
 %doc documentation/*
 
 %files -f build-%{name}-%{version}/devel.filelist devel
