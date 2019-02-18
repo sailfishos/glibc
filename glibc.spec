@@ -324,20 +324,18 @@ rm -f $RPM_BUILD_ROOT%{_sbindir}/rpcinfo
 
 # BUILD THE FILE LIST
 {
-  find $RPM_BUILD_ROOT \( -type f -o -type l \) \
-       \( \
-	 -name etc -printf "%%%%config " -o \
-	 -name gconv-modules \
-	 -printf "%%%%verify(not md5 size mtime) %%%%config(noreplace) " -o \
-	 -name gconv-modules.cache \
-	 -printf "%%%%verify(not md5 size mtime) " \
-	 , \
-	 ! -path "*/lib/debug/*" -printf "/%%P\n" \)
+  find $RPM_BUILD_ROOT \( -type f -o -type l \) '!' -path "*/lib/debug/*" \
+    | sed -e "s|^${RPM_BUILD_ROOT}||" -e '\|/etc/|s|^|%%config |' \
+          -e '\|/gconv-modules$|s|^|%%verify(not md5 size mtime) %%config(noreplace) |' \
+          -e '\|/gconv-modules\.cache$|s|^|%%verify(not md5 size mtime) |'
   find $RPM_BUILD_ROOT -type d \
-       \( -path '*%{_prefix}/share/*' ! -path '*%{_infodir}' -o \
-	  -path "*%{_prefix}/include/*" -o \
-	  -path "*%{_prefix}/lib/locale/*" \
-       \) -printf "%%%%dir /%%P\n"
+    \( -path '*%{_datadir}/locale' -prune -o \
+       \( -path '*%{_datadir}/*' \
+        ! -path '*%{_infodir}' -o \
+          -path "*%{_includedir}/*" \) \
+    \) \
+    | grep -v '%{_datadir}/locale' \
+    | sed "s|^$RPM_BUILD_ROOT|%%dir |"
 } | {
 
   # primary filelist
