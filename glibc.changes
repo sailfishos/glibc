@@ -1,5 +1,6 @@
-* Mon Jan 21 2019 Marko Kenttälä <marko.kenttala@jolla.com> - 2.25-git3
-- Added gnu target, contributes to jb#36174
+* Mon Feb 18 2019 Niels Breet <niels.breet@jolla.com> - 2.25+git2
+- Change pthread configure params, contributes to JB#36174
+- Added gnu target
 
 * Mon Nov 12 2018 Marko Kenttälä <marko.kenttala@jolla.com> - 2.25+git1
 - Upgrade to glibc-2.25, fixes jb#36174
