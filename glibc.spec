@@ -1,7 +1,7 @@
 Name: glibc
 
 Summary: GNU C library shared libraries
-Version: 2.25+git2
+Version: 2.25+git3
 Release: 0
 License: LGPLv2+ and LGPLv2+ with exceptions and GPLv2+
 Group: System/Libraries
@@ -177,6 +177,14 @@ The glibc-debug package contains debug libraries.
 
 If unsure if you need this, don't install this package.
 
+%package doc
+Summary:   Documentation for %{name}
+Group:     Documentation
+Requires:  %{name} = %{version}-%{release}
+
+%description doc
+%{summary}.
+
 %prep
 rm -rf glibc-2.25
 xz -dc %SOURCE0 | tar -x
@@ -316,20 +324,18 @@ rm -f $RPM_BUILD_ROOT%{_sbindir}/rpcinfo
 
 # BUILD THE FILE LIST
 {
-  find $RPM_BUILD_ROOT \( -type f -o -type l \) \
-       \( \
-	 -name etc -printf "%%%%config " -o \
-	 -name gconv-modules \
-	 -printf "%%%%verify(not md5 size mtime) %%%%config(noreplace) " -o \
-	 -name gconv-modules.cache \
-	 -printf "%%%%verify(not md5 size mtime) " \
-	 , \
-	 ! -path "*/lib/debug/*" -printf "/%%P\n" \)
+  find $RPM_BUILD_ROOT \( -type f -o -type l \) '!' -path "*/lib/debug/*" \
+    | sed -e "s|^${RPM_BUILD_ROOT}||" -e '\|/etc/|s|^|%%config |' \
+          -e '\|/gconv-modules$|s|^|%%verify(not md5 size mtime) %%config(noreplace) |' \
+          -e '\|/gconv-modules\.cache$|s|^|%%verify(not md5 size mtime) |'
   find $RPM_BUILD_ROOT -type d \
-       \( -path '*%{_prefix}/share/*' ! -path '*%{_infodir}' -o \
-	  -path "*%{_prefix}/include/*" -o \
-	  -path "*%{_prefix}/lib/locale/*" \
-       \) -printf "%%%%dir /%%P\n"
+    \( -path '*%{_datadir}/locale' -prune -o \
+       \( -path '*%{_datadir}/*' \
+        ! -path '*%{_infodir}' -o \
+          -path "*%{_includedir}/*" \) \
+    \) \
+    | grep -v '%{_datadir}/locale' \
+    | sed "s|^$RPM_BUILD_ROOT|%%dir |"
 } | {
 
   # primary filelist
@@ -409,23 +415,22 @@ rm -rf $RPM_BUILD_ROOT%{_prefix}/share/zoneinfo
 
 # the last bit: more documentation
 rm -rf ../documentation
-mkdir ../documentation
-cp ../glibc-2.25/crypt/README.ufc-crypt ../documentation/README.ufc-crypt
-cp ../glibc-2.25/timezone/README ../documentation/README.timezone
-cp ../glibc-2.25/ChangeLog{,.15,.16} ../documentation
-bzip2 -9 ../documentation/ChangeLog*
-cp ../glibc-2.25/posix/gai.conf ../documentation/
+mkdir -p $RPM_BUILD_ROOT%{_docdir}/%{name}-%{version}
+bzip2 -9 ../glibc-2.25/ChangeLog*
+install -m0644 -t $RPM_BUILD_ROOT%{_docdir}/%{name}-%{version} \
+        ../glibc-2.25/crypt/README.ufc-crypt \
+        ../glibc-2.25/ChangeLog{,.16,.17}.bz2 \
+        ../glibc-2.25/posix/gai.conf \
+        ../glibc-2.25/README \
+        ../glibc-2.25/NEWS \
+        ../glibc-2.25/INSTALL \
+        ../glibc-2.25/BUGS \
+        ../glibc-2.25/CONFORMANCE \
+        ../glibc-2.25/hesiod/README.hesiod
+install -m0644 ../glibc-2.25/timezone/README \
+        $RPM_BUILD_ROOT%{_docdir}/%{name}-%{version}/README.timezone
 
-# Docs
-cp ../glibc-2.25/COPYING ..
-cp ../glibc-2.25/LICENSES ..
-cp ../glibc-2.25/COPYING.LIB ..
-cp ../glibc-2.25/README ..
-cp ../glibc-2.25/NEWS ..
-cp ../glibc-2.25/INSTALL ..
-cp ../glibc-2.25/BUGS ..
-cp ../glibc-2.25/CONFORMANCE ..
-install -D ../glibc-2.25/hesiod/README.hesiod ../hesiod/README.hesiod
+cp ../glibc-2.25/{COPYING,COPYING.LIB,LICENSES} ..
 
 %if 0%{run_glibc_tests}
 
@@ -524,7 +529,7 @@ fi
 %dir %attr(0700,root,root) /var/cache/ldconfig
 %attr(0600,root,root) %verify(not md5 size mtime) %ghost %config(missingok,noreplace) /var/cache/ldconfig/aux-cache
 %attr(0644,root,root) %verify(not md5 size mtime) %ghost %config(missingok,noreplace) /etc/ld.so.cache
-%doc COPYING COPYING.LIB LICENSES
+%license COPYING COPYING.LIB LICENSES
 
 
 %ifnarch %{auxarches}
@@ -533,12 +538,9 @@ fi
 %dir %{_prefix}/lib/locale
 %dir %attr(755,root,root) /etc/default
 %verify(not md5 size mtime) %config(noreplace) /etc/default/nss
-%doc documentation/*
 
 %files -f build-%{name}-%{version}/devel.filelist devel
 %defattr(-,root,root)
-%doc README NEWS INSTALL BUGS CONFORMANCE
-%doc hesiod/README.hesiod
 
 %files -f build-%{name}-%{version}/static.filelist static
 %defattr(-,root,root)
@@ -570,3 +572,7 @@ fi
 %files debug
 %defattr(-,root,root)
 %{_prefix}/%{_lib}/debug/usr/lib/*
+
+%files doc
+%defattr(-,root,root)
+%{_docdir}/%{name}-%{version}

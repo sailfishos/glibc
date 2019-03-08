@@ -1,3 +1,6 @@
+* Mon Feb 18 2019 Tomi Leppänen <tomi.leppanen@jolla.com> - 2.25+git3
+- Add glibc-doc subpackage. Contributes to JB#24119
+
 * Mon Feb 18 2019 Niels Breet <niels.breet@jolla.com> - 2.25+git2
 - Change pthread configure params, contributes to JB#36174
 - Added gnu target
