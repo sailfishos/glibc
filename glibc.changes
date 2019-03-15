@@ -1,3 +1,8 @@
+* Fri Mar 15 2019 Marko Saukko <marko.saukko@jolla.com> - 2.25+git4
+- Apply 2.25.6 patch set from ubuntu. Contributes to JB#45152
+- Fixes CVE-2017-15670, CVE-2017-15671, CVE-2017-15804,
+  CVE-2017-1000408, CVE-2017-1000409, CVE-2017-16997
+
 * Mon Feb 18 2019 Tomi Leppänen <tomi.leppanen@jolla.com> - 2.25+git3
 - Add glibc-doc subpackage. Contributes to JB#24119
 
