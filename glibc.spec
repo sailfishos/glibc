@@ -250,7 +250,7 @@ export MAKEINFO=:
     --enable-stack-protector=strong \
     --build=%{target}
 
-make %{?_smp_mflags} -r CFLAGS="$build_CFLAGS"
+make %{?_smp_mflags} -r CFLAGS="$build_CFLAGS -Wno-error=maybe-uninitialized"
 
 cd ..
 
