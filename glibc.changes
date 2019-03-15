@@ -1,3 +1,8 @@
+* Fri Mar 15 2019 Marko Saukko <marko.saukko@jolla.com> - 2.27+git1
+- Update to 2.27. Fixes JB#45152
+- Drop already integrated patch glibc-2.25-posix-spawn-fix.patch
+- Drop not needed patch glibc-2.25-no-timestamping.patch
+
 * Mon Feb 18 2019 Tomi Leppänen <tomi.leppanen@jolla.com> - 2.25+git3
 - Add glibc-doc subpackage. Contributes to JB#24119
 

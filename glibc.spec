@@ -1,27 +1,25 @@
 Name: glibc
 
 Summary: GNU C library shared libraries
-Version: 2.25+git3
+Version: 2.27+git1
 Release: 0
 License: LGPLv2+ and LGPLv2+ with exceptions and GPLv2+
 Group: System/Libraries
 URL: http://www.gnu.org/software/libc/
-Source0: glibc-2.25.tar.xz
+Source0: glibc-2.27.tar.xz
 Source11: build-locale-archive.c
 
 Patch1: glibc-arm-alignment-fix.patch
 Patch2: glibc-2.25-arm-runfast.patch
-Patch3: glibc-2.25-no-timestamping.patch
 Patch4: glibc-2.25-elf-rtld.diff
-Patch5: glibc-2.25-ldso-rpath-prefix-option.diff
+Patch5: glibc-2.27-ldso-rpath-prefix-option.diff
 Patch6: glibc-2.25-nsswitchconf-location.diff
 Patch7: glibc-2.25-nscd-socket-location.diff
 Patch8: glibc-2.25-ldso-nodefaultdirs-option.diff
 Patch9: glibc-2.14-locarchive-fedora.patch
 Patch10: eglibc-2.15-fix-neon-libdl.patch
 Patch11: eglibc-2.19-shlib-make.patch
-Patch12: glibc-2.25-bits.patch
-Patch13: glibc-2.25-posix-spawn-fix.patch
+Patch12: glibc-2.27-bits.patch
 
 Provides: ldconfig
 # The dynamic linker supports DT_GNU_HASH
@@ -68,6 +66,7 @@ BuildRequires: binutils >= 2.19.51.0.10
 BuildRequires: gcc >= 3.2.1-5
 BuildRequires: elfutils >= 0.72
 BuildRequires: rpm >= 4.2-0.56
+BuildRequires: bison >= 2.7
 
 %define __find_provides %{_builddir}/%{glibcsrcdir}/find_provides.sh
 %define _filter_GLIBC_PRIVATE 1
@@ -186,15 +185,14 @@ Requires:  %{name} = %{version}-%{release}
 %{summary}.
 
 %prep
-rm -rf glibc-2.25
+rm -rf glibc-2.27
 xz -dc %SOURCE0 | tar -x
 
-cd glibc-2.25
+cd glibc-2.27
 %patch1 -p2
 %ifarch %{arm}
 %patch2 -p1
 %endif
-%patch3 -p1
 %patch4 -p1
 %patch5 -p1
 %patch6 -p1
@@ -206,7 +204,6 @@ cd glibc-2.25
 %endif
 %patch11 -p1
 %patch12 -p1
-%patch13 -p1
 
 %build
 GCC=gcc
@@ -241,10 +238,10 @@ build_CFLAGS="$BuildFlags -O3"
 
 export MAKEINFO=:
 
-../glibc-2.25/configure CC="$GCC" CXX="$GXX" CFLAGS="$build_CFLAGS" \
+../glibc-2.27/configure CC="$GCC" CXX="$GXX" CFLAGS="$build_CFLAGS" \
 	--prefix=%{_prefix} \
 	"--enable-add-ons=libidn" --without-cvs $EnableKernel \
-	--enable-bind-now --with-tls \
+	--enable-bind-now \
 	--with-headers=%{_prefix}/include \
 %ifarch %{multiarcharches}
 	--enable-multi-arch \
@@ -257,23 +254,25 @@ make %{?_smp_mflags} -r CFLAGS="$build_CFLAGS"
 
 cd ..
 
-$GCC -Os -static -o build-locale-archive %SOURCE11 \
+$GCC -Os -g -static -o build-locale-archive %SOURCE11 \
   ./build-%{name}-%{version}/locale/locarchive.o \
   ./build-%{name}-%{version}/locale/md5.o \
+  ./build-%{name}-%{version}/locale/record-status.o \
   -DDATADIR=\"%{_datadir}\" -DPREFIX=\"%{_prefix}\" \
-  -L./build-%{name}-%{version} -Iglibc-2.25
+  -L./build-%{name}-%{version} -Iglibc-2.27 \
+  -B./build-%{name}-%{version}/csu/ -lc -lc_nonshared
 
 %install
 rm -rf ${RPM_BUILD_ROOT}
 cd build-%{name}-%{version}
 make -j1 install_root=${RPM_BUILD_ROOT} install
 
-install -p -m 644 ../glibc-2.25/nss/nsswitch.conf $RPM_BUILD_ROOT/etc/nsswitch.conf
+install -p -m 644 ../glibc-2.27/nss/nsswitch.conf $RPM_BUILD_ROOT/etc/nsswitch.conf
 
 mkdir -p $RPM_BUILD_ROOT/etc/default
-install -p -m 644 ../glibc-2.25/nis/nss $RPM_BUILD_ROOT/etc/default/nss
+install -p -m 644 ../glibc-2.27/nis/nss $RPM_BUILD_ROOT/etc/default/nss
 
-install -m 644 ../glibc-2.25/nscd/nscd.conf $RPM_BUILD_ROOT/etc
+install -m 644 ../glibc-2.27/nscd/nscd.conf $RPM_BUILD_ROOT/etc
 
 # Include ld.so.conf
 echo 'include /etc/ld.so.conf.d/*.conf' > $RPM_BUILD_ROOT/etc/ld.so.conf
@@ -416,21 +415,19 @@ rm -rf $RPM_BUILD_ROOT%{_prefix}/share/zoneinfo
 # the last bit: more documentation
 rm -rf ../documentation
 mkdir -p $RPM_BUILD_ROOT%{_docdir}/%{name}-%{version}
-bzip2 -9 ../glibc-2.25/ChangeLog*
+bzip2 -k -9 -f ../glibc-2.27/ChangeLog
 install -m0644 -t $RPM_BUILD_ROOT%{_docdir}/%{name}-%{version} \
-        ../glibc-2.25/crypt/README.ufc-crypt \
-        ../glibc-2.25/ChangeLog{,.16,.17}.bz2 \
-        ../glibc-2.25/posix/gai.conf \
-        ../glibc-2.25/README \
-        ../glibc-2.25/NEWS \
-        ../glibc-2.25/INSTALL \
-        ../glibc-2.25/BUGS \
-        ../glibc-2.25/CONFORMANCE \
-        ../glibc-2.25/hesiod/README.hesiod
-install -m0644 ../glibc-2.25/timezone/README \
+        ../glibc-2.27/crypt/README.ufc-crypt \
+        ../glibc-2.27/ChangeLog.bz2 \
+        ../glibc-2.27/posix/gai.conf \
+        ../glibc-2.27/README \
+        ../glibc-2.27/NEWS \
+        ../glibc-2.27/INSTALL \
+        ../glibc-2.27/hesiod/README.hesiod
+install -m0644 ../glibc-2.27/timezone/README \
         $RPM_BUILD_ROOT%{_docdir}/%{name}-%{version}/README.timezone
 
-cp ../glibc-2.25/{COPYING,COPYING.LIB,LICENSES} ..
+cp ../glibc-2.27/{COPYING,COPYING.LIB,LICENSES} ..
 
 %if 0%{run_glibc_tests}
 
