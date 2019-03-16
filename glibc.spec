@@ -1,7 +1,7 @@
 Name: glibc
 
 Summary: GNU C library shared libraries
-Version: 2.25+git3
+Version: 2.25+git4
 Release: 0
 License: LGPLv2+ and LGPLv2+ with exceptions and GPLv2+
 Group: System/Libraries
@@ -21,7 +21,7 @@ Patch9: glibc-2.14-locarchive-fedora.patch
 Patch10: eglibc-2.15-fix-neon-libdl.patch
 Patch11: eglibc-2.19-shlib-make.patch
 Patch12: glibc-2.25-bits.patch
-Patch13: glibc-2.25-posix-spawn-fix.patch
+Patch13: ubuntu-2.25.6-git-updates.diff
 
 Provides: ldconfig
 # The dynamic linker supports DT_GNU_HASH
