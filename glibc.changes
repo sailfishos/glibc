@@ -1,3 +1,6 @@
+* Wed Mar 27 2019 Marko Kenttälä <marko.kenttala@jolla.com> - 2.25+git5
+- Added debuginfo handling, fixes jb#45224
+
 * Fri Mar 15 2019 Marko Saukko <marko.saukko@jolla.com> - 2.25+git4
 - Apply 2.25.6 patch set from ubuntu. Contributes to JB#45152
 - Fixes CVE-2017-15670, CVE-2017-15671, CVE-2017-15804,
