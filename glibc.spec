@@ -1,7 +1,9 @@
+%define glibcsrcdir glibc-2.25
+
 Name: glibc
 
 Summary: GNU C library shared libraries
-Version: 2.25+git4
+Version: 2.25+git5
 Release: 0
 License: LGPLv2+ and LGPLv2+ with exceptions and GPLv2+
 Group: System/Libraries
@@ -167,16 +169,6 @@ which can be helpful during program debugging.
 
 If unsure if you need this, don't install this package.
 
-%package debug
-Summary: Debug libraries from GNU C library
-Group: Development/Libraries
-Requires: %{name} = %{version}-%{release}
-
-%description debug
-The glibc-debug package contains debug libraries.
-
-If unsure if you need this, don't install this package.
-
 %package doc
 Summary:   Documentation for %{name}
 Group:     Documentation
@@ -186,10 +178,10 @@ Requires:  %{name} = %{version}-%{release}
 %{summary}.
 
 %prep
-rm -rf glibc-2.25
+%setup -q -n %{glibcsrcdir}
 xz -dc %SOURCE0 | tar -x
 
-cd glibc-2.25
+cd %{glibcsrcdir}
 %patch1 -p2
 %ifarch %{arm}
 %patch2 -p1
@@ -241,7 +233,7 @@ build_CFLAGS="$BuildFlags -O3"
 
 export MAKEINFO=:
 
-../glibc-2.25/configure CC="$GCC" CXX="$GXX" CFLAGS="$build_CFLAGS" \
+../%{glibcsrcdir}/configure CC="$GCC" CXX="$GXX" CFLAGS="$build_CFLAGS" \
 	--prefix=%{_prefix} \
 	"--enable-add-ons=libidn" --without-cvs $EnableKernel \
 	--enable-bind-now --with-tls \
@@ -261,19 +253,19 @@ $GCC -Os -static -o build-locale-archive %SOURCE11 \
   ./build-%{name}-%{version}/locale/locarchive.o \
   ./build-%{name}-%{version}/locale/md5.o \
   -DDATADIR=\"%{_datadir}\" -DPREFIX=\"%{_prefix}\" \
-  -L./build-%{name}-%{version} -Iglibc-2.25
+  -L./build-%{name}-%{version} -I%{glibcsrcdir}
 
 %install
 rm -rf ${RPM_BUILD_ROOT}
 cd build-%{name}-%{version}
 make -j1 install_root=${RPM_BUILD_ROOT} install
 
-install -p -m 644 ../glibc-2.25/nss/nsswitch.conf $RPM_BUILD_ROOT/etc/nsswitch.conf
+install -p -m 644 ../%{glibcsrcdir}/nss/nsswitch.conf $RPM_BUILD_ROOT/etc/nsswitch.conf
 
 mkdir -p $RPM_BUILD_ROOT/etc/default
-install -p -m 644 ../glibc-2.25/nis/nss $RPM_BUILD_ROOT/etc/default/nss
+install -p -m 644 ../%{glibcsrcdir}/nis/nss $RPM_BUILD_ROOT/etc/default/nss
 
-install -m 644 ../glibc-2.25/nscd/nscd.conf $RPM_BUILD_ROOT/etc
+install -m 644 ../%{glibcsrcdir}/nscd/nscd.conf $RPM_BUILD_ROOT/etc
 
 # Include ld.so.conf
 echo 'include /etc/ld.so.conf.d/*.conf' > $RPM_BUILD_ROOT/etc/ld.so.conf
@@ -416,21 +408,21 @@ rm -rf $RPM_BUILD_ROOT%{_prefix}/share/zoneinfo
 # the last bit: more documentation
 rm -rf ../documentation
 mkdir -p $RPM_BUILD_ROOT%{_docdir}/%{name}-%{version}
-bzip2 -9 ../glibc-2.25/ChangeLog*
+bzip2 -9 ../%{glibcsrcdir}/ChangeLog*
 install -m0644 -t $RPM_BUILD_ROOT%{_docdir}/%{name}-%{version} \
-        ../glibc-2.25/crypt/README.ufc-crypt \
-        ../glibc-2.25/ChangeLog{,.16,.17}.bz2 \
-        ../glibc-2.25/posix/gai.conf \
-        ../glibc-2.25/README \
-        ../glibc-2.25/NEWS \
-        ../glibc-2.25/INSTALL \
-        ../glibc-2.25/BUGS \
-        ../glibc-2.25/CONFORMANCE \
-        ../glibc-2.25/hesiod/README.hesiod
-install -m0644 ../glibc-2.25/timezone/README \
+        ../%{glibcsrcdir}/crypt/README.ufc-crypt \
+        ../%{glibcsrcdir}/ChangeLog{,.16,.17}.bz2 \
+        ../%{glibcsrcdir}/posix/gai.conf \
+        ../%{glibcsrcdir}/README \
+        ../%{glibcsrcdir}/NEWS \
+        ../%{glibcsrcdir}/INSTALL \
+        ../%{glibcsrcdir}/BUGS \
+        ../%{glibcsrcdir}/CONFORMANCE \
+        ../%{glibcsrcdir}/hesiod/README.hesiod
+install -m0644 ../%{glibcsrcdir}/timezone/README \
         $RPM_BUILD_ROOT%{_docdir}/%{name}-%{version}/README.timezone
 
-cp ../glibc-2.25/{COPYING,COPYING.LIB,LICENSES} ..
+cp ../%{glibcsrcdir}/{COPYING,COPYING.LIB,LICENSES} ..
 
 %if 0%{run_glibc_tests}
 
@@ -468,23 +460,30 @@ ar rcs libpthread.a libpthread.o
 rm libpthread.o
 popd
 
+find_debuginfo_args='--strict-build-id -g'
+/usr/lib/rpm/find-debuginfo.sh $find_debuginfo_args -o debuginfo.filelist
+# Remove any duplicates output by a buggy find-debuginfo.sh.
+sort -u debuginfo.filelist > debuginfo2.filelist
+mv debuginfo2.filelist debuginfo.filelist
 
+# Remove some common directories from the common package debuginfo so that we
+# don't end up owning them.
+exclude_common_dirs()
+{
+	exclude_dirs="%{_prefix}/src/debug"
+	exclude_dirs="$exclude_dirs $(echo %{_prefix}/lib/debug{,/%{_lib},/bin,/sbin})"
+	exclude_dirs="$exclude_dirs $(echo %{_prefix}/lib/debug%{_prefix}{,/%{_lib},/libexec,/bin,/sbin})"
 
-%ifarch %{auxarches}
+	for d in $(echo $exclude_dirs | sed 's/ /\n/g'); do
+		sed -i "\|^%%dir $d/\?$|d" $1
+	done
+}
 
-echo Cutting down the list of unpackaged files
->> debuginfocommon.filelist
-sed -e '/%%dir/d;/%%config/d;/%%verify/d;s/%%lang([^)]*) //;s#^/*##' \
-    common.filelist devel.filelist static.filelist headers.filelist \
-    utils.filelist nscd.filelist debuginfocommon.filelist |
-(cd $RPM_BUILD_ROOT; xargs --no-run-if-empty rm -f 2> /dev/null || :)
-
-%else
+exclude_common_dirs debuginfo.filelist
 
 mkdir -p $RPM_BUILD_ROOT/var/{db,run}/nscd
 touch $RPM_BUILD_ROOT/var/{db,run}/nscd/{passwd,group,hosts,services}
 touch $RPM_BUILD_ROOT/var/run/nscd/{socket,nscd.pid}
-%endif
 
 install -m 700 ../build-locale-archive $RPM_BUILD_ROOT/usr/sbin/build-locale-archive
 
@@ -568,10 +567,6 @@ fi
 %attr(0600,root,root) %verify(not md5 size mtime) %ghost %config(missingok,noreplace) /var/db/nscd/services
 %ghost %config(missingok,noreplace) /etc/sysconfig/nscd
 %endif
-
-%files debug
-%defattr(-,root,root)
-%{_prefix}/%{_lib}/debug/usr/lib/*
 
 %files doc
 %defattr(-,root,root)
