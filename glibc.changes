@@ -1,3 +1,19 @@
+* Thu Apr 25 2019 Niels Breet <niels.breet@jolla.com> - 2.28+git1
+- Update to 2.28. Fixes JB#45154
+- Fixes CVE-2016-10739, CVE-2016-6261, CVE-2016-6263, CVE-2017-14062,
+  CVE-2017-18269, CVE-2018-11236, CVE-2018-11237, CVE-2018-19591,
+  CVE-2019-6488, CVE-2019-7309, CVE-2019-9169
+
+* Thu Mar 28 2019 Marko Saukko <marko.saukko@jolla.com> - 2.27+git1
+- Update to 2.27. Fixes JB#45152
+- Drop already integrated patch glibc-2.25-posix-spawn-fix.patch
+- Drop not needed patch glibc-2.25-no-timestamping.patch
+- Fixes CVE-2009-5064, CVE-2017-15670, CVE-2017-15671, CVE-2017-15804,
+  CVE-2017-17426, CVE-2017-1000408, CVE-2017-1000409, CVE-2017-16997,
+  CVE-2018-1000001,CVE-2018-6485
+  2.26 Fixes CVE-2017-1000366, CVE-2010-3192, CVE-2010-3192,
+  CVE-2017-12132
+
 * Wed Mar 27 2019 Marko Kenttälä <marko.kenttala@jolla.com> - 2.25+git5
 - Added debuginfo handling, fixes jb#45224
 
