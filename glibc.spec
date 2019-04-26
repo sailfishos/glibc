@@ -5,7 +5,7 @@
 Name: glibc
 
 Summary: GNU C library shared libraries
-Version: 2.28+git1
+Version: 2.28+git2
 Release: 0
 License: LGPLv2+ and LGPLv2+ with exceptions and GPLv2+
 Group: System/Libraries
@@ -193,16 +193,6 @@ which can be helpful during program debugging.
 
 If unsure if you need this, don't install this package.
 
-%package debuginfo
-Summary: Debug libraries from GNU C library
-Group: Development/Libraries
-Requires: %{name} = %{version}-%{release}
-
-%description debuginfo
-The glibc-debug package contains debug libraries.
-
-If unsure if you need this, don't install this package.
-
 %package doc
 Summary:   Documentation for %{name}
 Group:     Documentation
@@ -212,7 +202,7 @@ Requires:  %{name} = %{version}-%{release}
 %{summary}.
 
 %prep
-rm -rf %{glibcsrcdir}
+%setup -q -n %{glibcsrcdir}
 xz -dc %SOURCE0 | tar -x
 
 cd %{glibcsrcdir}
@@ -1131,11 +1121,6 @@ fi
 %ghost %config(missingok,noreplace) /etc/sysconfig/nscd
 %endif
 
-%if 0%{?_enable_debug_packages}
-%files debuginfo -f debuginfo.filelist
-%ifarch %{debuginfocommonarches}
-%ifnarch %{auxarches}
-#%%files debuginfo-common -f debuginfocommon.filelist
-%endif
-%endif
-%endif
+%files doc
+%defattr(-,root,root)
+%{_docdir}/%{name}-%{version}

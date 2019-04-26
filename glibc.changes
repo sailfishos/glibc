@@ -1,3 +1,6 @@
+* Fri Apr 26 2019 Niels Breet <niels.breet@jolla.com> - 2.28+git2
+- Add debuginfo handling, doc package. Contributes to JB#45154
+
 * Thu Apr 25 2019 Niels Breet <niels.breet@jolla.com> - 2.28+git1
 - Update to 2.28. Fixes JB#45154
 - Fixes CVE-2016-10739, CVE-2016-6261, CVE-2016-6263, CVE-2017-14062,
