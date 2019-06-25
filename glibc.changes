@@ -1,3 +1,6 @@
+* Tue Jun 25 2019 Martin Kampas <martin.kampas@jolla.com> - 2.28+git3
+- Do not prefix RPATHs under /home. Contributes to JB#46168
+
 * Fri Apr 26 2019 Niels Breet <niels.breet@jolla.com> - 2.28+git2
 - Add debuginfo handling, doc package. Contributes to JB#45154
 
