@@ -1,8 +1,19 @@
+ld.so: Add --rpath-prefix option
+
+Scratchbox2 uses the --rpath-prefix option to make the linker search for
+required libraries under the target rootfs.
+
+Packages that run their own binaries as a build step may use RPATH to
+resolve dependencies located under the build tree - such RPATHs must not
+be redirected under the target rootfs. It is a common assumption in
+Scratchbox2 that builds happen under user's home directory. Therefore,
+RPATHs under /home are excluded from this manipulation.
+
 diff --git a/elf/dl-load.c b/elf/dl-load.c
-index 7554a99..eb34a7a 100644
+index c51e4b37..57a357ea 100644
 --- a/elf/dl-load.c
 +++ b/elf/dl-load.c
-@@ -385,7 +385,8 @@ static size_t max_dirnamelen;
+@@ -443,7 +443,8 @@ static size_t max_dirnamelen;
  
  static struct r_search_path_elem **
  fillin_rpath (char *rpath, struct r_search_path_elem **result, const char *sep,
@@ -12,14 +23,15 @@ index 7554a99..eb34a7a 100644
  {
    char *cp;
    size_t nelems = 0;
-@@ -425,9 +426,23 @@ fillin_rpath (char *rpath, struct r_search_path_elem **result, const char *sep,
+@@ -483,9 +484,24 @@ fillin_rpath (char *rpath, struct r_search_path_elem **result, const char *sep,
  	}
  
        /* See if this directory is already known.  */
 -      for (dirp = GL(dl_all_dirs); dirp != NULL; dirp = dirp->next)
 -	if (dirp->dirnamelen == len && memcmp (cp, dirp->dirname, len) == 0)
 -	  break;
-+      if (__builtin_expect (rpath_prefix != NULL, 0))
++      if (__builtin_expect (rpath_prefix != NULL, 0)
++	  && (memcmp (cp, "/home/", 6) != 0))
 +	{
 +	  /* has rpath_prefix */
 +	  size_t rpath_prefix_len = strlen (rpath_prefix);
@@ -39,13 +51,14 @@ index 7554a99..eb34a7a 100644
  
        if (dirp != NULL)
  	{
-@@ -445,22 +460,43 @@ fillin_rpath (char *rpath, struct r_search_path_elem **result, const char *sep,
+@@ -503,22 +519,44 @@ fillin_rpath (char *rpath, struct r_search_path_elem **result, const char *sep,
  	  size_t cnt;
  	  enum r_dir_status init_val;
  	  size_t where_len = where ? strlen (where) + 1 : 0;
 +	  size_t rpath_prefix_len = 0;
 +
 +	  if (__builtin_expect (rpath_prefix != NULL, 0)
++	      && (memcmp (cp, "/home/", 6) != 0)
 +	      && !__libc_enable_secure)
 +	    {
 +		rpath_prefix_len = strlen (rpath_prefix);
@@ -88,7 +101,7 @@ index 7554a99..eb34a7a 100644
  
  	  /* We have to make sure all the relative directories are
  	     never ignored.  The current directory might change and
-@@ -471,7 +507,8 @@ fillin_rpath (char *rpath, struct r_search_path_elem **result, const char *sep,
+@@ -529,7 +567,8 @@ fillin_rpath (char *rpath, struct r_search_path_elem **result, const char *sep,
  
  	  dirp->what = what;
  	  if (__glibc_likely (where != NULL))
@@ -98,7 +111,7 @@ index 7554a99..eb34a7a 100644
  				  + (ncapstr * sizeof (enum r_dir_status)),
  				  where, where_len);
  	  else
-@@ -570,7 +607,7 @@ decompose_rpath (struct r_search_path_struct *sps,
+@@ -628,7 +667,7 @@ decompose_rpath (struct r_search_path_struct *sps,
        _dl_signal_error (ENOMEM, NULL, NULL, errstring);
      }
  
@@ -107,7 +120,7 @@ index 7554a99..eb34a7a 100644
  
    /* Free the copied RPATH string.  `fillin_rpath' make own copies if
       necessary.  */
-@@ -755,7 +792,7 @@ _dl_init_paths (const char *llp)
+@@ -813,7 +852,7 @@ _dl_init_paths (const char *llp)
  	}
  
        (void) fillin_rpath (llp_tmp, env_path_list.dirs, ":;",
@@ -117,7 +130,7 @@ index 7554a99..eb34a7a 100644
        if (env_path_list.dirs[0] == NULL)
  	{
 diff --git a/elf/dl-support.c b/elf/dl-support.c
-index 114f77a..502399f 100644
+index b5f10d5a..cdf189b7 100644
 --- a/elf/dl-support.c
 +++ b/elf/dl-support.c
 @@ -58,6 +58,9 @@ const char *_dl_profile_output;
@@ -131,10 +144,10 @@ index 114f77a..502399f 100644
  struct link_map *_dl_profile_map;
  
 diff --git a/elf/rtld.c b/elf/rtld.c
-index 453f56e..c6bdd02 100644
+index 385b5f88..9bc6d162 100644
 --- a/elf/rtld.c
 +++ b/elf/rtld.c
-@@ -965,6 +965,15 @@ dl_main (const ElfW(Phdr) *phdr,
+@@ -967,6 +967,15 @@ dl_main (const ElfW(Phdr) *phdr,
  	  {
  	    GLRO(dl_inhibit_rpath) = _dl_argv[2];
  
@@ -150,19 +163,20 @@ index 453f56e..c6bdd02 100644
  	    _dl_skip_args += 2;
  	    _dl_argc -= 2;
  	    _dl_argv += 2;
-@@ -1003,6 +1012,7 @@ of this helper program; chances are you did not intend to run this program.\n\
+@@ -1013,6 +1022,8 @@ of this helper program; chances are you did not intend to run this program.\n\
    --inhibit-cache       Do not use " LD_SO_CACHE "\n\
    --library-path PATH   use given PATH instead of content of the environment\n\
  			variable LD_LIBRARY_PATH\n\
 +  --rpath-prefix PREFIX add PREFIX to every RUNPATH and RPATH component\n\
++			unless it is a path under the /home tree\n\
    --inhibit-rpath LIST  ignore RUNPATH and RPATH information in object names\n\
  			in LIST\n\
-   --audit LIST          use objects named in LIST as auditors\n");
+   --argv0 STRING        use STRING as argv[0]\n\
 diff --git a/sysdeps/generic/ldsodefs.h b/sysdeps/generic/ldsodefs.h
-index 0ea2786..a9bff29 100644
+index 95dc8751..83b6ae2f 100644
 --- a/sysdeps/generic/ldsodefs.h
 +++ b/sysdeps/generic/ldsodefs.h
-@@ -608,6 +608,12 @@ struct rtld_global_ro
+@@ -617,6 +617,12 @@ struct rtld_global_ro
    /* List of auditing interfaces.  */
    struct audit_ifaces *_dl_audit;
    unsigned int _dl_naudit;
