@@ -168,6 +168,7 @@ libraries, as well as national language (locale) support.
 
 # We need to run ldconfig manually because ldconfig cannot handle the
 # relative include path in the /etc/ld.so.conf file we gneerate.
+# Note: Currently an absolute path is in use
 %undefine __brp_ldconfig
 
 ######################################################################
@@ -433,7 +434,7 @@ install -m 644 %{glibcsrcdir}/nscd/nscd.service %{glibc_sysroot}/lib/systemd/sys
 %endif
 
 # Include ld.so.conf
-echo 'include ld.so.conf.d/*.conf' > %{glibc_sysroot}/etc/ld.so.conf
+echo 'include /etc/ld.so.conf.d/*.conf' > %{glibc_sysroot}/etc/ld.so.conf
 echo -n '' > %{glibc_sysroot}/etc/ld.so.cache
 chmod 644 %{glibc_sysroot}/etc/ld.so.conf
 mkdir -p %{glibc_sysroot}/etc/ld.so.conf.d
