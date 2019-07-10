@@ -1,3 +1,6 @@
+* Wed Jul 10 2019 Martin Kampas <martin.kampas@jolla.com> - 2.28+git4
+- Use an absolute path in ld.so.conf. Contributes to JB#46501
+
 * Tue Jun 25 2019 Martin Kampas <martin.kampas@jolla.com> - 2.28+git3
 - Do not prefix RPATHs under /home. Contributes to JB#46168
 
