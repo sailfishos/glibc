@@ -42,7 +42,7 @@ BuildRequires: xz tar
 Requires(pre): libgcc
 BuildRequires:  zlib-devel texinfo
 BuildRequires: sed >= 3.95, libcap-devel, gettext
-BuildRequires: gawk,  util-linux, quilt
+BuildRequires: gawk,  util-linux
 # This gcc >= 3.2 is to ensure that __frame_state_for is exported by glibc
 # will be compatible with egcs 1.x.y
 BuildRequires: gcc >= 3.2
