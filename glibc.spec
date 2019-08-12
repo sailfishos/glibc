@@ -26,6 +26,7 @@ Patch11: eglibc-2.19-shlib-make.patch
 Patch12: glibc-2.27-bits.patch
 Patch13: git-updates.diff
 
+Requires: filesystem >= 3.2
 Provides: ldconfig
 # The dynamic linker supports DT_GNU_HASH
 Provides: rtld(GNU_HASH)
@@ -541,9 +542,10 @@ ar cr %{glibc_sysroot}%{_prefix}/%{_lib}/libpthread_nonshared.a
 
 ##############################################################################
 # Beyond this point in the install process we no longer modify the set of
-# installed files, with one exception, for auxarches we cleanup the file list
-# at the end and remove files which we don't intend to ship. We need the file
-# list to effect a proper cleanup, and so it happens last.
+# installed files, with two exceptions,  The /lib folder is moved under /usr
+# and for auxarches we cleanup the file list at the end and remove files
+# which we don't intend to ship. We need the file list to effect a proper
+# cleanup, and so it happens last.
 ##############################################################################
 
 ##############################################################################
@@ -936,6 +938,21 @@ sed -e '/%%dir/d;/%%config/d;/%%verify/d;s/%%lang([^)]*) //;s#^/*##' \
 	| (cd %{glibc_sysroot}; xargs --no-run-if-empty rm -f 2> /dev/null || :)
 %endif # %%{auxarches}
 
+# move /lib under /usr
+mv %{glibc_sysroot}/lib/* %{glibc_sysroot}%{_libdir}
+rm -rf %{glibc_sysroot}/lib
+# change filelists accordingly. Change master.filelist temporarily writeable
+chmod 0777 master.filelist
+for list in master glibc common utils nscd devel headers static \
+       libnsl nss_db nss_hesiod nss-devel compat-libpthread_nonshared \
+               debuginfo debuginfocommon
+do
+       cat $list.filelist | sed -e "s|^/lib/|/usr/lib/|" > temp.filelist
+       cat temp.filelist | sort > $list.filelist
+done
+chmod 0444 master.filelist
+rm temp.filelist
+
 ##############################################################################
 # Run the glibc testsuite
 ##############################################################################
@@ -995,9 +1012,9 @@ popd
 echo ====================TESTING END=====================
 PLTCMD='/^Relocation section .*\(\.rela\?\.plt\|\.rela\.IA_64\.pltoff\)/,/^$/p'
 echo ====================PLT RELOCS LD.SO================
-readelf -Wr %{glibc_sysroot}/%{_lib}/ld-*.so | sed -n -e "$PLTCMD"
+readelf -Wr %{glibc_sysroot}/%{_libdir}/ld-*.so | sed -n -e "$PLTCMD"
 echo ====================PLT RELOCS LIBC.SO==============
-readelf -Wr %{glibc_sysroot}/%{_lib}/libc-*.so | sed -n -e "$PLTCMD"
+readelf -Wr %{glibc_sysroot}/%{_libdir}/libc-*.so | sed -n -e "$PLTCMD"
 echo ====================PLT RELOCS END==================
 
 # Finally, check if valgrind runs with the new glibc.
@@ -1075,7 +1092,7 @@ fi
 %files -f glibc.filelist
 %dir %{_prefix}/%{_lib}/audit
 %ifarch s390x
-/lib/ld64.so.1
+%{_libdir}/ld64.so.1
 %endif
 %verify(not md5 size mtime) %config(noreplace) /etc/nsswitch.conf
 %verify(not md5 size mtime) %config(noreplace) /etc/ld.so.conf
@@ -1107,7 +1124,7 @@ fi
 %config(noreplace) /etc/nscd.conf
 %dir %attr(0755,root,root) /var/run/nscd
 %dir %attr(0755,root,root) /var/db/nscd
-/lib/systemd/system/nscd.service
+%{_libdir}/systemd/system/nscd.service
 #/lib/systemd/system/nscd.socket
 %attr(0644,root,root) %verify(not md5 size mtime) %ghost %config(missingok,noreplace) /var/run/nscd/nscd.pid
 %attr(0666,root,root) %verify(not md5 size mtime) %ghost %config(missingok,noreplace) /var/run/nscd/socket
