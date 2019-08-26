@@ -2,6 +2,9 @@
 # Default: Always disable the benchtests.
 %bcond_with benchtests
 
+# Only some architectures have static PIE support.
+%define pie_arches %{ix86} x86_64
+
 Name: glibc
 
 Summary: GNU C library shared libraries
@@ -279,8 +282,14 @@ build()
                 --enable-obsolete-rpc \
                 --disable-profile \
                 --enable-obsolete-rpc \
+%ifarch %{pie_arches}
+		--enable-static-pie \
+%endif
+		--enable-tunables \
 		${core_with_options} \
-                --disable-multi-arch \
+%ifarch %{ix86}
+		--disable-multi-arch \
+%endif
 %if %{without werror}
 		--disable-werror \
 %endif

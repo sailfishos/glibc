@@ -1,3 +1,6 @@
+* Mon Aug 26 2019 Niels Breet <niels.breet@jolla.com> - 2.28+git6
+- Enable-cet for x86. Contributes to JB#46923
+
 * Fri Aug 09 2019 Niels Breet <niels.breet@jolla.com> - 2.28+git5
 - Get rid of quilt build-requires. Contributes to JB#46706
 
