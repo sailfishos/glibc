@@ -288,10 +288,8 @@ build()
 %if %{with bootstrap}
 		--without-selinux \
 %endif
-                libc_cv_slibdir=/lib ||
+                ||
 		{ cat config.log; false; }
-
-# Note: We need /lib instead of /lib64 for aarch64, so we force it here
 
 	make %{?_smp_mflags} -O -r CFLAGS="$build_CFLAGS"
 	popd
@@ -918,7 +916,7 @@ cat master.filelist | grep '/libnss_[a-z]*\.so$' master.filelist >> devel.fileli
 # remove nss db Makefile
 rm %{glibc_sysroot}/var/db/Makefile
 # remove libnsl
-rm %{glibc_sysroot}/lib/libnsl*
+rm %{glibc_sysroot}/%{_lib}/libnsl*
 
 ##############################################################################
 # Delete files that we do not intended to ship with the auxarch.
