@@ -1,16 +1,15 @@
-%define glibcsrcdir glibc-2.28
+%define glibcsrcdir glibc-2.30
 # Default: Always disable the benchtests.
 %bcond_with benchtests
 
 Name: glibc
 
 Summary: GNU C library shared libraries
-Version: 2.28+git7
+Version: 2.30+git1
 Release: 0
 License: LGPLv2+ and LGPLv2+ with exceptions and GPLv2+
-Group: System/Libraries
 URL: http://www.gnu.org/software/libc/
-Source0: glibc-2.28.tar.xz
+Source0: glibc-2.30.tar.xz
 Source1: build-locale-archive.c
 
 Patch1: glibc-arm-alignment-fix.patch
@@ -24,7 +23,6 @@ Patch9: glibc-2.14-locarchive-fedora.patch
 Patch10: eglibc-2.15-fix-neon-libdl.patch
 Patch11: eglibc-2.19-shlib-make.patch
 Patch12: glibc-2.27-bits.patch
-Patch13: git-updates.diff
 
 Provides: ldconfig
 # The dynamic linker supports DT_GNU_HASH
@@ -74,6 +72,7 @@ BuildRequires: rpm >= 4.2-0.56
 BuildRequires: bison >= 2.7
 # GNU make 4.0 introduced the -O option.
 BuildRequires: make >= 4.0
+BuildRequires: python3-base
 
 %define __find_provides %{_builddir}/%{glibcsrcdir}/find_provides.sh
 %define _filter_GLIBC_PRIVATE 1
@@ -222,7 +221,6 @@ cd %{glibcsrcdir}
 %endif
 %patch11 -p1
 %patch12 -p1
-%patch13 -p1
 
 %build
 GCC=gcc

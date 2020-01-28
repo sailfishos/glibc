@@ -27,9 +27,9 @@ diff -ur glibc-2.14.1-orig/elf/rtld.c glibc-2.14.1/elf/rtld.c
 @@ -1021,6 +1030,7 @@
  			variable LD_LIBRARY_PATH\n\
    --inhibit-rpath LIST  ignore RUNPATH and RPATH information in object names\n\
- 			in LIST\n\
+			in LIST\n\
 +  --argv0 STRING        use STRING as argv[0]\n\
-   --audit LIST          use objects named in LIST as auditors\n");
+   --audit LIST          use objects named in LIST as auditors\n\
 
        ++_dl_skip_args;
 @@ -1073,6 +1083,8 @@
