@@ -1,3 +1,6 @@
+* Thu Jan 27 2020 Marko Lemmetty <marko.lemmetty@jolla.com> - 2.30+git1
+- Update to 2.30 version. Fixes JB#48615
+
 * Thu Jan 02 2020 Niels Breet <niels.breet@jolla.com> - 2.28+git7
 - Remove hardcoded libdir for aarch64. Contributes to JB#47986
 
