@@ -1,3 +1,6 @@
+* Sun Feb 02 2020 Matti Kosola <matti.kosola@jolla.com> - 2.30+git2
+- Revert: elf: Refuse to dlopen PIE objects. JB#48615
+
 * Thu Jan 27 2020 Marko Lemmetty <marko.lemmetty@jolla.com> - 2.30+git1
 - Update to 2.30 version. Fixes JB#48615
 

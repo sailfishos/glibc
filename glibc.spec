@@ -5,7 +5,7 @@
 Name: glibc
 
 Summary: GNU C library shared libraries
-Version: 2.30+git1
+Version: 2.30+git2
 Release: 0
 License: LGPLv2+ and LGPLv2+ with exceptions and GPLv2+
 URL: http://www.gnu.org/software/libc/
@@ -23,6 +23,7 @@ Patch9: glibc-2.14-locarchive-fedora.patch
 Patch10: eglibc-2.15-fix-neon-libdl.patch
 Patch11: eglibc-2.19-shlib-make.patch
 Patch12: glibc-2.27-bits.patch
+Patch13: 0001-Revert-elf-Refuse-to-dlopen-PIE-objects-BZ-24323.patch
 
 Provides: ldconfig
 # The dynamic linker supports DT_GNU_HASH
@@ -221,6 +222,7 @@ cd %{glibcsrcdir}
 %endif
 %patch11 -p1
 %patch12 -p1
+%patch13 -p1
 
 %build
 GCC=gcc
