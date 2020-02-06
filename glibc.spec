@@ -5,7 +5,7 @@
 Name: glibc
 
 Summary: GNU C library shared libraries
-Version: 2.30+git2
+Version: 2.30+git3
 Release: 0
 License: LGPLv2+ and LGPLv2+ with exceptions and GPLv2+
 URL: http://www.gnu.org/software/libc/
@@ -244,6 +244,19 @@ build_CFLAGS="$BuildFlags -O1"
 build_CFLAGS="$BuildFlags -O3"
 %endif
 
+# Use RPM_OPT_FLAGS, so we use system wide optimizations
+# GLIBC currently doesn't build with FORTIFY_SOURCE
+# Every other flag which we filter out is already specified in this spec
+# or is obsolete for our current gcc.
+%ifarch %{arm}
+OPT_FLAGS=`echo "$RPM_OPT_FLAGS" | sed -e "s/-O2\ //g" \
+                   | sed -e "s/-fstack-protector\ //g" \
+                   | sed -e "s/-Wp,-D_FORTIFY_SOURCE=2\ //g" \
+                   | sed -e "s/--param=ssp-buffer-size=4\ //g"` 
+
+build_CFLAGS="$build_CFLAGS $OPT_FLAGS"
+%endif
+
 # Special flag to enable annobin annotations for statically linked
 # assembler code.  Needs to be passed to make; not preserved by
 # configure.
@@ -277,14 +290,11 @@ build()
 		--enable-stack-protector=strong \
                 --disable-profile \
                 --enable-obsolete-rpc \
-                --disable-profile \
-                --enable-obsolete-rpc \
 		${core_with_options} \
                 --disable-multi-arch \
 %if %{without werror}
 		--disable-werror \
 %endif
-		--disable-profile \
 %if %{with bootstrap}
 		--without-selinux \
 %endif
