@@ -1,3 +1,6 @@
+* Thu Feb 06 2020 Niels Breet <niels.breet@jolla.com> - 2.30+git3
+- Use global RPM_OPT_FLAGS for arm builds. Contributes to JB#48210
+
 * Sun Feb 02 2020 Matti Kosola <matti.kosola@jolla.com> - 2.30+git2
 - Revert: elf: Refuse to dlopen PIE objects. JB#48615
 
