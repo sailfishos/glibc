@@ -39,7 +39,7 @@ Provides: ld-linux.so.3(GLIBC_2.4)
 BuildRequires: xz tar
 # Require libgcc in case some program calls pthread_cancel in its %%post
 Requires(pre): libgcc
-BuildRequires:  zlib-devel texinfo
+BuildRequires:  zlib-devel
 BuildRequires: sed >= 3.95, libcap-devel, gettext
 BuildRequires: gawk,  util-linux
 # This gcc >= 3.2 is to ensure that __frame_state_for is exported by glibc
