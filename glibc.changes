@@ -1,3 +1,6 @@
+* Wed Jul 22 2020 Evgeny Eremin <e.eremin@omprussia.ru> - 2.30+git4
+- Fix CVE-2020-6096. JB#49988
+
 * Thu Feb 06 2020 Niels Breet <niels.breet@jolla.com> - 2.30+git3
 - Use global RPM_OPT_FLAGS for arm builds. Contributes to JB#48210
 
