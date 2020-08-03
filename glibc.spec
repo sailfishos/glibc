@@ -5,7 +5,7 @@
 Name: glibc
 
 Summary: GNU C library shared libraries
-Version: 2.30+git3
+Version: 2.30+git4
 Release: 0
 License: LGPLv2+ and LGPLv2+ with exceptions and GPLv2+
 URL: http://www.gnu.org/software/libc/
@@ -24,6 +24,8 @@ Patch10: eglibc-2.15-fix-neon-libdl.patch
 Patch11: eglibc-2.19-shlib-make.patch
 Patch12: glibc-2.27-bits.patch
 Patch13: 0001-Revert-elf-Refuse-to-dlopen-PIE-objects-BZ-24323.patch
+Patch14: 0002-arm-CVE-2020-6096-fix-memcpy-and-memmove-for-negativ.patch
+Patch15: 0003-arm-CVE-2020-6096-Fix-multiarch-memcpy-for-negative-.patch
 
 Provides: ldconfig
 # The dynamic linker supports DT_GNU_HASH
@@ -223,6 +225,8 @@ cd %{glibcsrcdir}
 %patch11 -p1
 %patch12 -p1
 %patch13 -p1
+%patch14 -p1
+%patch15 -p1
 
 %build
 GCC=gcc
