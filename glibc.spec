@@ -26,6 +26,8 @@ Patch12: glibc-2.27-bits.patch
 Patch13: 0001-Revert-elf-Refuse-to-dlopen-PIE-objects-BZ-24323.patch
 Patch14: 0002-arm-CVE-2020-6096-fix-memcpy-and-memmove-for-negativ.patch
 Patch15: 0003-arm-CVE-2020-6096-Fix-multiarch-memcpy-for-negative-.patch
+Patch16: 0001-Fix-array-bounds-violation-in-regex-matcher-bug-2514.patch
+Patch17: 0001-posix-Sync-regex-with-gnulib.patch
 
 Provides: ldconfig
 # The dynamic linker supports DT_GNU_HASH
@@ -227,6 +229,8 @@ cd %{glibcsrcdir}
 %patch13 -p1
 %patch14 -p1
 %patch15 -p1
+%patch16 -p1
+%patch17 -p1
 
 %build
 GCC=gcc
