@@ -1,0 +1,495 @@
+From 2a0356e1191804d57005e1cfe2a72f019b7a8cce Mon Sep 17 00:00:00 2001
+From: Adhemerval Zanella <adhemerval.zanella@linaro.org>
+Date: Mon, 4 Nov 2019 16:47:11 -0300
+Subject: [PATCH] posix: Sync regex with gnulib
+
+It sync with gnulib commit 6cfb4302b3e1da14d706198b693558290e9b00f4
+and contains the fixes:
+
+https://git.savannah.gnu.org/cgit/gnulib.git/commit/?id=32915b2a8a43825720755113bdffe9f67a591748
+https://git.savannah.gnu.org/cgit/gnulib.git/commit/?id=48f07576b8cd935b48e1050551f45ab1a79b9f01
+https://git.savannah.gnu.org/cgit/gnulib.git/commit/?id=5e407aba1f775d51b25481cb55f324c9868f62d7
+https://git.savannah.gnu.org/cgit/gnulib.git/commit/?id=4e02b30c761c76d04057fa5f6bba71401f9310cd
+https://git.savannah.gnu.org/cgit/gnulib.git/commit/?id=79f8ee4e389f8cb1339f8abed9a7d29816e2a2d4
+
+Checked on x86_64-linux-gnu and i686-linux-gnu.
+---
+ include/verify.h       |  2 +
+ posix/regcomp.c        | 35 +++++-------------
+ posix/regex_internal.c | 13 ++-----
+ posix/regex_internal.h | 30 +++++----------
+ posix/regexec.c        | 83 ++++++++++++------------------------------
+ 5 files changed, 49 insertions(+), 114 deletions(-)
+
+diff --git a/include/verify.h b/include/verify.h
+index 00e78d3f8c..c3db0e3c72 100644
+--- a/include/verify.h
++++ b/include/verify.h
+@@ -1,2 +1,4 @@
+ /* Gnulib <verify.h>, simplified by assuming GCC 4.6 or later.  */
+ #define verify(R) _Static_assert (R, "verify (" #R ")")
++
++#define assume(R) ((R) ? (void) 0 : __builtin_unreachable ())
+diff --git a/posix/regcomp.c b/posix/regcomp.c
+index 7525355a9b..3e8f1e6107 100644
+--- a/posix/regcomp.c
++++ b/posix/regcomp.c
+@@ -1436,7 +1436,7 @@ link_nfa_nodes (void *extra, bin_tree_t *node)
+       break;
+ 
+     case END_OF_RE:
+-      assert (node->next == NULL);
++      DEBUG_ASSERT (node->next == NULL);
+       break;
+ 
+     case OP_DUP_ASTERISK:
+@@ -1452,8 +1452,8 @@ link_nfa_nodes (void *extra, bin_tree_t *node)
+ 	  right = node->right->first->node_idx;
+ 	else
+ 	  right = node->next->node_idx;
+-	assert (left > -1);
+-	assert (right > -1);
++	DEBUG_ASSERT (left > -1);
++	DEBUG_ASSERT (right > -1);
+ 	err = re_node_set_init_2 (dfa->edests + idx, left, right);
+       }
+       break;
+@@ -1471,7 +1471,7 @@ link_nfa_nodes (void *extra, bin_tree_t *node)
+       break;
+ 
+     default:
+-      assert (!IS_EPSILON_NODE (node->token.type));
++      DEBUG_ASSERT (!IS_EPSILON_NODE (node->token.type));
+       dfa->nexts[idx] = node->next->node_idx;
+       break;
+     }
+@@ -1653,9 +1653,7 @@ calc_eclosure (re_dfa_t *dfa)
+ {
+   Idx node_idx;
+   bool incomplete;
+-#ifdef DEBUG
+-  assert (dfa->nodes_len > 0);
+-#endif
++  DEBUG_ASSERT (dfa->nodes_len > 0);
+   incomplete = false;
+   /* For each nodes, calculate epsilon closure.  */
+   for (node_idx = 0; ; ++node_idx)
+@@ -1670,9 +1668,7 @@ calc_eclosure (re_dfa_t *dfa)
+ 	  node_idx = 0;
+ 	}
+ 
+-#ifdef DEBUG
+-      assert (dfa->eclosures[node_idx].nelem != -1);
+-#endif
++      DEBUG_ASSERT (dfa->eclosures[node_idx].nelem != -1);
+ 
+       /* If we have already calculated, skip it.  */
+       if (dfa->eclosures[node_idx].nelem != 0)
+@@ -2442,9 +2438,7 @@ parse_expression (re_string_t *regexp, regex_t *preg, re_token_t *token,
+ 
+     default:
+       /* Must not happen?  */
+-#ifdef DEBUG
+-      assert (0);
+-#endif
++      DEBUG_ASSERT (false);
+       return NULL;
+     }
+   fetch_token (token, regexp, syntax);
+@@ -3306,7 +3300,7 @@ parse_bracket_exp (re_string_t *regexp, re_dfa_t *dfa, re_token_t *token,
+ 	       goto parse_bracket_exp_free_return;
+ 	      break;
+ 	    default:
+-	      assert (0);
++	      DEBUG_ASSERT (false);
+ 	      break;
+ 	    }
+ 	}
+@@ -3662,7 +3656,6 @@ build_charclass_op (re_dfa_t *dfa, RE_TRANSLATE_TYPE trans,
+   Idx alloc = 0;
+ #endif /* not RE_ENABLE_I18N */
+   reg_errcode_t ret;
+-  re_token_t br_token;
+   bin_tree_t *tree;
+ 
+   sbcset = (re_bitset_ptr_t) calloc (sizeof (bitset_t), 1);
+@@ -3713,11 +3706,7 @@ build_charclass_op (re_dfa_t *dfa, RE_TRANSLATE_TYPE trans,
+ #endif
+ 
+   /* Build a tree for simple bracket.  */
+-#if defined GCC_LINT || defined lint
+-  memset (&br_token, 0, sizeof br_token);
+-#endif
+-  br_token.type = SIMPLE_BRACKET;
+-  br_token.opr.sbcset = sbcset;
++  re_token_t br_token = { .type = SIMPLE_BRACKET, .opr.sbcset = sbcset };
+   tree = create_token_tree (dfa, NULL, NULL, &br_token);
+   if (__glibc_unlikely (tree == NULL))
+     goto build_word_op_espace;
+@@ -3808,11 +3797,7 @@ static bin_tree_t *
+ create_tree (re_dfa_t *dfa, bin_tree_t *left, bin_tree_t *right,
+ 	     re_token_type_t type)
+ {
+-  re_token_t t;
+-#if defined GCC_LINT || defined lint
+-  memset (&t, 0, sizeof t);
+-#endif
+-  t.type = type;
++  re_token_t t = { .type = type };
+   return create_token_tree (dfa, left, right, &t);
+ }
+ 
+diff --git a/posix/regex_internal.c b/posix/regex_internal.c
+index 99fbb26ecb..6aa9116084 100644
+--- a/posix/regex_internal.c
++++ b/posix/regex_internal.c
+@@ -212,7 +212,7 @@ build_wcs_buffer (re_string_t *pstr)
+ {
+ #ifdef _LIBC
+   unsigned char buf[MB_LEN_MAX];
+-  assert (MB_LEN_MAX >= pstr->mb_cur_max);
++  DEBUG_ASSERT (MB_LEN_MAX >= pstr->mb_cur_max);
+ #else
+   unsigned char buf[64];
+ #endif
+@@ -285,7 +285,7 @@ build_wcs_upper_buffer (re_string_t *pstr)
+   size_t mbclen;
+ #ifdef _LIBC
+   char buf[MB_LEN_MAX];
+-  assert (MB_LEN_MAX >= pstr->mb_cur_max);
++  DEBUG_ASSERT (pstr->mb_cur_max <= MB_LEN_MAX);
+ #else
+   char buf[64];
+ #endif
+@@ -685,9 +685,7 @@ re_string_reconstruct (re_string_t *pstr, Idx idx, int eflags)
+ 			 pstr->valid_len - offset);
+ 	      pstr->valid_len -= offset;
+ 	      pstr->valid_raw_len -= offset;
+-#if defined DEBUG && DEBUG
+-	      assert (pstr->valid_len > 0);
+-#endif
++	      DEBUG_ASSERT (pstr->valid_len > 0);
+ 	    }
+ 	}
+       else
+@@ -941,10 +939,7 @@ re_string_context_at (const re_string_t *input, Idx idx, int eflags)
+       Idx wc_idx = idx;
+       while(input->wcs[wc_idx] == WEOF)
+ 	{
+-#if defined DEBUG && DEBUG
+-	  /* It must not happen.  */
+-	  assert (wc_idx >= 0);
+-#endif
++	  DEBUG_ASSERT (wc_idx >= 0);
+ 	  --wc_idx;
+ 	  if (wc_idx < 0)
+ 	    return input->tip_context;
+diff --git a/posix/regex_internal.h b/posix/regex_internal.h
+index 5462419b78..06957f0fc8 100644
+--- a/posix/regex_internal.h
++++ b/posix/regex_internal.h
+@@ -20,7 +20,6 @@
+ #ifndef _REGEX_INTERNAL_H
+ #define _REGEX_INTERNAL_H 1
+ 
+-#include <assert.h>
+ #include <ctype.h>
+ #include <stdio.h>
+ #include <stdlib.h>
+@@ -34,6 +33,14 @@
+ #include <stdint.h>
+ 
+ #include <intprops.h>
++#include <verify.h>
++
++#if defined DEBUG && DEBUG != 0
++# include <assert.h>
++# define DEBUG_ASSERT(x) assert (x)
++#else
++# define DEBUG_ASSERT(x) assume (x)
++#endif
+ 
+ #ifdef _LIBC
+ # include <libc-lock.h>
+@@ -44,22 +51,7 @@
+ # define lock_unlock(lock) __libc_lock_unlock (lock)
+ #elif defined GNULIB_LOCK && !defined USE_UNLOCKED_IO
+ # include "glthread/lock.h"
+-  /* Use gl_lock_define if empty macro arguments are known to work.
+-     Otherwise, fall back on less-portable substitutes.  */
+-# if ((defined __GNUC__ && !defined __STRICT_ANSI__) \
+-      || (defined __STDC_VERSION__ && 199901L <= __STDC_VERSION__))
+-#  define lock_define(name) gl_lock_define (, name)
+-# elif USE_POSIX_THREADS
+-#  define lock_define(name) pthread_mutex_t name;
+-# elif USE_PTH_THREADS
+-#  define lock_define(name) pth_mutex_t name;
+-# elif USE_SOLARIS_THREADS
+-#  define lock_define(name) mutex_t name;
+-# elif USE_WINDOWS_THREADS
+-#  define lock_define(name) gl_lock_t name;
+-# else
+-#  define lock_define(name)
+-# endif
++# define lock_define(name) gl_lock_define (, name)
+ # define lock_init(lock) glthread_lock_init (&(lock))
+ # define lock_fini(lock) glthread_lock_destroy (&(lock))
+ # define lock_lock(lock) glthread_lock_lock (&(lock))
+@@ -618,11 +610,7 @@ typedef struct
+ {
+   /* The string object corresponding to the input string.  */
+   re_string_t input;
+-#if defined _LIBC || (defined __STDC_VERSION__ && __STDC_VERSION__ >= 199901L)
+   const re_dfa_t *const dfa;
+-#else
+-  const re_dfa_t *dfa;
+-#endif
+   /* EFLAGS of the argument of regexec.  */
+   int eflags;
+   /* Where the matching ends.  */
+diff --git a/posix/regexec.c b/posix/regexec.c
+index 4ff30a79c0..3c46ac81dd 100644
+--- a/posix/regexec.c
++++ b/posix/regexec.c
+@@ -443,7 +443,7 @@ re_search_stub (struct re_pattern_buffer *bufp, const char *string, Idx length,
+     {
+       if (ret_len)
+ 	{
+-	  assert (pmatch[0].rm_so == start);
++	  DEBUG_ASSERT (pmatch[0].rm_so == start);
+ 	  rval = pmatch[0].rm_eo - start;
+ 	}
+       else
+@@ -502,9 +502,9 @@ re_copy_regs (struct re_registers *regs, regmatch_t *pmatch, Idx nregs,
+     }
+   else
+     {
+-      assert (regs_allocated == REGS_FIXED);
++      DEBUG_ASSERT (regs_allocated == REGS_FIXED);
+       /* This function may not be called with REGS_FIXED and nregs too big.  */
+-      assert (regs->num_regs >= nregs);
++      DEBUG_ASSERT (nregs <= regs->num_regs);
+       rval = REGS_FIXED;
+     }
+ 
+@@ -597,21 +597,12 @@ re_search_internal (const regex_t *preg, const char *string, Idx length,
+   Idx extra_nmatch;
+   bool sb;
+   int ch;
+-#if defined _LIBC || (defined __STDC_VERSION__ && __STDC_VERSION__ >= 199901L)
+   re_match_context_t mctx = { .dfa = dfa };
+-#else
+-  re_match_context_t mctx;
+-#endif
+   char *fastmap = ((preg->fastmap != NULL && preg->fastmap_accurate
+ 		    && start != last_start && !preg->can_be_null)
+ 		   ? preg->fastmap : NULL);
+   RE_TRANSLATE_TYPE t = preg->translate;
+ 
+-#if !(defined _LIBC || (defined __STDC_VERSION__ && __STDC_VERSION__ >= 199901L))
+-  memset (&mctx, '\0', sizeof (re_match_context_t));
+-  mctx.dfa = dfa;
+-#endif
+-
+   extra_nmatch = (nmatch > preg->re_nsub) ? nmatch - (preg->re_nsub + 1) : 0;
+   nmatch -= extra_nmatch;
+ 
+@@ -622,10 +613,8 @@ re_search_internal (const regex_t *preg, const char *string, Idx length,
+ 			|| dfa->init_state_begbuf == NULL))
+     return REG_NOMATCH;
+ 
+-#ifdef DEBUG
+   /* We assume front-end functions already check them.  */
+-  assert (0 <= last_start && last_start <= length);
+-#endif
++  DEBUG_ASSERT (0 <= last_start && last_start <= length);
+ 
+   /* If initial states with non-begbuf contexts have no elements,
+      the regex must be anchored.  If preg->newline_anchor is set,
+@@ -677,8 +666,6 @@ re_search_internal (const regex_t *preg, const char *string, Idx length,
+ 	  goto free_return;
+ 	}
+     }
+-  else
+-    mctx.state_log = NULL;
+ 
+   match_first = start;
+   mctx.input.tip_context = (eflags & REG_NOTBOL) ? CONTEXT_BEGBUF
+@@ -838,10 +825,8 @@ re_search_internal (const regex_t *preg, const char *string, Idx length,
+       match_ctx_clean (&mctx);
+     }
+ 
+-#ifdef DEBUG
+-  assert (match_last != -1);
+-  assert (err == REG_NOERROR);
+-#endif
++  DEBUG_ASSERT (match_last != -1);
++  DEBUG_ASSERT (err == REG_NOERROR);
+ 
+   /* Set pmatch[] if we need.  */
+   if (nmatch > 0)
+@@ -886,7 +871,7 @@ re_search_internal (const regex_t *preg, const char *string, Idx length,
+ 		   : mctx.input.offsets[pmatch[reg_idx].rm_eo]);
+ 	      }
+ #else
+-	    assert (mctx.input.offsets_needed == 0);
++	    DEBUG_ASSERT (mctx.input.offsets_needed == 0);
+ #endif
+ 	    pmatch[reg_idx].rm_so += match_first;
+ 	    pmatch[reg_idx].rm_eo += match_first;
+@@ -926,9 +911,7 @@ prune_impossible_nodes (re_match_context_t *mctx)
+   re_dfastate_t **sifted_states;
+   re_dfastate_t **lim_states = NULL;
+   re_sift_context_t sctx;
+-#ifdef DEBUG
+-  assert (mctx->state_log != NULL);
+-#endif
++  DEBUG_ASSERT (mctx->state_log != NULL);
+   match_last = mctx->match_last;
+   halt_node = mctx->last_node;
+ 
+@@ -1074,7 +1057,7 @@ check_matching (re_match_context_t *mctx, bool fl_longest_match,
+   /* An initial state must not be NULL (invalid).  */
+   if (__glibc_unlikely (cur_state == NULL))
+     {
+-      assert (err == REG_ESPACE);
++      DEBUG_ASSERT (err == REG_ESPACE);
+       return -2;
+     }
+ 
+@@ -1129,7 +1112,7 @@ check_matching (re_match_context_t *mctx, bool fl_longest_match,
+ 	  err = extend_buffers (mctx, next_char_idx + 1);
+ 	  if (__glibc_unlikely (err != REG_NOERROR))
+ 	    {
+-	      assert (err == REG_ESPACE);
++	      DEBUG_ASSERT (err == REG_ESPACE);
+ 	      return -2;
+ 	    }
+ 	}
+@@ -1212,9 +1195,7 @@ check_halt_state_context (const re_match_context_t *mctx,
+ {
+   Idx i;
+   unsigned int context;
+-#ifdef DEBUG
+-  assert (state->halt);
+-#endif
++  DEBUG_ASSERT (state->halt);
+   context = re_string_context_at (&mctx->input, idx, mctx->eflags);
+   for (i = 0; i < state->nodes.nelem; ++i)
+     if (check_halt_node_context (mctx->dfa, state->nodes.elems[i], context))
+@@ -1362,7 +1343,7 @@ pop_fail_stack (struct re_fail_stack_t *fs, Idx *pidx, Idx nregs,
+ 		regmatch_t *regs, re_node_set *eps_via_nodes)
+ {
+   Idx num = --fs->num;
+-  assert (num >= 0);
++  DEBUG_ASSERT (num >= 0);
+   *pidx = fs->stack[num].idx;
+   memcpy (regs, fs->stack[num].regs, sizeof (regmatch_t) * nregs);
+   re_node_set_free (eps_via_nodes);
+@@ -1389,10 +1370,8 @@ set_regs (const regex_t *preg, const re_match_context_t *mctx, size_t nmatch,
+   regmatch_t *prev_idx_match;
+   bool prev_idx_match_malloced = false;
+ 
+-#ifdef DEBUG
+-  assert (nmatch > 1);
+-  assert (mctx->state_log != NULL);
+-#endif
++  DEBUG_ASSERT (nmatch > 1);
++  DEBUG_ASSERT (mctx->state_log != NULL);
+   if (fl_backtrack)
+     {
+       fs = &fs_body;
+@@ -1578,9 +1557,7 @@ sift_states_backward (const re_match_context_t *mctx, re_sift_context_t *sctx)
+   Idx str_idx = sctx->last_str_idx;
+   re_node_set cur_dest;
+ 
+-#ifdef DEBUG
+-  assert (mctx->state_log != NULL && mctx->state_log[str_idx] != NULL);
+-#endif
++  DEBUG_ASSERT (mctx->state_log != NULL && mctx->state_log[str_idx] != NULL);
+ 
+   /* Build sifted state_log[str_idx].  It has the nodes which can epsilon
+      transit to the last_node and the last_node itself.  */
+@@ -1648,11 +1625,8 @@ build_sifted_states (const re_match_context_t *mctx, re_sift_context_t *sctx,
+       Idx prev_node = cur_src->elems[i];
+       int naccepted = 0;
+       bool ok;
++      DEBUG_ASSERT (!IS_EPSILON_NODE (dfa->nodes[prev_node].type));
+ 
+-#ifdef DEBUG
+-      re_token_type_t type = dfa->nodes[prev_node].type;
+-      assert (!IS_EPSILON_NODE (type));
+-#endif
+ #ifdef RE_ENABLE_I18N
+       /* If the node may accept "multi byte".  */
+       if (dfa->nodes[prev_node].accept_mb)
+@@ -2505,9 +2479,7 @@ transit_state_mb (re_match_context_t *mctx, re_dfastate_t *pstate)
+       err = clean_state_log_if_needed (mctx, dest_idx);
+       if (__glibc_unlikely (err != REG_NOERROR))
+ 	return err;
+-#ifdef DEBUG
+-      assert (dfa->nexts[cur_node_idx] != -1);
+-#endif
++      DEBUG_ASSERT (dfa->nexts[cur_node_idx] != -1);
+       new_nodes = dfa->eclosures + dfa->nexts[cur_node_idx];
+ 
+       dest_state = mctx->state_log[dest_idx];
+@@ -2571,9 +2543,7 @@ transit_state_bkref (re_match_context_t *mctx, const re_node_set *nodes)
+ 
+       /* And add the epsilon closures (which is 'new_dest_nodes') of
+ 	 the backreference to appropriate state_log.  */
+-#ifdef DEBUG
+-      assert (dfa->nexts[node_idx] != -1);
+-#endif
++      DEBUG_ASSERT (dfa->nexts[node_idx] != -1);
+       for (; bkc_idx < mctx->nbkref_ents; ++bkc_idx)
+ 	{
+ 	  Idx subexp_len;
+@@ -3032,10 +3002,8 @@ check_arrival_add_next_nodes (re_match_context_t *mctx, Idx str_idx,
+     {
+       int naccepted = 0;
+       Idx cur_node = cur_nodes->elems[cur_idx];
+-#ifdef DEBUG
+-      re_token_type_t type = dfa->nodes[cur_node].type;
+-      assert (!IS_EPSILON_NODE (type));
+-#endif
++      DEBUG_ASSERT (!IS_EPSILON_NODE (dfa->nodes[cur_node].type));
++
+ #ifdef RE_ENABLE_I18N
+       /* If the node may accept "multi byte".  */
+       if (dfa->nodes[cur_node].accept_mb)
+@@ -3103,9 +3071,7 @@ check_arrival_expand_ecl (const re_dfa_t *dfa, re_node_set *cur_nodes,
+   reg_errcode_t err;
+   Idx idx, outside_node;
+   re_node_set new_nodes;
+-#ifdef DEBUG
+-  assert (cur_nodes->nelem);
+-#endif
++  DEBUG_ASSERT (cur_nodes->nelem);
+   err = re_node_set_alloc (&new_nodes, cur_nodes->nelem);
+   if (__glibc_unlikely (err != REG_NOERROR))
+     return err;
+@@ -3695,6 +3661,7 @@ group_nodes_into_DFAstates (const re_dfa_t *dfa, const re_dfastate_t *state,
+ 	  bitset_empty (accepts);
+ 	}
+     }
++  assume (ndests <= SBC_MAX);
+   return ndests;
+  error_return:
+   for (j = 0; j < ndests; ++j)
+@@ -4272,10 +4239,8 @@ static reg_errcode_t
+ __attribute_warn_unused_result__
+ match_ctx_add_subtop (re_match_context_t *mctx, Idx node, Idx str_idx)
+ {
+-#ifdef DEBUG
+-  assert (mctx->sub_tops != NULL);
+-  assert (mctx->asub_tops > 0);
+-#endif
++  DEBUG_ASSERT (mctx->sub_tops != NULL);
++  DEBUG_ASSERT (mctx->asub_tops > 0);
+   if (__glibc_unlikely (mctx->nsub_tops == mctx->asub_tops))
+     {
+       Idx new_asub_tops = mctx->asub_tops * 2;
+-- 
+2.30.0
+
