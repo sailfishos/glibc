@@ -1,3 +1,6 @@
+* Thu Jan 14 2021 Björn Bidar <bjorn.bidar@jolla.com> - 2.30+git5
+- Add fix for GLIBC#11053. Contributes to JB#44353
+
 * Wed Jul 22 2020 Evgeny Eremin <e.eremin@omprussia.ru> - 2.30+git4
 - Fix CVE-2020-6096. JB#49988
 
