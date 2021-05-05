@@ -1,3 +1,6 @@
+* Wed May 05 2021 Mikhail Labyuk <m.labyuk@omprussia.ru> - 2.30+git6
+- Fix CVE-2020-27618. Contributes to JB#54165
+
 * Thu Jan 14 2021 Björn Bidar <bjorn.bidar@jolla.com> - 2.30+git5
 - Add fix for GLIBC#11053. Contributes to JB#44353
 
