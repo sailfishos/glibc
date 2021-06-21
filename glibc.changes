@@ -1,3 +1,7 @@
+* Thu Jun 17 2021 Mikhail Labiuk <m.labyuk@omp.ru> - 2.30+git7
+-  CVE-2021-33574 mq_notify use-after-free. Contributes to JB#54744
+   Upstream: https://sourceware.org/bugzilla/show_bug.cgi?id=27896
+
 * Wed May 05 2021 Mikhail Labyuk <m.labyuk@omprussia.ru> - 2.30+git6
 - Fix CVE-2020-27618. Contributes to JB#54165
 
