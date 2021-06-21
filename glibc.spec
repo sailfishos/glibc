@@ -5,7 +5,7 @@
 Name: glibc
 
 Summary: GNU C library shared libraries
-Version: 2.30+git6
+Version: 2.30+git7
 Release: 0
 License: LGPLv2+ and LGPLv2+ with exceptions and GPLv2+
 URL: http://www.gnu.org/software/libc/
@@ -29,6 +29,8 @@ Patch15: 0003-arm-CVE-2020-6096-Fix-multiarch-memcpy-for-negative-.patch
 Patch16: 0001-Fix-array-bounds-violation-in-regex-matcher-bug-2514.patch
 Patch17: 0001-posix-Sync-regex-with-gnulib.patch
 Patch18: glibc-CVE-2020-27618.patch
+Patch19: glibc-CVE-2021-33574-mq_notify-use-after-free-pthread-attribute.patch
+Patch20: glibc-CVE-2021-33574-backport-fix-use-pthread-attr-copy.patch
 
 
 Provides: ldconfig
@@ -234,6 +236,8 @@ cd %{glibcsrcdir}
 %patch16 -p1
 %patch17 -p1
 %patch18 -p1
+%patch19 -p1
+%patch20 -p1
 
 %build
 GCC=gcc
