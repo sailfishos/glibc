@@ -959,6 +959,9 @@ sed -e '/%%dir/d;/%%config/d;/%%verify/d;s/%%lang([^)]*) //;s#^/*##' \
 	| (cd %{glibc_sysroot}; xargs --no-run-if-empty rm -f 2> /dev/null || :)
 %endif # %%{auxarches}
 
+
+ln -s %{_libdir}/libcrypt.so.1 $RPM_BUILD_ROOT%{_libdir}/libcrypt.so.2
+
 ##############################################################################
 # Run the glibc testsuite
 ##############################################################################
@@ -1100,6 +1103,7 @@ fi
 %ifarch s390x
 /lib/ld64.so.1
 %endif
+%{_libdir}/libcrypt.so.2
 %verify(not md5 size mtime) %config(noreplace) /etc/nsswitch.conf
 %verify(not md5 size mtime) %config(noreplace) /etc/ld.so.conf
 %verify(not md5 size mtime) %config(noreplace) /etc/rpc
