@@ -5,7 +5,7 @@
 Name: glibc
 
 Summary: GNU C library shared libraries
-Version: 2.30+git8
+Version: 2.30+git9
 Release: 0
 License: LGPLv2+ and LGPLv2+ with exceptions and GPLv2+
 URL: http://www.gnu.org/software/libc/
@@ -290,7 +290,8 @@ build()
 %if %{with bootstrap}
 		--without-selinux \
 %endif
-                ||
+                --disable-crypt    \
+              ||
 		{ cat config.log; false; }
 
 	make %{?_smp_mflags} -O -r CFLAGS="$build_CFLAGS"
