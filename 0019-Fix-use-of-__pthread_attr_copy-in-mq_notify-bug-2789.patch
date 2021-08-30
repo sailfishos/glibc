@@ -1,4 +1,4 @@
-From 217b6dc298156bdb0d6aea9ea93e7e394a5ff091 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Florian Weimer <fweimer@redhat.com>
 Date: Tue, 1 Jun 2021 17:51:41 +0200
 Subject: [PATCH] Fix use of __pthread_attr_copy in mq_notify (bug 27896)
@@ -24,7 +24,7 @@ Reference:https://sourceware.org/git/?p=glibc.git;a=commit;h=217b6dc298156bdb0d6
  1 file changed, 29 insertions(+), 2 deletions(-)
 
 diff --git a/sysdeps/unix/sysv/linux/mq_notify.c b/sysdeps/unix/sysv/linux/mq_notify.c
-index c4091169..76963567 100644
+index 88633c89c0d0b9765282196b68584357ad41b20c..0ce0e9164e1cc77044c3879f9c718559e954c21a 100644
 --- a/sysdeps/unix/sysv/linux/mq_notify.c
 +++ b/sysdeps/unix/sysv/linux/mq_notify.c
 @@ -260,7 +260,34 @@ mq_notify (mqd_t mqdes, const struct sigevent *notification)
@@ -72,6 +72,3 @@ index c4091169..76963567 100644
      {
        pthread_attr_destroy (data.attr);
        free (data.attr);
--- 
-2.23.0
-

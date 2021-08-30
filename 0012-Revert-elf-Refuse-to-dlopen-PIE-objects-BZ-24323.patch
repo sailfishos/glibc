@@ -1,4 +1,4 @@
-From aafd1ef00c51824b7cc3b11bf24317400d2289ed Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Matti Kosola <matti.kosola@jolla.com>
 Date: Sun, 2 Feb 2020 10:57:54 +0200
 Subject: [PATCH] Revert "elf: Refuse to dlopen PIE objects [BZ #24323]"
@@ -13,7 +13,7 @@ This reverts commit 2c75b545de6fe3c44138799c68217a94bc669a88.
  delete mode 100644 elf/tst-dlopen-pie.c
 
 diff --git a/elf/Makefile b/elf/Makefile
-index a3eefd1b1f..bc3e092e5a 100644
+index a3eefd1b1f490b899640bfc29220913a1de35c4e..bc3e092e5accc943f7b87388bb1dea9d15125dbb 100644
 --- a/elf/Makefile
 +++ b/elf/Makefile
 @@ -312,7 +312,7 @@ test-xfail-tst-protected1b = yes
@@ -35,10 +35,10 @@ index a3eefd1b1f..bc3e092e5a 100644
  ifeq (yes,$(build-shared))
  # NB: Please keep cet-built-dso in sysdeps/x86/Makefile in sync with
 diff --git a/elf/dl-load.c b/elf/dl-load.c
-index 5abeb867f1..2bbef81b6e 100644
+index 3b00898028f8b65af56b1034a50c01f9012e1cde..acb3aeee629d9ff65d0b2844129d621d23083a4f 100644
 --- a/elf/dl-load.c
 +++ b/elf/dl-load.c
-@@ -1158,10 +1158,6 @@ _dl_map_object_from_fd (const char *name, const char *origname, int fd,
+@@ -1197,10 +1197,6 @@ _dl_map_object_from_fd (const char *name, const char *origname, int fd,
  	goto call_lose;
        }
  
@@ -49,7 +49,7 @@ index 5abeb867f1..2bbef81b6e 100644
      if (__glibc_unlikely (type != ET_DYN)
  	&& __glibc_unlikely ((mode & __RTLD_OPENEXEC) == 0))
        {
-@@ -1198,11 +1194,9 @@ _dl_map_object_from_fd (const char *name, const char *origname, int fd,
+@@ -1237,11 +1233,9 @@ _dl_map_object_from_fd (const char *name, const char *origname, int fd,
    elf_get_dynamic_info (l, NULL);
  
    /* Make sure we are not dlopen'ing an object that has the
@@ -64,7 +64,7 @@ index 5abeb867f1..2bbef81b6e 100644
      {
        /* We are not supposed to load this object.  Free all resources.  */
        _dl_unmap_segments (l);
-@@ -1213,11 +1207,7 @@ _dl_map_object_from_fd (const char *name, const char *origname, int fd,
+@@ -1252,11 +1246,7 @@ _dl_map_object_from_fd (const char *name, const char *origname, int fd,
        if (l->l_phdr_allocated)
  	free ((void *) l->l_phdr);
  
@@ -79,7 +79,7 @@ index 5abeb867f1..2bbef81b6e 100644
  
 diff --git a/elf/tst-dlopen-pie.c b/elf/tst-dlopen-pie.c
 deleted file mode 100644
-index 6a41c731cb..0000000000
+index 6a41c731cbc5ab7b928196e99fc49c6dc3b80a40..0000000000000000000000000000000000000000
 --- a/elf/tst-dlopen-pie.c
 +++ /dev/null
 @@ -1,49 +0,0 @@
@@ -133,7 +133,7 @@ index 6a41c731cb..0000000000
 -
 -#include <support/test-driver.c>
 diff --git a/include/elf.h b/include/elf.h
-index 14ed67ff67..ab76aafb1e 100644
+index 14ed67ff67d36349b12750c431478ce86c504ab0..ab76aafb1e6b408480055ae8eccfa237406e49c7 100644
 --- a/include/elf.h
 +++ b/include/elf.h
 @@ -23,7 +23,7 @@
@@ -145,6 +145,3 @@ index 14ed67ff67..ab76aafb1e 100644
  
  #endif /* !_ISOMAC */
  #endif /* elf.h */
--- 
-2.24.1
-

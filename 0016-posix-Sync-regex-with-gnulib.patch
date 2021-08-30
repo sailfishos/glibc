@@ -1,4 +1,4 @@
-From 2a0356e1191804d57005e1cfe2a72f019b7a8cce Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Adhemerval Zanella <adhemerval.zanella@linaro.org>
 Date: Mon, 4 Nov 2019 16:47:11 -0300
 Subject: [PATCH] posix: Sync regex with gnulib
@@ -22,7 +22,7 @@ Checked on x86_64-linux-gnu and i686-linux-gnu.
  5 files changed, 49 insertions(+), 114 deletions(-)
 
 diff --git a/include/verify.h b/include/verify.h
-index 00e78d3f8c..c3db0e3c72 100644
+index 00e78d3f8c84ebb4e056fbe4d30187563a3dfdd9..c3db0e3c72a3a7a74cc787be54d0e7d9fbc001a8 100644
 --- a/include/verify.h
 +++ b/include/verify.h
 @@ -1,2 +1,4 @@
@@ -31,7 +31,7 @@ index 00e78d3f8c..c3db0e3c72 100644
 +
 +#define assume(R) ((R) ? (void) 0 : __builtin_unreachable ())
 diff --git a/posix/regcomp.c b/posix/regcomp.c
-index 7525355a9b..3e8f1e6107 100644
+index 7525355a9b154427ce2181d095a61fb87e98a21b..3e8f1e6107db6157c445f7c431fbc5b1864680a5 100644
 --- a/posix/regcomp.c
 +++ b/posix/regcomp.c
 @@ -1436,7 +1436,7 @@ link_nfa_nodes (void *extra, bin_tree_t *node)
@@ -140,7 +140,7 @@ index 7525355a9b..3e8f1e6107 100644
  }
  
 diff --git a/posix/regex_internal.c b/posix/regex_internal.c
-index 99fbb26ecb..6aa9116084 100644
+index 9004ce809eb3cc96c7905242e15bf9e325e8cd60..83a5e009dab21b10bf6bd3e82a9868c2054eaedd 100644
 --- a/posix/regex_internal.c
 +++ b/posix/regex_internal.c
 @@ -212,7 +212,7 @@ build_wcs_buffer (re_string_t *pstr)
@@ -185,7 +185,7 @@ index 99fbb26ecb..6aa9116084 100644
  	  if (wc_idx < 0)
  	    return input->tip_context;
 diff --git a/posix/regex_internal.h b/posix/regex_internal.h
-index 5462419b78..06957f0fc8 100644
+index 5462419b7878b2c3e125e0e20244766844672916..06957f0fc880b41439ca50ca35f9579313379908 100644
 --- a/posix/regex_internal.h
 +++ b/posix/regex_internal.h
 @@ -20,7 +20,6 @@
@@ -248,7 +248,7 @@ index 5462419b78..06957f0fc8 100644
    int eflags;
    /* Where the matching ends.  */
 diff --git a/posix/regexec.c b/posix/regexec.c
-index 4ff30a79c0..3c46ac81dd 100644
+index 91c86ac406777af80204a65550f65f4f0bd03a7a..38b6d6719ade4241ccffc2608ae0d34a77ac1b69 100644
 --- a/posix/regexec.c
 +++ b/posix/regexec.c
 @@ -443,7 +443,7 @@ re_search_stub (struct re_pattern_buffer *bufp, const char *string, Idx length,
@@ -377,7 +377,7 @@ index 4ff30a79c0..3c46ac81dd 100644
    context = re_string_context_at (&mctx->input, idx, mctx->eflags);
    for (i = 0; i < state->nodes.nelem; ++i)
      if (check_halt_node_context (mctx->dfa, state->nodes.elems[i], context))
-@@ -1362,7 +1343,7 @@ pop_fail_stack (struct re_fail_stack_t *fs, Idx *pidx, Idx nregs,
+@@ -1365,7 +1346,7 @@ pop_fail_stack (struct re_fail_stack_t *fs, Idx *pidx, Idx nregs,
  		regmatch_t *regs, re_node_set *eps_via_nodes)
  {
    Idx num = --fs->num;
@@ -386,7 +386,7 @@ index 4ff30a79c0..3c46ac81dd 100644
    *pidx = fs->stack[num].idx;
    memcpy (regs, fs->stack[num].regs, sizeof (regmatch_t) * nregs);
    re_node_set_free (eps_via_nodes);
-@@ -1389,10 +1370,8 @@ set_regs (const regex_t *preg, const re_match_context_t *mctx, size_t nmatch,
+@@ -1392,10 +1373,8 @@ set_regs (const regex_t *preg, const re_match_context_t *mctx, size_t nmatch,
    regmatch_t *prev_idx_match;
    bool prev_idx_match_malloced = false;
  
@@ -399,7 +399,7 @@ index 4ff30a79c0..3c46ac81dd 100644
    if (fl_backtrack)
      {
        fs = &fs_body;
-@@ -1578,9 +1557,7 @@ sift_states_backward (const re_match_context_t *mctx, re_sift_context_t *sctx)
+@@ -1581,9 +1560,7 @@ sift_states_backward (const re_match_context_t *mctx, re_sift_context_t *sctx)
    Idx str_idx = sctx->last_str_idx;
    re_node_set cur_dest;
  
@@ -410,7 +410,7 @@ index 4ff30a79c0..3c46ac81dd 100644
  
    /* Build sifted state_log[str_idx].  It has the nodes which can epsilon
       transit to the last_node and the last_node itself.  */
-@@ -1648,11 +1625,8 @@ build_sifted_states (const re_match_context_t *mctx, re_sift_context_t *sctx,
+@@ -1651,11 +1628,8 @@ build_sifted_states (const re_match_context_t *mctx, re_sift_context_t *sctx,
        Idx prev_node = cur_src->elems[i];
        int naccepted = 0;
        bool ok;
@@ -423,7 +423,7 @@ index 4ff30a79c0..3c46ac81dd 100644
  #ifdef RE_ENABLE_I18N
        /* If the node may accept "multi byte".  */
        if (dfa->nodes[prev_node].accept_mb)
-@@ -2505,9 +2479,7 @@ transit_state_mb (re_match_context_t *mctx, re_dfastate_t *pstate)
+@@ -2508,9 +2482,7 @@ transit_state_mb (re_match_context_t *mctx, re_dfastate_t *pstate)
        err = clean_state_log_if_needed (mctx, dest_idx);
        if (__glibc_unlikely (err != REG_NOERROR))
  	return err;
@@ -434,7 +434,7 @@ index 4ff30a79c0..3c46ac81dd 100644
        new_nodes = dfa->eclosures + dfa->nexts[cur_node_idx];
  
        dest_state = mctx->state_log[dest_idx];
-@@ -2571,9 +2543,7 @@ transit_state_bkref (re_match_context_t *mctx, const re_node_set *nodes)
+@@ -2574,9 +2546,7 @@ transit_state_bkref (re_match_context_t *mctx, const re_node_set *nodes)
  
        /* And add the epsilon closures (which is 'new_dest_nodes') of
  	 the backreference to appropriate state_log.  */
@@ -445,7 +445,7 @@ index 4ff30a79c0..3c46ac81dd 100644
        for (; bkc_idx < mctx->nbkref_ents; ++bkc_idx)
  	{
  	  Idx subexp_len;
-@@ -3032,10 +3002,8 @@ check_arrival_add_next_nodes (re_match_context_t *mctx, Idx str_idx,
+@@ -3035,10 +3005,8 @@ check_arrival_add_next_nodes (re_match_context_t *mctx, Idx str_idx,
      {
        int naccepted = 0;
        Idx cur_node = cur_nodes->elems[cur_idx];
@@ -458,7 +458,7 @@ index 4ff30a79c0..3c46ac81dd 100644
  #ifdef RE_ENABLE_I18N
        /* If the node may accept "multi byte".  */
        if (dfa->nodes[cur_node].accept_mb)
-@@ -3103,9 +3071,7 @@ check_arrival_expand_ecl (const re_dfa_t *dfa, re_node_set *cur_nodes,
+@@ -3106,9 +3074,7 @@ check_arrival_expand_ecl (const re_dfa_t *dfa, re_node_set *cur_nodes,
    reg_errcode_t err;
    Idx idx, outside_node;
    re_node_set new_nodes;
@@ -469,7 +469,7 @@ index 4ff30a79c0..3c46ac81dd 100644
    err = re_node_set_alloc (&new_nodes, cur_nodes->nelem);
    if (__glibc_unlikely (err != REG_NOERROR))
      return err;
-@@ -3695,6 +3661,7 @@ group_nodes_into_DFAstates (const re_dfa_t *dfa, const re_dfastate_t *state,
+@@ -3698,6 +3664,7 @@ group_nodes_into_DFAstates (const re_dfa_t *dfa, const re_dfastate_t *state,
  	  bitset_empty (accepts);
  	}
      }
@@ -477,7 +477,7 @@ index 4ff30a79c0..3c46ac81dd 100644
    return ndests;
   error_return:
    for (j = 0; j < ndests; ++j)
-@@ -4272,10 +4239,8 @@ static reg_errcode_t
+@@ -4275,10 +4242,8 @@ static reg_errcode_t
  __attribute_warn_unused_result__
  match_ctx_add_subtop (re_match_context_t *mctx, Idx node, Idx str_idx)
  {
@@ -490,6 +490,3 @@ index 4ff30a79c0..3c46ac81dd 100644
    if (__glibc_unlikely (mctx->nsub_tops == mctx->asub_tops))
      {
        Idx new_asub_tops = mctx->asub_tops * 2;
--- 
-2.30.0
-

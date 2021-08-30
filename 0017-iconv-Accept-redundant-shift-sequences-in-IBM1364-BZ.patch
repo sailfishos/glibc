@@ -1,4 +1,4 @@
-From 9a99c682144bdbd40792ebf822fe9264e0376fb5 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Arjun Shankar <arjun@redhat.com>
 Date: Wed, 4 Nov 2020 12:19:38 +0100
 Subject: [PATCH] iconv: Accept redundant shift sequences in IBM1364 [BZ
@@ -17,10 +17,11 @@ etc., fixed in commit 692de4b3960d).
 
 Reviewed-by: Carlos O'Donell <carlos@redhat.com>
 ---
- iconvdata/ibm1364.c     | 14 ++------------
+ iconvdata/ibm1364.c | 14 ++------------
+ 1 file changed, 2 insertions(+), 12 deletions(-)
 
 diff --git a/iconvdata/ibm1364.c b/iconvdata/ibm1364.c
-index 49e7267ab4..521f0825b7 100644
+index 32ebe5a406520fb4f84ef62e0063d99ce98caf17..65d35871f1eb4afe1f0ef388da3089ccf5c99b5c 100644
 --- a/iconvdata/ibm1364.c
 +++ b/iconvdata/ibm1364.c
 @@ -158,24 +158,14 @@ enum
@@ -50,6 +51,3 @@ index 49e7267ab4..521f0825b7 100644
  	curcs = sb;							      \
  	++inptr;							      \
  	continue;							      \
--- 
-2.27.0
-

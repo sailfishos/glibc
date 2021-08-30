@@ -1,21 +1,36 @@
-diff -ru eglibc-2.18/csu/init-first.c eglibc-2.18-runfast/csu/init-first.c
---- eglibc-2.18/csu/init-first.c	2013-01-10 00:28:48.000000000 +0000
-+++ eglibc-2.18-runfast/csu/init-first.c	2014-01-01 10:46:24.000000000 +0000
-@@ -69,6 +69,9 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Bj=C3=B6rn=20Bidar?= <bjorn.bidar@jolla.com>
+Date: Tue, 31 Aug 2021 02:07:12 +0300
+Subject: [PATCH] ARM: default to FPU RunFast mode
+
+---
+ csu/init-first.c          | 5 +++++
+ sysdeps/arm/fpu_control.h | 8 +++++---
+ 2 files changed, 10 insertions(+), 3 deletions(-)
+
+diff --git a/csu/init-first.c b/csu/init-first.c
+index 10762b61f590df5e2bde19d6554e21e8cacc76ee..7257fc005088a1f71d3b058d4d1f4abe1ffbbb7d 100644
+--- a/csu/init-first.c
++++ b/csu/init-first.c
+@@ -63,6 +63,11 @@ _init (int argc, char **argv, char **envp)
  	__setfpucw (__fpu_control);
      }
-
+ 
++#if defined(__arm__)
 +  /* Set the default FPU mode once again it is RunFast */
 +  _FPU_SETCW(_FPU_DEFAULT);
++#endif
 +
    /* Save the command-line arguments.  */
    __libc_argc = argc;
    __libc_argv = argv;
---- eglibc-2.18/ports/sysdeps/arm/fpu_control.h	2013-06-24 22:42:26.000000000 +0000
-+++ eglibc-2.18-runfast/sysdeps/arm/fpu_control.h	2014-01-01 11:06:13.000000000 +0000
+diff --git a/sysdeps/arm/fpu_control.h b/sysdeps/arm/fpu_control.h
+index dcf39fcb03612a0d2f7a28b588aa60dc5061e4e7..c32b219b746f5e7bbf75ceaa0806882cba67452c 100644
+--- a/sysdeps/arm/fpu_control.h
++++ b/sysdeps/arm/fpu_control.h
 @@ -22,7 +22,8 @@
  #if !(defined(_LIBC) && !defined(_LIBC_TEST)) && defined(__SOFTFP__)
-
+ 
  #define _FPU_RESERVED 0xffffffff
 -#define _FPU_DEFAULT  0x00000000
 +#define _FPU_DEFAULT    (3 << 24)
@@ -30,10 +45,10 @@ diff -ru eglibc-2.18/csu/init-first.c eglibc-2.18-runfast/csu/init-first.c
 -#define _FPU_DEFAULT    0x00000000
 +/* The default mode is RunFast */
 +#define _FPU_DEFAULT   (3 << 24)
-
+ 
  /* Default + exceptions enabled.  */
 -#define _FPU_IEEE	(_FPU_DEFAULT | 0x00001f00)
 +#define _FPU_IEEE	0x00001f00
-
+ 
  /* Type of the control word.  */
  typedef unsigned int fpu_control_t;

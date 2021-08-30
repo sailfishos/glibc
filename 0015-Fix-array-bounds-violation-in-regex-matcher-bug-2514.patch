@@ -1,4 +1,4 @@
-From fc141ea78ee3d87c67b18488827fe2d89c9343e7 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Andreas Schwab <schwab@suse.de>
 Date: Wed, 30 Oct 2019 10:38:36 +0100
 Subject: [PATCH] Fix array bounds violation in regex matcher (bug 25149)
@@ -14,10 +14,10 @@ pop_fail_stack which is bug 11053.
  1 file changed, 5 insertions(+), 2 deletions(-)
 
 diff --git a/posix/regexec.c b/posix/regexec.c
-index 3c46ac81dd..38b6d6719a 100644
+index 4ff30a79c09a86f8f36127ed453a3b29349ebfa6..91c86ac406777af80204a65550f65f4f0bd03a7a 100644
 --- a/posix/regexec.c
 +++ b/posix/regexec.c
-@@ -1266,10 +1266,13 @@ proceed_next_node (const re_match_context_t *mctx, Idx nregs, regmatch_t *regs,
+@@ -1285,10 +1285,13 @@ proceed_next_node (const re_match_context_t *mctx, Idx nregs, regmatch_t *regs,
        if (type == OP_BACK_REF)
  	{
  	  Idx subexp_idx = dfa->nodes[node].opr.idx + 1;
@@ -33,6 +33,3 @@ index 3c46ac81dd..38b6d6719a 100644
  		return -1;
  	      else if (naccepted)
  		{
--- 
-2.30.0
-

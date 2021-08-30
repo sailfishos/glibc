@@ -1,16 +1,27 @@
-ld.so: Add --rpath-prefix option
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Bj=C3=B6rn=20Bidar?= <bjorn.bidar@jolla.com>
+Date: Tue, 31 Aug 2021 01:58:49 +0300
+Subject: [PATCH] (scratchbox2) Add new option "--rpath-prefix" to ld.so
 
-Scratchbox2 uses the --rpath-prefix option to make the linker search for
-required libraries under the target rootfs.
+This patch adds a new option "--rpath-prefix" to ld.so.
+This makes it possible to add a prefix to all RPATH and
+RUNPATH options from binaries and libraries; that way
+Scratchbox 2 can run also host-compatible binaries that
+contain such options (without this, the RPATHs would
+refer to the libraries on the host system and not to
+the correct libraries under 'target_root').
 
-Packages that run their own binaries as a build step may use RPATH to
-resolve dependencies located under the build tree - such RPATHs must not
-be redirected under the target rootfs. It is a common assumption in
-Scratchbox2 that builds happen under user's home directory. Therefore,
-RPATHs under /home are excluded from this manipulation.
+Note that this patch causes no harm in the default case, i.e.
+when the dynamic linker is started "automatically" by the kernel.
+---
+ elf/dl-load.c              | 63 ++++++++++++++++++++++++++++++--------
+ elf/dl-support.c           |  3 ++
+ elf/rtld.c                 | 11 +++++++
+ sysdeps/generic/ldsodefs.h |  6 ++++
+ 4 files changed, 71 insertions(+), 12 deletions(-)
 
 diff --git a/elf/dl-load.c b/elf/dl-load.c
-index c51e4b37..57a357ea 100644
+index c092ed3e674650f3b93dfca992bbdc775f6d1b8e..3b00898028f8b65af56b1034a50c01f9012e1cde 100644
 --- a/elf/dl-load.c
 +++ b/elf/dl-load.c
 @@ -443,7 +443,8 @@ static size_t max_dirnamelen;
@@ -130,12 +141,12 @@ index c51e4b37..57a357ea 100644
        if (env_path_list.dirs[0] == NULL)
  	{
 diff --git a/elf/dl-support.c b/elf/dl-support.c
-index b5f10d5a..cdf189b7 100644
+index a9cf3366633f2aa8ea4c16b8eb2ecd2015174e57..02894dbf2aaea4bdb31223968f1248c37fe54de2 100644
 --- a/elf/dl-support.c
 +++ b/elf/dl-support.c
-@@ -58,6 +58,9 @@ const char *_dl_profile_output;
-    ignored.  */
- const char *_dl_inhibit_rpath;
+@@ -61,6 +61,9 @@ const char *_dl_inhibit_rpath;
+ /* flag: don't search default directories if set. */
+ int _dl_no_default_dirs = 0;
  
 +/* prefix to be added to all RUNPATHs and RPATHs */
 +const char *_dl_rpath_prefix = NULL;
@@ -144,10 +155,10 @@ index b5f10d5a..cdf189b7 100644
  struct link_map *_dl_profile_map;
  
 diff --git a/elf/rtld.c b/elf/rtld.c
-index 385b5f88..9bc6d162 100644
+index c2022d5bf7cafba0fe3fa3cfaf7cf6470ab23320..415188c233792eea6484ce709f4bfc128775323b 100644
 --- a/elf/rtld.c
 +++ b/elf/rtld.c
-@@ -967,6 +967,15 @@ dl_main (const ElfW(Phdr) *phdr,
+@@ -1188,6 +1188,15 @@ dl_main (const ElfW(Phdr) *phdr,
  	  {
  	    GLRO(dl_inhibit_rpath) = _dl_argv[2];
  
@@ -163,7 +174,7 @@ index 385b5f88..9bc6d162 100644
  	    _dl_skip_args += 2;
  	    _dl_argc -= 2;
  	    _dl_argv += 2;
-@@ -1013,6 +1022,8 @@ of this helper program; chances are you did not intend to run this program.\n\
+@@ -1242,6 +1251,8 @@ of this helper program; chances are you did not intend to run this program.\n\
    --inhibit-cache       Do not use " LD_SO_CACHE "\n\
    --library-path PATH   use given PATH instead of content of the environment\n\
  			variable LD_LIBRARY_PATH\n\
@@ -173,10 +184,10 @@ index 385b5f88..9bc6d162 100644
  			in LIST\n\
    --argv0 STRING        use STRING as argv[0]\n\
 diff --git a/sysdeps/generic/ldsodefs.h b/sysdeps/generic/ldsodefs.h
-index 95dc8751..83b6ae2f 100644
+index ddf23e32ad1952aab5b1ca955d98f90f42e346ec..f946848d25930056a8135d96381e80ca0eb02bf7 100644
 --- a/sysdeps/generic/ldsodefs.h
 +++ b/sysdeps/generic/ldsodefs.h
-@@ -617,6 +617,12 @@ struct rtld_global_ro
+@@ -614,6 +614,12 @@ struct rtld_global_ro
    /* List of auditing interfaces.  */
    struct audit_ifaces *_dl_audit;
    unsigned int _dl_naudit;

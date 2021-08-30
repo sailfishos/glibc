@@ -1,4 +1,4 @@
-%define glibcsrcdir glibc-2.30
+%global glibcsrcdir glibc-2.30
 # Default: Always disable the benchtests.
 %bcond_with benchtests
 
@@ -12,26 +12,25 @@ URL: http://www.gnu.org/software/libc/
 Source0: glibc-2.30.tar.xz
 Source1: build-locale-archive.c
 
-Patch1: glibc-arm-alignment-fix.patch
-Patch2: glibc-2.25-arm-runfast.patch
-Patch4: glibc-2.25-elf-rtld.diff
-Patch5: glibc-2.27-ldso-rpath-prefix-option.diff
-Patch6: glibc-2.25-nsswitchconf-location.diff
-Patch7: glibc-2.25-nscd-socket-location.diff
-Patch8: glibc-2.25-ldso-nodefaultdirs-option.diff
-Patch9: glibc-2.14-locarchive-fedora.patch
-Patch10: eglibc-2.15-fix-neon-libdl.patch
-Patch11: eglibc-2.19-shlib-make.patch
-Patch12: glibc-2.27-bits.patch
-Patch13: 0001-Revert-elf-Refuse-to-dlopen-PIE-objects-BZ-24323.patch
-Patch14: 0002-arm-CVE-2020-6096-fix-memcpy-and-memmove-for-negativ.patch
-Patch15: 0003-arm-CVE-2020-6096-Fix-multiarch-memcpy-for-negative-.patch
-Patch16: 0001-Fix-array-bounds-violation-in-regex-matcher-bug-2514.patch
-Patch17: 0001-posix-Sync-regex-with-gnulib.patch
-Patch18: glibc-CVE-2020-27618.patch
-Patch19: glibc-CVE-2021-33574-mq_notify-use-after-free-pthread-attribute.patch
-Patch20: glibc-CVE-2021-33574-backport-fix-use-pthread-attr-copy.patch
-
+Patch1: 0001-Fix-libc6-alignment-error-in-lib-ld-linux.so.3-on-ar.patch
+Patch2: 0002-ARM-default-to-FPU-RunFast-mode.patch
+Patch3: 0003-Fix-locale-archives-fixing-MER-295.patch
+Patch4: 0004-Fix-crash-when-linking-with-libdl-on-arm-with-NEON.patch
+Patch5: 0005-Fix-shlib.lds-generation.patch
+Patch6: 0006-scratchbox2-Allow-specifying-of-nscd-socket-location.patch
+Patch7: 0007-scratchbox2-Allow-specifying-of-nsswitch.conf-path.patch
+Patch8: 0008-scratchbox2-Add-options-to-not-set-any-default-dirs-.patch
+Patch9: 0009-scratchbox2-Add-ld.so-argv0-STRING-to-use-STRING-as-.patch
+Patch10: 0010-scratchbox2-Add-new-option-rpath-prefix-to-ld.so.patch
+Patch11: 0011-Define-bits-endian.h-instead-of-generating-it.patch
+Patch12: 0012-Revert-elf-Refuse-to-dlopen-PIE-objects-BZ-24323.patch
+Patch13: 0013-arm-CVE-2020-6096-fix-memcpy-and-memmove-for-negativ.patch
+Patch14: 0014-arm-CVE-2020-6096-Fix-multiarch-memcpy-for-negative-.patch
+Patch15: 0015-Fix-array-bounds-violation-in-regex-matcher-bug-2514.patch
+Patch16: 0016-posix-Sync-regex-with-gnulib.patch
+Patch17: 0017-iconv-Accept-redundant-shift-sequences-in-IBM1364-BZ.patch
+Patch18: 0018-Use-__pthread_attr_copy-in-mq_notify-bug-27896.patch
+Patch19: 0019-Fix-use-of-__pthread_attr_copy-in-mq_notify-bug-2789.patch
 
 Provides: ldconfig
 # The dynamic linker supports DT_GNU_HASH
@@ -211,33 +210,7 @@ Requires:  %{name} = %{version}-%{release}
 %{summary}.
 
 %prep
-%setup -q -n %{glibcsrcdir}
-xz -dc %SOURCE0 | tar -x
-
-cd %{glibcsrcdir}
-%patch1 -p2
-%ifarch %{arm}
-%patch2 -p1
-%endif
-%patch4 -p1
-%patch5 -p1
-%patch6 -p1
-%patch7 -p1
-%patch8 -p1
-%patch9 -p1
-%if 0%{?qemu_user_space_build}
-%patch10 -p1
-%endif
-%patch11 -p1
-%patch12 -p1
-%patch13 -p1
-%patch14 -p1
-%patch15 -p1
-%patch16 -p1
-%patch17 -p1
-%patch18 -p1
-%patch19 -p1
-%patch20 -p1
+%autosetup  -p1 -n %{glibcsrcdir}
 
 %build
 GCC=gcc
@@ -292,12 +265,12 @@ echo "$GCC" > Gcc
 ##############################################################################
 build()
 {
-	local builddir=build-%{target}${1:+-$1}
+	local builddir=%{_builddir}/build-%{target}${1:+-$1}
 	${1+shift}
 	rm -rf $builddir
 	mkdir $builddir
 	pushd $builddir
-	../%{glibcsrcdir}/configure CC="$GCC" CXX="$GXX" CFLAGS="$build_CFLAGS" \
+        %{_builddir}/%{glibcsrcdir}/configure CC="$GCC" CXX="$GXX" CFLAGS="$build_CFLAGS" \
 		--prefix=%{_prefix} \
 		--with-headers=%{_prefix}/include $EnableKernel \
 		--enable-bind-now \
@@ -341,7 +314,7 @@ find . -type f -name '*.filelist' -exec rm -rf {} \;
 GCC=`cat Gcc`
 
 # Build and install:
-make -j1 install_root=%{glibc_sysroot} install -C build-%{target}
+make -j1 install_root=%{glibc_sysroot} install -C %{_builddir}/build-%{target}
 
 # install_different:
 #	Install all core libraries into DESTDIR/SUBDIR. Either the file is
@@ -445,15 +418,15 @@ rm -f %{glibc_sysroot}%{_infodir}/libc.info*
 ##############################################################################
 # Install configuration files for services
 ##############################################################################
-install -p -m 644 %{glibcsrcdir}/nss/nsswitch.conf %{glibc_sysroot}/etc/nsswitch.conf
+install -p -m 644 nss/nsswitch.conf %{glibc_sysroot}/etc/nsswitch.conf
 
 %ifnarch %{auxarches}
 # This is for ncsd - in glibc 2.2
-install -m 644 %{glibcsrcdir}/nscd/nscd.conf %{glibc_sysroot}/etc
+install -m 644 nscd/nscd.conf %{glibc_sysroot}/etc
 mkdir -p %{glibc_sysroot}%{_tmpfilesdir}
-install -m 644 %{glibcsrcdir}/nscd/nscd.conf %{buildroot}%{_tmpfilesdir}
+install -m 644 nscd/nscd.conf %{buildroot}%{_tmpfilesdir}
 mkdir -p %{glibc_sysroot}/lib/systemd/system
-install -m 644 %{glibcsrcdir}/nscd/nscd.service %{glibc_sysroot}/lib/systemd/system
+install -m 644 nscd/nscd.service %{glibc_sysroot}/lib/systemd/system
 %endif
 
 # Include ld.so.conf
@@ -497,9 +470,9 @@ rm -rf %{glibc_sysroot}%{_prefix}/share/zoneinfo
 # which is to at least keep the timestamp consistent.  The choice of using
 # glibc_post_upgrade.c is arbitrary.
 touch -r %{SOURCE0} %{glibc_sysroot}/etc/ld.so.conf
-touch -r %{glibcsrcdir}/sunrpc/etc.rpc %{glibc_sysroot}/etc/rpc
+touch -r sunrpc/etc.rpc %{glibc_sysroot}/etc/rpc
 
-pushd build-%{target}
+pushd %{_builddir}/build-%{target}
 $GCC -Os -g -static -o build-locale-archive %{SOURCE1} \
 	../build-%{target}/locale/locarchive.o \
 	../build-%{target}/locale/md5.o \
@@ -511,9 +484,9 @@ install -m 700 build-locale-archive %{glibc_sysroot}%{_prefix}/sbin/build-locale
 popd
 
 # Lastly copy some additional documentation for the packages.
-rm -rf %{glibcsrcdir}/documentation
-mkdir %{glibcsrcdir}/documentation
-cp %{glibcsrcdir}/timezone/README %{glibcsrcdir}/documentation/README.timezone
+rm -rf documentation
+mkdir documentation
+cp timezone/README documentation/README.timezone
 
 #%if 0%{?_enable_debug_packages}
 
@@ -898,7 +871,7 @@ cat debuginfocommon.sources >> debuginfo.filelist
 
 # The auxarches get only these few source files.
 auxarches_debugsources=\
-'/(generic|linux|%{basearch}|nptl(_db)?)/|/%{glibcsrcdir}/build|/dl-osinfo\.h'
+'/(generic|linux|%{basearch}|nptl(_db)?)/|/dl-osinfo\.h'
 
 # Place the source files into the core debuginfo pakcage.
 grep "$auxarches_debugsources" debuginfocommon.sources >> debuginfo.filelist
@@ -963,6 +936,7 @@ sed -e '/%%dir/d;/%%config/d;/%%verify/d;s/%%lang([^)]*) //;s#^/*##' \
 # Run the glibc testsuite
 ##############################################################################
 %check
+cd ..
 %if %{with testsuite}
 
 # Run the glibc tests. If any tests fail to build we exit %%check with
@@ -1109,14 +1083,14 @@ fi
 %dir %attr(0700,root,root) /var/cache/ldconfig
 %attr(0600,root,root) %verify(not md5 size mtime) %ghost %config(missingok,noreplace) /var/cache/ldconfig/aux-cache
 %attr(0644,root,root) %verify(not md5 size mtime) %ghost %config(missingok,noreplace) /etc/ld.so.cache
-%doc %{glibcsrcdir}/README %{glibcsrcdir}/NEWS %{glibcsrcdir}/INSTALL %{glibcsrcdir}/elf/rtld-debugger-interface.txt
+%doc README NEWS INSTALL elf/rtld-debugger-interface.txt
 # If rpm doesn't support %%license, then use %%doc instead.
 %{!?_licensedir:%global license %%doc}
-%license %{glibcsrcdir}/COPYING %{glibcsrcdir}/COPYING.LIB %{glibcsrcdir}/LICENSES
+%license COPYING COPYING.LIB LICENSES
 
 %ifnarch %{auxarches}
 %files -f common.filelist common
-%doc %{glibcsrcdir}/documentation/README.timezone
+%doc documentation/README.timezone
 
 %files -f devel.filelist devel
 

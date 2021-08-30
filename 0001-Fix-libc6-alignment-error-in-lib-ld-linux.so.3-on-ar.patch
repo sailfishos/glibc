@@ -1,0 +1,41 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Bj=C3=B6rn=20Bidar?= <bjorn.bidar@jolla.com>
+Date: Tue, 31 Aug 2021 00:17:48 +0300
+Subject: [PATCH] Fix libc6: alignment error in /lib/ld-linux.so.3 on armel
+
+Source of the patch is:
+https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=548842
+https://sourceware.org/legacy-ml/crossgcc/2009-11/msg00008.html
+---
+ sysdeps/arm/dl-machine.h | 13 +++++++++++--
+ 1 file changed, 11 insertions(+), 2 deletions(-)
+
+diff --git a/sysdeps/arm/dl-machine.h b/sysdeps/arm/dl-machine.h
+index 7a2f9d9b782e321dc26f117ea9719eb2191a1ccf..87f1bccb5615f54803f028316c5390874ec1ceb3 100644
+--- a/sysdeps/arm/dl-machine.h
++++ b/sysdeps/arm/dl-machine.h
+@@ -626,13 +626,22 @@ elf_machine_rela (struct link_map *map, const Elf32_Rela *reloc,
+ }
+ # endif
+ 
++union arm_unaligned_data {
++  Elf32_Addr l_addr;
++} __attribute__ ((packed));
++
+ auto inline void
+ __attribute__ ((always_inline))
+ elf_machine_rel_relative (Elf32_Addr l_addr, const Elf32_Rel *reloc,
+ 			  void *const reloc_addr_arg)
+ {
+-  Elf32_Addr *const reloc_addr = reloc_addr_arg;
+-  *reloc_addr += l_addr;
++  if (((long)reloc_addr_arg) & 0x3) {
++    union arm_unaligned_data *const lpdata = reloc_addr_arg;
++    lpdata->l_addr += l_addr;
++  } else {
++    Elf32_Addr *const reloc_addr = reloc_addr_arg;
++    *reloc_addr += l_addr;
++  }
+ }
+ 
+ # ifndef RTLD_BOOTSTRAP
