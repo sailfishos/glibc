@@ -1,3 +1,8 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Bj=C3=B6rn=20Bidar?= <bjorn.bidar@jolla.com>
+Date: Tue, 31 Aug 2021 01:19:23 +0300
+Subject: [PATCH] Fix crash when linking with libdl on arm with NEON
+
 When compiled for arm with -mfpu=neon, the .init_array section declared
 here becomes 64-bit aligned. Since the dynamic linker expects an array of
 32-bit function pointers with no gaps, this causes an immediate SIGSEGV
@@ -16,10 +21,15 @@ attribute wasn't available yet when this code was written.)
 
 Richard Braakman
 richard.braakman@jollamobile.com
+---
+ dlfcn/dlfcn.c | 9 +--------
+ 1 file changed, 1 insertion(+), 8 deletions(-)
 
---- eglibc-2.15/dlfcn/dlfcn.c	2006-08-17 04:18:26.000000000 +0300
-+++ glibc-fixed/dlfcn/dlfcn.c	2013-06-10 13:20:34.846885906 +0300
-@@ -24,16 +24,9 @@
+diff --git a/dlfcn/dlfcn.c b/dlfcn/dlfcn.c
+index b30f42d50dbd3f1d4b70d80ecbf9cd9fdfb8f460..69b82e7dafe8da3db7c42896cd55d34c15b92fdf 100644
+--- a/dlfcn/dlfcn.c
++++ b/dlfcn/dlfcn.c
+@@ -23,16 +23,9 @@ int __dlfcn_argc attribute_hidden;
  char **__dlfcn_argv attribute_hidden;
  
  

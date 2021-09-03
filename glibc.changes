@@ -1,3 +1,7 @@
+* Tue Aug 31 2021 Björn Bidar <bjorn.bidar@jolla.com> - 2.30+git8
+- Document all patches and use %autosetup
+- Add fix for CVE-2021-38604. Fixes JB#55185
+
 * Thu Jun 17 2021 Mikhail Labiuk <m.labyuk@omp.ru> - 2.30+git7
 -  CVE-2021-33574 mq_notify use-after-free. Contributes to JB#54744
    Upstream: https://sourceware.org/bugzilla/show_bug.cgi?id=27896

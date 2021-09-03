@@ -1,0 +1,70 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Bj=C3=B6rn=20Bidar?= <bjorn.bidar@jolla.com>
+Date: Tue, 31 Aug 2021 01:56:22 +0300
+Subject: [PATCH] (scratchbox2) Add ld.so --argv0 <STRING> to use <STRING> as
+ argv0
+
+A small patch for the dynamic linker/loader ("ld.so", also known as
+"ld-linux.so"). The dynamic linker is part of the "glibc" package.
+
+This patch adds one command line option which is only used
+when the dynamic linker is started as an ordinary program,
+which is a seldom used way to start dynamically linked
+programs. SB2 uses that option to preserve semantics of the
+exec* calls
+
+[SB2 starts the dynamic linker as an ordinary program,
+to be able to get full control of the execution environment -
+this is somewhat complex system. Study the implementation
+of SB2's exec-related functions for full details]
+
+Note that this patch causes no harm in the default case, i.e.
+when the dynamic linker is started "automatically" by the kernel.
+---
+ elf/rtld.c | 12 ++++++++++++
+ 1 file changed, 12 insertions(+)
+
+diff --git a/elf/rtld.c b/elf/rtld.c
+index 38b56eb380e035202b978c786f7fcac5730d5d5e..c2022d5bf7cafba0fe3fa3cfaf7cf6470ab23320 100644
+--- a/elf/rtld.c
++++ b/elf/rtld.c
+@@ -1119,6 +1119,7 @@ dl_main (const ElfW(Phdr) *phdr,
+ 
+   if (*user_entry == (ElfW(Addr)) ENTRY_POINT)
+     {
++      char *forced_argv0 = NULL;
+       /* Ho ho.  We are not the program interpreter!  We are the program
+ 	 itself!  This means someone ran ld.so as a command.  Well, that
+ 	 might be convenient to do sometimes.  We support it by
+@@ -1202,6 +1203,14 @@ dl_main (const ElfW(Phdr) *phdr,
+ 	else if (! strcmp (_dl_argv[1], "--preload") && _dl_argc > 2)
+ 	  {
+ 	    preloadarg = _dl_argv[2];
++	    _dl_skip_args += 2;
++	    _dl_argc -= 2;
++	    _dl_argv += 2;
++	  }
++	else if (! strcmp (_dl_argv[1], "--argv0") && _dl_argc > 2)
++	  {
++	    forced_argv0 = _dl_argv[2];
++
+ 	    _dl_skip_args += 2;
+ 	    _dl_argc -= 2;
+ 	    _dl_argv += 2;
+@@ -1235,6 +1244,7 @@ of this helper program; chances are you did not intend to run this program.\n\
+ 			variable LD_LIBRARY_PATH\n\
+   --inhibit-rpath LIST  ignore RUNPATH and RPATH information in object names\n\
+ 			in LIST\n\
++  --argv0 STRING        use STRING as argv[0]\n\
+   --audit LIST          use objects named in LIST as auditors\n\
+   --preload LIST        preload objects named in LIST\n");
+ 
+@@ -1287,6 +1297,8 @@ of this helper program; chances are you did not intend to run this program.\n\
+ 	  rtld_timer_stop (&load_time, start);
+ 	}
+ 
++      if (forced_argv0 != NULL) _dl_argv[0] = forced_argv0;
++
+       /* Now the map for the main executable is available.  */
+       main_map = GL(dl_ns)[LM_ID_BASE]._ns_loaded;
+ 
