@@ -1,3 +1,6 @@
+* Wed Nov 10 2021 Niels Breet <niels.breet@jolla.com> - 2.30+git10
+- Remove broken Obsoletes for x86_64. Contributes to JB#56278
+
 * Mon Sep 27 2021 Björn Bidar <bjorn.bidar@jolla.com> - 2.30+git9
 - Disable crypt. Contributes to JB#54931
 
