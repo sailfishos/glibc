@@ -5,7 +5,7 @@
 Name: glibc
 
 Summary: GNU C library shared libraries
-Version: 2.30+git9
+Version: 2.30+git10
 Release: 0
 License: LGPLv2+ and LGPLv2+ with exceptions and GPLv2+
 URL: http://www.gnu.org/software/libc/
@@ -132,12 +132,6 @@ which is highly discouraged.
 Summary: Header files for development using standard C libraries
 Group: Development/Libraries
 Provides: %{name}-headers(%{_target_cpu})
-%ifarch x86_64
-# If both -m32 and -m64 is to be supported on AMD64, x86_64 glibc-headers
-# have to be installed, not i586 ones.
-Obsoletes: %{name}-headers(i586)
-Obsoletes: %{name}-headers(i686)
-%endif
 Requires(pre): kernel-headers
 Requires: kernel-headers >= 2.2.1, %{name} = %{version}-%{release}
 BuildRequires: kernel-headers >= 2.6.22
