@@ -35,6 +35,10 @@ Patch19: 0019-Fix-use-of-__pthread_attr_copy-in-mq_notify-bug-2789.patch
 Patch20: 0020-librt-fix-NULL-pointer-dereference-bug-28213.patch
 Patch21: 0021-librt-add-test-bug-28213.patch
 # end
+# CVE-2022-23219
+Patch22: 0022-socket-Add-the-__sockaddr_un_set-function.patch
+Patch23: 0023-unix-CVE-2022-23219-Buffer-overflow-in-sunrpc-clnt_create.patch
+# end
 
 Provides: ldconfig
 # The dynamic linker supports DT_GNU_HASH
