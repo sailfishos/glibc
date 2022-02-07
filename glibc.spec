@@ -39,6 +39,7 @@ Patch21: 0021-librt-add-test-bug-28213.patch
 Patch22: 0022-socket-Add-the-__sockaddr_un_set-function.patch
 Patch23: 0023-unix-CVE-2022-23219-Buffer-overflow-in-sunrpc-clnt_create.patch
 # end
+Patch24: 0024-unix-CVE-2022-23218-Buffer-overflow-in-sunrpc-svcunix_create.patch
 
 Provides: ldconfig
 # The dynamic linker supports DT_GNU_HASH
