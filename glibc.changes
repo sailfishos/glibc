@@ -1,3 +1,7 @@
+* Thu Feb 10 2022 Sergey Levin <elvingrey@gmail.com> - 2.30+git11
+- Add fix for CVE-2022-23218. Fixes JB#57362
+- Add fix for CVE-2022-23219. Fixes JB#57335
+
 * Wed Nov 10 2021 Niels Breet <niels.breet@jolla.com> - 2.30+git10
 - Remove broken Obsoletes for x86_64. Contributes to JB#56278
 
