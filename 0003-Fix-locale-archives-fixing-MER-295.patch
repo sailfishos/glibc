@@ -8,10 +8,10 @@ Subject: [PATCH] Fix locale archives, fixing MER#295
  1 file changed, 5 insertions(+), 5 deletions(-)
 
 diff --git a/locale/programs/locarchive.c b/locale/programs/locarchive.c
-index e6310b18beee8dd2a6d505fedfecbc8df7ec4400..7d50c758f1a7bc47525dd7f5c5cf4697dc44ab38 100644
+index 8d79a1b6..5fadd544 100644
 --- a/locale/programs/locarchive.c
 +++ b/locale/programs/locarchive.c
-@@ -281,9 +281,9 @@ oldlocrecentcmp (const void *a, const void *b)
+@@ -280,9 +280,9 @@ oldlocrecentcmp (const void *a, const void *b)
  /* forward decls for below */
  static uint32_t add_locale (struct locarhandle *ah, const char *name,
  			    locale_data_t data, bool replace);
@@ -24,7 +24,7 @@ index e6310b18beee8dd2a6d505fedfecbc8df7ec4400..7d50c758f1a7bc47525dd7f5c5cf4697
  
  
  static bool
-@@ -695,7 +695,7 @@ close_archive (struct locarhandle *ah)
+@@ -701,7 +701,7 @@ close_archive (struct locarhandle *ah)
  #include "../../intl/explodename.c"
  #include "../../intl/l10nflist.c"
  
@@ -33,7 +33,7 @@ index e6310b18beee8dd2a6d505fedfecbc8df7ec4400..7d50c758f1a7bc47525dd7f5c5cf4697
  insert_name (struct locarhandle *ah,
  	     const char *name, size_t name_len, bool replace)
  {
-@@ -756,7 +756,7 @@ insert_name (struct locarhandle *ah,
+@@ -762,7 +762,7 @@ insert_name (struct locarhandle *ah,
    return &namehashtab[idx];
  }
  
