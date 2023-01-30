@@ -1,45 +1,26 @@
-%global glibcsrcdir glibc-2.30
+%global glibcsrcdir glibc-2.41
 # Default: Always disable the benchtests.
 %bcond_with benchtests
 
 Name: glibc
 
 Summary: GNU C library shared libraries
-Version: 2.30+git12
+Version: 2.41+git1
 Release: 0
 License: LGPLv2+ and LGPLv2+ with exceptions and GPLv2+
 URL: http://www.gnu.org/software/libc/
-Source0: glibc-2.30.tar.xz
+Source0: glibc-2.41.tar.xz
 Source1: build-locale-archive.c
 
 Patch1: 0001-Fix-libc6-alignment-error-in-lib-ld-linux.so.3-on-ar.patch
 Patch2: 0002-ARM-default-to-FPU-RunFast-mode.patch
 Patch3: 0003-Fix-locale-archives-fixing-MER-295.patch
-Patch4: 0004-Fix-crash-when-linking-with-libdl-on-arm-with-NEON.patch
-Patch5: 0005-Fix-shlib.lds-generation.patch
-Patch6: 0006-scratchbox2-Allow-specifying-of-nscd-socket-location.patch
-Patch7: 0007-scratchbox2-Allow-specifying-of-nsswitch.conf-path.patch
-Patch8: 0008-scratchbox2-Add-options-to-not-set-any-default-dirs-.patch
-Patch9: 0009-scratchbox2-Add-ld.so-argv0-STRING-to-use-STRING-as-.patch
-Patch10: 0010-scratchbox2-Add-new-option-rpath-prefix-to-ld.so.patch
-Patch11: 0011-Define-bits-endian.h-instead-of-generating-it.patch
-Patch12: 0012-Revert-elf-Refuse-to-dlopen-PIE-objects-BZ-24323.patch
-Patch13: 0013-arm-CVE-2020-6096-fix-memcpy-and-memmove-for-negativ.patch
-Patch14: 0014-arm-CVE-2020-6096-Fix-multiarch-memcpy-for-negative-.patch
-Patch15: 0015-Fix-array-bounds-violation-in-regex-matcher-bug-2514.patch
-Patch16: 0016-posix-Sync-regex-with-gnulib.patch
-Patch17: 0017-iconv-Accept-redundant-shift-sequences-in-IBM1364-BZ.patch
-Patch18: 0018-Use-__pthread_attr_copy-in-mq_notify-bug-27896.patch
-Patch19: 0019-Fix-use-of-__pthread_attr_copy-in-mq_notify-bug-2789.patch
-# CVE-2021-38604
-Patch20: 0020-librt-fix-NULL-pointer-dereference-bug-28213.patch
-Patch21: 0021-librt-add-test-bug-28213.patch
-# end
-# CVE-2022-23219
-Patch22: 0022-socket-Add-the-__sockaddr_un_set-function.patch
-Patch23: 0023-unix-CVE-2022-23219-Buffer-overflow-in-sunrpc-clnt_create.patch
-# end
-Patch24: 0024-unix-CVE-2022-23218-Buffer-overflow-in-sunrpc-svcunix_create.patch
+Patch4: 0004-scratchbox2-Allow-specifying-of-nscd-socket-location.patch
+Patch5: 0005-scratchbox2-Allow-specifying-of-nsswitch.conf-path.patch
+Patch6: 0006-scratchbox2-Add-options-to-not-set-any-default-dirs-.patch
+Patch7: 0007-scratchbox2-Add-new-option-rpath-prefix-to-ld.so.patch
+Patch8: 0008-Define-bits-endian.h-instead-of-generating-it.patch
+Patch9: 0009-Revert-elf-Refuse-to-dlopen-PIE-objects-BZ-24323.patch
 
 Provides: ldconfig
 # The dynamic linker supports DT_GNU_HASH
@@ -93,6 +74,7 @@ BuildRequires: python3-base
 
 %define __find_provides %{_builddir}/%{glibcsrcdir}/find_provides.sh
 %define _filter_GLIBC_PRIVATE 1
+%global __provides_exclude ^libc_malloc_debug\\.so.*$
 %define run_glibc_tests 0
 
 %description
@@ -106,7 +88,6 @@ Linux system will not function.
 
 %package devel
 Summary: Object files for development using standard C libraries
-Group: Development/Libraries
 Requires(pre): /sbin/install-info
 Requires(pre): %{name}-headers
 Requires: %{name}-headers = %{version}-%{release}
@@ -125,7 +106,6 @@ use the standard C libraries.
 
 %package static
 Summary: C library static libraries for -static linking
-Group: Development/Libraries
 Requires: %{name}-devel = %{version}-%{release}
 
 %description static
@@ -135,7 +115,6 @@ which is highly discouraged.
 
 %package headers
 Summary: Header files for development using standard C libraries
-Group: Development/Libraries
 Provides: %{name}-headers(%{_target_cpu})
 Requires(pre): kernel-headers
 Requires: kernel-headers >= 2.2.1, %{name} = %{version}-%{release}
@@ -156,7 +135,6 @@ use the standard C libraries.
 Summary: Common binaries and locale data for glibc
 Requires: %{name} = %{version}-%{release}
 Requires: tzdata >= 2003a
-Group: System/Base
 
 %description common
 The glibc-common package includes common binaries for the GNU libc
@@ -185,7 +163,6 @@ libraries, as well as national language (locale) support.
 
 %package -n nscd
 Summary: A Name Service Caching Daemon (nscd)
-Group: System/Daemons
 Requires(pre): /usr/sbin/useradd, /usr/sbin/userdel, sh-utils
 
 %description -n nscd
@@ -194,7 +171,6 @@ performance with NIS+, and may help with DNS as well.
 
 %package utils
 Summary: Development utilities from GNU C library
-Group: Development/Tools
 Requires: %{name} = %{version}-%{release}
 
 %description utils
@@ -206,7 +182,6 @@ If unsure if you need this, don't install this package.
 
 %package doc
 Summary:   Documentation for %{name}
-Group:     Documentation
 Requires:  %{name} = %{version}-%{release}
 
 %description doc
@@ -474,7 +449,7 @@ rm -rf %{glibc_sysroot}%{_prefix}/share/zoneinfo
 # which is to at least keep the timestamp consistent.  The choice of using
 # glibc_post_upgrade.c is arbitrary.
 touch -r %{SOURCE0} %{glibc_sysroot}/etc/ld.so.conf
-touch -r sunrpc/etc.rpc %{glibc_sysroot}/etc/rpc
+touch -r inet/etc.rpc %{glibc_sysroot}/etc/rpc
 
 pushd %{_builddir}/build-%{target}
 $GCC -Os -g -static -o build-locale-archive %{SOURCE1} \
@@ -513,24 +488,11 @@ mkdir -p %{glibc_sysroot}%{_libdir}
 mv -f %{glibc_sysroot}/%{_lib}/lib{pcprofile,memusage}.so \
 	%{glibc_sysroot}%{_libdir}
 
+# Disallow linking against libc_malloc_debug.
+rm %{glibc_sysroot}%{_libdir}/libc_malloc_debug.so
+
 # Strip all of the installed object files.
 strip -g %{glibc_sysroot}%{_libdir}/*.o
-
-###############################################################################
-# Rebuild libpthread.a using --whole-archive to ensure all of libpthread
-# is included in a static link. This prevents any problems when linking
-# statically, using parts of libpthread, and other necessary parts not
-# being included. Upstream has decided that this is the wrong approach to
-# this problem and that the full set of dependencies should be resolved
-# such that static linking works and produces the most minimally sized
-# static application possible.
-###############################################################################
-pushd %{glibc_sysroot}%{_prefix}/%{_lib}/
-$GCC -r -nostdlib -o libpthread.o -Wl,--whole-archive ./libpthread.a
-rm libpthread.a
-ar rcs libpthread.a libpthread.o
-rm libpthread.o
-popd
 
 ##############################################################################
 # Build an empty libpthread_nonshared.a for compatiliby with applications
@@ -697,10 +659,16 @@ cat glibc.filelist
 grep '%{_infodir}' master.filelist | grep -v '%{_infodir}/dir' > devel.filelist
 %endif
 
-# Put some static files into the devel package.
+###############################################################################
+# glibc-devel
+###############################################################################
+
+# Static libraries that land in glibc-devel, not glibc-static.
+devel_static_library_pattern='/lib\(\(c\|pthread\|nldbl\|mvec\)_nonshared\|g\|ieee\|mcheck\|pthread\|dl\|rt\|util\|anl\)\.a$'
+
 grep '%{_libdir}/lib.*\.a' master.filelist \
-  | grep '/lib\(\(c\|pthread\|nldbl\|mvec\)_nonshared\|g\|ieee\|mcheck\)\.a$' \
-  >> devel.filelist
+  | grep "$devel_static_library_pattern" \
+  > devel.filelist
 
 # Put all of the object files and *.so (not the versioned ones) into the
 # devel package.
@@ -736,7 +704,7 @@ grep '%{_prefix}/include' < master.filelist \
 
 # Put the rest of the static files into the static package.
 grep '%{_libdir}/lib.*\.a' < master.filelist \
-  | grep -v '/lib\(\(c\|pthread\|nldbl\|mvec\)_nonshared\|g\|ieee\|mcheck\)\.a$' \
+  | grep -v "$devel_static_library_pattern" \
   > static.filelist
 
 ###############################################################################
@@ -744,11 +712,13 @@ grep '%{_libdir}/lib.*\.a' < master.filelist \
 ###############################################################################
 
 # All of the bin and certain sbin files go into the common package except
-# glibc_post_upgrade.* and iconvconfig which need to go in glibc. Likewise
-# nscd is excluded because it goes in nscd.
-grep '%{_prefix}/bin' master.filelist >> common.filelist
-grep '%{_prefix}/sbin/[^gi]' master.filelist \
-	| grep -v 'nscd' >> common.filelist
+# iconvconfig which needs to go in glibc.  The iconvconfig binary is kept in
+# the main glibc package because we use it in the post-install scriptlet to
+# rebuild the gconv-modules.cache.
+grep '%{_prefix}/bin' master.filelist \
+       >> common.filelist
+grep '%{_prefix}/sbin' master.filelist \
+       | grep -v '%{_prefix}/sbin/iconvconfig' >> common.filelist
 # All of the files under share go into the common package since they should be
 # multilib-independent.
 # Exceptions:
@@ -795,7 +765,7 @@ EOF
 # Move the NSS-related files to the NSS subpackages.  Be careful not
 # to pick up .debug files, and the -devel symbolic links.
 for module in db hesiod; do
-  grep -E "/libnss_$module(\.so\.[0-9.]+|-[0-9.]+\.so)$" \
+  grep -E "/libnss_$module\\.so\\.[0-9.]+\$" \
     master.filelist > nss_$module.filelist
 done
 
@@ -812,7 +782,7 @@ grep '/libnss_[a-z]*\.so$' master.filelist > nss-devel.filelist
 ###############################################################################
 
 # Prepare the libnsl-related file lists.
-grep '/libnsl-[0-9.]*.so$' master.filelist > libnsl.filelist
+grep -E '/libnsl\.so\.[0-9]+$' master.filelist > libnsl.filelist
 test $(wc -l < libnsl.filelist) -eq 1
 
 ###############################################################################
@@ -884,13 +854,15 @@ grep "$auxarches_debugsources" debuginfocommon.sources >> debuginfo.filelist
 grep -v "$auxarches_debugsources" \
   debuginfocommon.sources >> debuginfocommon.filelist
 
-%endif # %%{biarcharches}
+#endif %%{biarcharches}
+%endif
 
 # Add the list of *.a archives in the debug directory to
 # the common debuginfo package.
 list_debug_archives >> debuginfocommon.filelist
 
-%endif # %%{debuginfocommonarches}
+#endif %%{debuginfocommonarches}
+%endif
 
 # Remove some common directories from the common package debuginfo so that we
 # don't end up owning them.
@@ -934,7 +906,8 @@ sed -e '/%%dir/d;/%%config/d;/%%verify/d;s/%%lang([^)]*) //;s#^/*##' \
 	debuginfocommon.filelist \
 %endif
 	| (cd %{glibc_sysroot}; xargs --no-run-if-empty rm -f 2> /dev/null || :)
-%endif # %%{auxarches}
+# %%{auxarches}
+%endif
 
 ##############################################################################
 # Run the glibc testsuite
@@ -1018,7 +991,8 @@ elf/ld.so --library-path .:elf:nptl:dlfcn \
 %endif
 popd
 
-%endif # %%{run_glibc_tests}
+# %%{run_glibc_tests}
+%endif
 
 
 %pre -p <lua>
