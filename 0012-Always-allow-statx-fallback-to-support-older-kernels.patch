@@ -1,0 +1,25 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Matti=20Lehtim=C3=A4ki?= <matti.lehtimaki@jolla.com>
+Date: Wed, 31 Jan 2024 15:54:04 +0200
+Subject: [PATCH] Always allow statx fallback to support older kernels
+
+---
+ sysdeps/unix/sysv/linux/kernel-features.h | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/sysdeps/unix/sysv/linux/kernel-features.h b/sysdeps/unix/sysv/linux/kernel-features.h
+index 74adc3956b4e2ebb9a5caf1f07b86a47cf845117..48a845b91a52cab6d6cd671fbfdbce3e333da143 100644
+--- a/sysdeps/unix/sysv/linux/kernel-features.h
++++ b/sysdeps/unix/sysv/linux/kernel-features.h
+@@ -115,9 +115,11 @@
+ #endif
+ 
+ /* Support for statx was added in kernel 4.11.  */
++/* Always allow statx fallback to support older kernels
+ #if __LINUX_KERNEL_VERSION >= 0x040B00
+ # define __ASSUME_STATX 1
+ #endif
++*/
+ 
+ /* Support for clone call used on fork.  The signature varies across the
+    architectures with current 4 different variants:

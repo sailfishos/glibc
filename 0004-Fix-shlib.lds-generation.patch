@@ -1,0 +1,54 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Bj=C3=B6rn=20Bidar?= <bjorn.bidar@jolla.com>
+Date: Tue, 31 Aug 2021 01:34:24 +0300
+Subject: [PATCH] Fix shlib.lds generation
+
+Generate sed command line used to create shlib.lds before invoking it
+to prevent buffer overflow in make.
+
+Fixes MER#472
+---
+ Makerules | 21 +++++++++++----------
+ 1 file changed, 11 insertions(+), 10 deletions(-)
+
+diff --git a/Makerules b/Makerules
+index d1e139d03c1c448e14aee35af3e54ee7abe2180c..f4de25d6137027b22cf8160a49c0727c5fe6c4fa 100644
+--- a/Makerules
++++ b/Makerules
+@@ -551,18 +551,12 @@ shlib-lds-flags =
+ else
+ # binutils only position loadable notes into the first page for binaries,
+ # not for shared objects
+-$(common-objpfx)shlib.lds: $(common-objpfx)config.make $(..)Makerules
+-	$(LINK.o) -shared -Wl,-O1 \
+-		  -nostdlib -nostartfiles \
+-		  $(sysdep-LDFLAGS) $(rtld-LDFLAGS) $(LDFLAGS.so) \
+-		  -Wl,--verbose 2>/dev/null | \
+-	  sed > $@T \
+-	      -e '/^=========/,/^=========/!d;/^=========/d' \
+-	      -e 's/^.*\*(\.dynbss).*$$/& \
++shlib-lds-hash = -e '/^=========/,/^=========/!d;/^=========/d'
++shlib-lds-dynbss = -e 's/^.*\*(\.dynbss).*$$/& \
+ 		 PROVIDE(__start___libc_freeres_ptrs = .); \
+ 		 *(__libc_freeres_ptrs) \
+-		 PROVIDE(__stop___libc_freeres_ptrs = .);/'\
+-	      -e 's@^.*\*(\.jcr).*$$@& \
++		 PROVIDE(__stop___libc_freeres_ptrs = .);/'
++shlib-lds-jcr = -e 's@^.*\*(\.jcr).*$$@& \
+ 		 PROVIDE(__start___libc_subfreeres = .);\
+ 		 __libc_subfreeres : { *(__libc_subfreeres) }\
+ 		 PROVIDE(__stop___libc_subfreeres = .);\
+@@ -573,6 +567,13 @@ $(common-objpfx)shlib.lds: $(common-objpfx)config.make $(..)Makerules
+ 		 __libc_IO_vtables : { *(__libc_IO_vtables) }\
+ 		 PROVIDE(__stop___libc_IO_vtables = .);\
+ 		 /DISCARD/ : { *(.gnu.glibc-stub.*) }@'
++$(common-objpfx)shlib.lds: $(common-objpfx)config.make $(..)Makerules
++	$(LINK.o) -shared -Wl,-O1 \
++		  -nostdlib -nostartfiles \
++		  $(sysdep-LDFLAGS) $(rtld-LDFLAGS) $(LDFLAGS.so) \
++		  -Wl,--verbose 2>/dev/null | \
++	  sed > $@T \
++	      $(shlib-lds-hash) $(shlib-lds-dynbss) $(shlib-lds-jcr)
+ 	test -s $@T
+ 	mv -f $@T $@
+ common-generated += shlib.lds

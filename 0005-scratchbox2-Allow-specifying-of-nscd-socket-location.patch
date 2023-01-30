@@ -1,0 +1,152 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Bj=C3=B6rn=20Bidar?= <bjorn.bidar@jolla.com>
+Date: Tue, 31 Aug 2021 01:47:36 +0300
+Subject: [PATCH] (scratchbox2) Allow specifying of nscd socket location
+
+This patch makes location of nscd's socket to be run-time
+configurable via an environment variable.
+---
+ nscd/connections.c | 25 ++++++++++++++++++++++---
+ nscd/nscd.c        | 21 +++++++++++++++++----
+ nscd/nscd_helper.c | 16 +++++++++++++++-
+ 3 files changed, 54 insertions(+), 8 deletions(-)
+
+diff --git a/nscd/connections.c b/nscd/connections.c
+index 61d1674eb49a2eb48e3534662e675ff5b1936f6a..ebfdc03966d1470f10c6b75a1b11650d105aec29 100644
+--- a/nscd/connections.c
++++ b/nscd/connections.c
+@@ -476,6 +476,20 @@ fail:
+   return 0;
+ }
+ 
++int __nscd_get_socket_path(char *buf, size_t bufsiz)
++{
++  const char *ext_nscd_socket_path = getenv ("NSCD_SOCKET_PATH");
++  if (ext_nscd_socket_path) {
++    int len = strlen(ext_nscd_socket_path);
++    strncpy (buf, ext_nscd_socket_path, bufsiz);
++    if (len >= bufsiz) return -1;
++    return 0;
++  }
++  strncpy (buf, _PATH_NSCDSOCKET, bufsiz);
++  if (sizeof(_PATH_NSCDSOCKET) >= bufsiz) return -1;
++  return 0;
++}
++
+ 
+ /* Initialize database information structures.  */
+ void
+@@ -787,15 +801,20 @@ cannot create read-only descriptor for \"%s\"; no mmap"),
+   /* Bind a name to the socket.  */
+   struct sockaddr_un sock_addr;
+   sock_addr.sun_family = AF_UNIX;
+-  strcpy (sock_addr.sun_path, _PATH_NSCDSOCKET);
++  if (__nscd_get_socket_path (sock_addr.sun_path, sizeof(sock_addr.sun_path)) < 0)
++    {
++      dbg_log ("Path to nscd socket is too long");
++      exit (1);
++    }
++
+   if (bind (sock, (struct sockaddr *) &sock_addr, sizeof (sock_addr)) < 0)
+     {
+-      dbg_log ("%s: %s", _PATH_NSCDSOCKET, strerror (errno));
++      dbg_log ("%s: %s", sock_addr.sun_path, strerror (errno));
+       do_exit (errno == EACCES ? 4 : 1, 0, NULL);
+     }
+ 
+   /* Set permissions for the socket.  */
+-  chmod (_PATH_NSCDSOCKET, DEFFILEMODE);
++  chmod (sock_addr.sun_path, DEFFILEMODE);
+ 
+   /* Set the socket up to accept connections.  */
+   if (listen (sock, SOMAXCONN) < 0)
+diff --git a/nscd/nscd.c b/nscd/nscd.c
+index 1897cae671bbcda1435cbdca14f790b11e4e89f2..9a3c51640d95a7214d1113c928064233422dabd5 100644
+--- a/nscd/nscd.c
++++ b/nscd/nscd.c
+@@ -137,6 +137,8 @@ static struct argp argp =
+ static bool get_stats;
+ static int parent_fd = -1;
+ 
++extern int __nscd_get_socket_path(char *buf, size_t bufsiz);
++
+ int
+ main (int argc, char **argv)
+ {
+@@ -298,7 +300,11 @@ main (int argc, char **argv)
+   signal (SIGPIPE, SIG_IGN);
+ 
+   /* Cleanup files created by a previous 'bind'.  */
+-  unlink (_PATH_NSCDSOCKET);
++  {
++    struct sockaddr_un addr;
++    if (__nscd_get_socket_path (addr.sun_path, sizeof(addr.sun_path)) >= 0)
++      unlink (addr.sun_path);
++  }
+ 
+ #ifdef HAVE_INOTIFY
+   /* Use inotify to recognize changed files.  */
+@@ -540,8 +546,12 @@ nscd_open_socket (void)
+     return -1;
+ 
+   addr.sun_family = AF_UNIX;
+-  assert (sizeof (addr.sun_path) >= sizeof (_PATH_NSCDSOCKET));
+-  strcpy (addr.sun_path, _PATH_NSCDSOCKET);
++  if (__nscd_get_socket_path (addr.sun_path, sizeof(addr.sun_path)) < 0)
++    {
++      close (sock);
++      return -1;
++    }
++
+   if (connect (sock, (struct sockaddr *) &addr, sizeof (addr)) < 0)
+     {
+       close (sock);
+@@ -556,10 +566,13 @@ nscd_open_socket (void)
+ void
+ termination_handler (int signum)
+ {
++  struct sockaddr_un addr;
++
+   close_sockets ();
+ 
+   /* Clean up the file created by 'bind'.  */
+-  unlink (_PATH_NSCDSOCKET);
++  if (__nscd_get_socket_path (addr.sun_path, sizeof(addr.sun_path)) >= 0)
++    unlink (addr.sun_path);
+ 
+   /* Clean up pid file.  */
+   unlink (_PATH_NSCDPID);
+diff --git a/nscd/nscd_helper.c b/nscd/nscd_helper.c
+index 8e66fa2548e87c9b24cade41339c83f4cef7f2cf..567a7fcbadc0bb7a51f1ca2c4ab2b7d2e37caa2e 100644
+--- a/nscd/nscd_helper.c
++++ b/nscd/nscd_helper.c
+@@ -162,6 +162,19 @@ __readvall (int fd, const struct iovec *iov, int iovcnt)
+   return ret;
+ }
+ 
++static int nscd_get_socket_path(char *buf, size_t bufsiz)
++{
++  const char *ext_nscd_socket_path = getenv ("NSCD_SOCKET_PATH");
++  if (ext_nscd_socket_path) {
++    int len = strlen(ext_nscd_socket_path);
++    strncpy (buf, ext_nscd_socket_path, bufsiz);
++    if (len >= bufsiz) return -1;
++    return 0;
++  }
++  strncpy (buf, _PATH_NSCDSOCKET, bufsiz);
++  if (sizeof(_PATH_NSCDSOCKET) >= bufsiz) return -1;
++  return 0;
++}
+ 
+ static int
+ open_socket (request_type type, const char *key, size_t keylen)
+@@ -181,7 +194,8 @@ open_socket (request_type type, const char *key, size_t keylen)
+ 
+   struct sockaddr_un sun;
+   sun.sun_family = AF_UNIX;
+-  strcpy (sun.sun_path, _PATH_NSCDSOCKET);
++  if (nscd_get_socket_path (sun.sun_path, sizeof(sun.sun_path)) < 0) goto out;
++
+   if (__connect (sock, (struct sockaddr *) &sun, sizeof (sun)) < 0
+       && errno != EINPROGRESS)
+     goto out;
