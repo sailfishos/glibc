@@ -2,6 +2,7 @@
 #include <assert.h>
 #include <dirent.h>
 #include <errno.h>
+#include <endian.h>
 #include <fcntl.h>
 #include <locale.h>
 #include <stdarg.h>
