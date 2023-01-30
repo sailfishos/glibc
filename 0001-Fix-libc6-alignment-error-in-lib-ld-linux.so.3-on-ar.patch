@@ -11,18 +11,18 @@ https://sourceware.org/legacy-ml/crossgcc/2009-11/msg00008.html
  1 file changed, 11 insertions(+), 2 deletions(-)
 
 diff --git a/sysdeps/arm/dl-machine.h b/sysdeps/arm/dl-machine.h
-index 7a2f9d9b782e321dc26f117ea9719eb2191a1ccf..87f1bccb5615f54803f028316c5390874ec1ceb3 100644
+index 9186831b..90c79d68 100644
 --- a/sysdeps/arm/dl-machine.h
 +++ b/sysdeps/arm/dl-machine.h
-@@ -626,13 +626,22 @@ elf_machine_rela (struct link_map *map, const Elf32_Rela *reloc,
+@@ -451,13 +451,22 @@ elf_machine_rel (struct link_map *map, struct r_scope_elem *scope[],
  }
- # endif
+ 
  
 +union arm_unaligned_data {
 +  Elf32_Addr l_addr;
 +} __attribute__ ((packed));
 +
- auto inline void
+ static inline void
  __attribute__ ((always_inline))
  elf_machine_rel_relative (Elf32_Addr l_addr, const Elf32_Rel *reloc,
  			  void *const reloc_addr_arg)
@@ -38,4 +38,4 @@ index 7a2f9d9b782e321dc26f117ea9719eb2191a1ccf..87f1bccb5615f54803f028316c539087
 +  }
  }
  
- # ifndef RTLD_BOOTSTRAP
+ 

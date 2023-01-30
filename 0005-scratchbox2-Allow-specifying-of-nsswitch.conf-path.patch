@@ -1,0 +1,44 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Bj=C3=B6rn=20Bidar?= <bjorn.bidar@jolla.com>
+Date: Tue, 31 Aug 2021 01:51:17 +0300
+Subject: [PATCH] (scratchbox2) Allow specifying of nsswitch.conf path
+
+This patch makes location of the /etc/nsswitch.conf file
+to be run-time configurable via an environment variable.
+
+This is needed for correct operation with Scratchbox 2.
+Without this, the sb2-virtualized environment will
+always read /etc/nsswitch.conf from the host.
+---
+ nss/nss_database.c | 11 ++++++++++-
+ 1 file changed, 10 insertions(+), 1 deletion(-)
+
+diff --git a/nss/nss_database.c b/nss/nss_database.c
+index efe77aea..80e99ead 100644
+--- a/nss/nss_database.c
++++ b/nss/nss_database.c
+@@ -28,6 +28,7 @@
+ #include <netdb.h>
+ #include <stdio_ext.h>
+ #include <string.h>
++#include <unistd.h> /* __libc_enable_secure */
+ 
+ struct nss_database_state
+ {
+@@ -303,7 +304,15 @@ static bool
+ nss_database_reload (struct nss_database_data *staging,
+                      struct file_change_detection *initial)
+ {
+-  FILE *fp = fopen (_PATH_NSSWITCH_CONF, "rce");
++  const char *ext_nss_config_file = NULL;
++  if (__libc_enable_secure == 0)
++  {
++    ext_nss_config_file = getenv ("NSSWITCH_CONF_PATH");
++  }
++  /* Open config file.  */
++  FILE *fp = fopen (ext_nss_config_file ?
++    ext_nss_config_file : _PATH_NSSWITCH_CONF, "rce");
++
+   if (fp == NULL)
+     switch (errno)
+       {
