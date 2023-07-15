@@ -1,15 +1,15 @@
-%global glibcsrcdir glibc-2.36
+%global glibcsrcdir glibc-2.37
 # Default: Always disable the benchtests.
 %bcond_with benchtests
 
 Name: glibc
 
 Summary: GNU C library shared libraries
-Version: 2.36+git1
+Version: 2.37+git1
 Release: 0
 License: LGPLv2+ and LGPLv2+ with exceptions and GPLv2+
 URL: http://www.gnu.org/software/libc/
-Source0: glibc-2.36.tar.xz
+Source0: glibc-2.37.tar.xz
 Source1: build-locale-archive.c
 
 Patch1: 0001-Fix-libc6-alignment-error-in-lib-ld-linux.so.3-on-ar.patch

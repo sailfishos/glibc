@@ -29,7 +29,7 @@ diff --git a/elf/dl-usage.c b/elf/dl-usage.c
 index 01cb6f4f07..ce2e1e93e2 100644
 --- a/elf/dl-usage.c
 +++ b/elf/dl-usage.c
-@@ -254,6 +254,7 @@ setting environment variables (which would be inherited by subprocesses).\n\
+@@ -194,6 +194,7 @@ setting environment variables (which would be inherited by subprocesses).\n\
                          only search built-in subdirectories if in LIST\n\
    --inhibit-rpath LIST  ignore RUNPATH and RPATH information in object names\n\
                          in LIST\n\
@@ -41,7 +41,7 @@ diff --git a/elf/rtld.c b/elf/rtld.c
 index e33175041a..6c8e88241c 100644
 --- a/elf/rtld.c
 +++ b/elf/rtld.c
-@@ -1384,6 +1384,7 @@ dl_main (const ElfW(Phdr) *phdr,
+@@ -1382,6 +1382,7 @@ dl_main (const ElfW(Phdr) *phdr,
    const char *ld_so_name = _dl_argv[0];
    if (*user_entry == (ElfW(Addr)) ENTRY_POINT)
      {
@@ -49,7 +49,7 @@ index e33175041a..6c8e88241c 100644
        /* Ho ho.  We are not the program interpreter!  We are the program
  	 itself!  This means someone ran ld.so as a command.  Well, that
  	 might be convenient to do sometimes.  We support it by
-@@ -1471,6 +1472,12 @@ dl_main (const ElfW(Phdr) *phdr,
+@@ -1469,6 +1470,12 @@ dl_main (const ElfW(Phdr) *phdr,
  	    _dl_argc -= 2;
  	    _dl_argv += 2;
  	  }

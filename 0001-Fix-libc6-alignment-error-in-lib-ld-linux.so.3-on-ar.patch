@@ -14,9 +14,9 @@ diff --git a/sysdeps/arm/dl-machine.h b/sysdeps/arm/dl-machine.h
 index 6a422713bd..1cc5afea4a 100644
 --- a/sysdeps/arm/dl-machine.h
 +++ b/sysdeps/arm/dl-machine.h
-@@ -538,13 +538,22 @@ elf_machine_rela (struct link_map *map, struct r_scope_elem *scope[],
+@@ -451,13 +451,22 @@
  }
- # endif
+ 
  
 +union arm_unaligned_data {
 +  Elf32_Addr l_addr;
@@ -38,4 +38,4 @@ index 6a422713bd..1cc5afea4a 100644
 +  }
  }
  
- # ifndef RTLD_BOOTSTRAP
+ 

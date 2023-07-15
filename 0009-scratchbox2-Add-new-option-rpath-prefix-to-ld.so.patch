@@ -145,7 +145,7 @@ diff --git a/elf/dl-support.c b/elf/dl-support.c
 index 6efff24d33..7cd92b58ec 100644
 --- a/elf/dl-support.c
 +++ b/elf/dl-support.c
-@@ -70,6 +70,9 @@ const char *_dl_inhibit_rpath;
+@@ -71,6 +71,9 @@ const char *_dl_inhibit_rpath;
  /* flag: don't search default directories if set. */
  int _dl_no_default_dirs = 0;
  
@@ -159,7 +159,7 @@ diff --git a/elf/dl-usage.c b/elf/dl-usage.c
 index ce2e1e93e2..b5cd2f95f7 100644
 --- a/elf/dl-usage.c
 +++ b/elf/dl-usage.c
-@@ -248,6 +248,8 @@ setting environment variables (which would be inherited by subprocesses).\n\
+@@ -188,6 +188,8 @@ setting environment variables (which would be inherited by subprocesses).\n\
    --inhibit-cache       Do not use " LD_SO_CACHE "\n\
    --library-path PATH   use given PATH instead of content of the environment\n\
                          variable LD_LIBRARY_PATH\n\
@@ -172,7 +172,7 @@ diff --git a/elf/rtld.c b/elf/rtld.c
 index 6c8e88241c..bea85d12c7 100644
 --- a/elf/rtld.c
 +++ b/elf/rtld.c
-@@ -1456,6 +1456,14 @@ dl_main (const ElfW(Phdr) *phdr,
+@@ -1454,6 +1454,14 @@ dl_main (const ElfW(Phdr) *phdr,
  	  {
  	    GLRO(dl_inhibit_rpath) = _dl_argv[2];
  
@@ -191,7 +191,7 @@ diff --git a/sysdeps/generic/ldsodefs.h b/sysdeps/generic/ldsodefs.h
 index 378d4938c6..af8818cca1 100644
 --- a/sysdeps/generic/ldsodefs.h
 +++ b/sysdeps/generic/ldsodefs.h
-@@ -694,6 +694,12 @@ struct rtld_global_ro
+@@ -697,6 +697,12 @@ struct rtld_global_ro
    /* List of auditing interfaces.  */
    struct audit_ifaces *_dl_audit;
    unsigned int _dl_naudit;

@@ -59,7 +59,7 @@ diff --git a/elf/dl-support.c b/elf/dl-support.c
 index 4af0b5b2ce..6efff24d33 100644
 --- a/elf/dl-support.c
 +++ b/elf/dl-support.c
-@@ -67,6 +67,9 @@ const char *_dl_profile_output;
+@@ -68,6 +68,9 @@ const char *_dl_profile_output;
     ignored.  */
  const char *_dl_inhibit_rpath;
  
@@ -73,7 +73,7 @@ diff --git a/elf/dl-usage.c b/elf/dl-usage.c
 index 98d8c98948..01cb6f4f07 100644
 --- a/elf/dl-usage.c
 +++ b/elf/dl-usage.c
-@@ -244,6 +244,7 @@ setting environment variables (which would be inherited by subprocesses).\n\
+@@ -184,6 +184,7 @@ setting environment variables (which would be inherited by subprocesses).\n\
    --list                list all dependencies and how they are resolved\n\
    --verify              verify that given object really is a dynamically linked\n\
                          object we can handle\n\
@@ -85,7 +85,7 @@ diff --git a/elf/rtld.c b/elf/rtld.c
 index cbbaf4a331..e33175041a 100644
 --- a/elf/rtld.c
 +++ b/elf/rtld.c
-@@ -1434,6 +1434,13 @@ dl_main (const ElfW(Phdr) *phdr,
+@@ -1432,6 +1432,13 @@ dl_main (const ElfW(Phdr) *phdr,
  	    --_dl_argc;
  	    ++_dl_argv;
  	  }
@@ -99,7 +99,7 @@ index cbbaf4a331..e33175041a 100644
  	else if (! strcmp (_dl_argv[1], "--library-path")
  		 && _dl_argc > 2)
  	  {
-@@ -2819,3 +2826,4 @@ print_statistics (const hp_timing_t *rtld_total_timep)
+@@ -2817,3 +2824,4 @@ print_statistics (const hp_timing_t *rtld_total_timep)
  			 load_time, *rtld_total_timep);
  #endif
  }
@@ -108,7 +108,7 @@ diff --git a/sysdeps/generic/ldsodefs.h b/sysdeps/generic/ldsodefs.h
 index 050a3032de..378d4938c6 100644
 --- a/sysdeps/generic/ldsodefs.h
 +++ b/sysdeps/generic/ldsodefs.h
-@@ -652,6 +652,8 @@ struct rtld_global_ro
+@@ -655,6 +655,8 @@ struct rtld_global_ro
  
    EXTERN enum dso_sort_algorithm _dl_dso_sort_algo;
  

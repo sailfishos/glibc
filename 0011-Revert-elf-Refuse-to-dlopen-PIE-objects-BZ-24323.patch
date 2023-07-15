@@ -16,7 +16,7 @@ diff --git a/elf/Makefile b/elf/Makefile
 index fd77d0c7c8..5b76037a42 100644
 --- a/elf/Makefile
 +++ b/elf/Makefile
-@@ -1023,9 +1023,8 @@ test-xfail-tst-protected1b = yes
+@@ -1008,9 +1008,8 @@ test-xfail-tst-protected1b = yes
  endif
  ifeq (yesyes,$(have-fpie)$(build-shared))
  modules-names += tst-piemod1
@@ -70,7 +70,7 @@ index 39db7916d7..0000000000
 +++ /dev/null
 @@ -1,49 +0,0 @@
 -/* dlopen test for PIE objects.
--   Copyright (C) 2019-2022 Free Software Foundation, Inc.
+-   Copyright (C) 2019-2023 Free Software Foundation, Inc.
 -   This file is part of the GNU C Library.
 -
 -   The GNU C Library is free software; you can redistribute it and/or
