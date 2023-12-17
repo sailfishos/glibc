@@ -23,8 +23,8 @@ const char *locar_file = PREFIX "/lib/locale/locale-archive";
 const char *tmpl_file = PREFIX "/lib/locale/locale-archive.tmpl";
 const char *loc_path = PREFIX "/lib/locale/";
 /* Flags set by `--verbose` option.  */
-int be_quiet = 1;
-int verbose = 0;
+extern int be_quiet;
+extern int verbose;
 int max_locarchive_open_retry = 10;
 const char *output_prefix;
 
@@ -647,6 +647,9 @@ int main (int argc, char *argv[])
   struct locarhandle tmpl_ah;
   char *new_locar_fname = NULL;
   size_t loc_path_len = strlen (loc_path);
+
+  be_quiet = 1;
+  verbose = 0;
 
   while (1)
     {
