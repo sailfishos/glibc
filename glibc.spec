@@ -494,22 +494,6 @@ rm %{glibc_sysroot}%{_libdir}/libc_malloc_debug.so
 # Strip all of the installed object files.
 strip -g %{glibc_sysroot}%{_libdir}/*.o
 
-###############################################################################
-# Rebuild libpthread.a using --whole-archive to ensure all of libpthread
-# is included in a static link. This prevents any problems when linking
-# statically, using parts of libpthread, and other necessary parts not
-# being included. Upstream has decided that this is the wrong approach to
-# this problem and that the full set of dependencies should be resolved
-# such that static linking works and produces the most minimally sized
-# static application possible.
-###############################################################################
-pushd %{glibc_sysroot}%{_prefix}/%{_lib}/
-$GCC -r -nostdlib -o libpthread.o -Wl,--whole-archive ./libpthread.a
-rm libpthread.a
-ar rcs libpthread.a libpthread.o
-rm libpthread.o
-popd 
-
 ##############################################################################
 # Build an empty libpthread_nonshared.a for compatiliby with applications
 # that have old linker scripts that reference this file. We ship this only
