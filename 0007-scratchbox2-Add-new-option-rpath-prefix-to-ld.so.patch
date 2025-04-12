@@ -1,0 +1,206 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Bj=C3=B6rn=20Bidar?= <bjorn.bidar@jolla.com>
+Date: Tue, 31 Aug 2021 01:58:49 +0300
+Subject: [PATCH] (scratchbox2) Add new option "--rpath-prefix" to ld.so
+
+This patch adds a new option "--rpath-prefix" to ld.so.
+This makes it possible to add a prefix to all RPATH and
+RUNPATH options from binaries and libraries; that way
+Scratchbox 2 can run also host-compatible binaries that
+contain such options (without this, the RPATHs would
+refer to the libraries on the host system and not to
+the correct libraries under 'target_root').
+
+Note that this patch causes no harm in the default case, i.e.
+when the dynamic linker is started "automatically" by the kernel.
+---
+ elf/dl-load.c              | 63 ++++++++++++++++++++++++++++++--------
+ elf/dl-support.c           |  3 ++
+ elf/dl-usage.c             |  2 ++
+ elf/rtld.c                 |  8 +++++
+ sysdeps/generic/ldsodefs.h |  6 ++++
+ 5 files changed, 70 insertions(+), 12 deletions(-)
+
+diff --git a/elf/dl-load.c b/elf/dl-load.c
+index a0e105a5a8..3217935390 100644
+--- a/elf/dl-load.c
++++ b/elf/dl-load.c
+@@ -440,7 +440,8 @@ static size_t max_dirnamelen;
+ 
+ static struct r_search_path_elem **
+ fillin_rpath (char *rpath, struct r_search_path_elem **result, const char *sep,
+-	      const char *what, const char *where, struct link_map *l)
++	      const char *what, const char *where, struct link_map *l,
++	      const char *rpath_prefix)
+ {
+   char *cp;
+   size_t nelems = 0;
+@@ -480,9 +481,24 @@ fillin_rpath (char *rpath, struct r_search_path_elem **result, const char *sep,
+ 	}
+ 
+       /* See if this directory is already known.  */
+-      for (dirp = GL(dl_all_dirs); dirp != NULL; dirp = dirp->next)
+-	if (dirp->dirnamelen == len && memcmp (cp, dirp->dirname, len) == 0)
+-	  break;
++      if (__builtin_expect (rpath_prefix != NULL, 0)
++	  && (memcmp (cp, "/home/", 6) != 0))
++	{
++	  /* has rpath_prefix */
++	  size_t rpath_prefix_len = strlen (rpath_prefix);
++
++	  for (dirp = GL(dl_all_dirs); dirp != NULL; dirp = dirp->next)
++	    if (dirp->dirnamelen == (rpath_prefix_len+len) &&
++		(memcmp (cp, rpath_prefix, rpath_prefix_len) == 0) &&
++		(memcmp (cp+rpath_prefix_len, dirp->dirname, len) == 0))
++	      break;
++	}
++      else
++	{
++	  for (dirp = GL(dl_all_dirs); dirp != NULL; dirp = dirp->next)
++	    if (dirp->dirnamelen == len && memcmp (cp, dirp->dirname, len) == 0)
++	      break;
++	}
+ 
+       if (dirp != NULL)
+ 	{
+@@ -500,22 +516,44 @@ fillin_rpath (char *rpath, struct r_search_path_elem **result, const char *sep,
+ 	  size_t cnt;
+ 	  enum r_dir_status init_val;
+ 	  size_t where_len = where ? strlen (where) + 1 : 0;
++	  size_t rpath_prefix_len = 0;
++
++	  if (__builtin_expect (rpath_prefix != NULL, 0)
++	      && (memcmp (cp, "/home/", 6) != 0)
++	      && !__libc_enable_secure)
++	    {
++		rpath_prefix_len = strlen (rpath_prefix);
++		if (*cp != '/') rpath_prefix_len++; /* need to add a '/' */
++	    }
+ 
+ 	  /* It's a new directory.  Create an entry and add it.  */
+ 	  dirp = (struct r_search_path_elem *)
+ 	    malloc (sizeof (*dirp) + ncapstr * sizeof (enum r_dir_status)
+-		    + where_len + len + 1);
++		    + where_len + rpath_prefix_len + len + 1);
+ 	  if (dirp == NULL)
+ 	    _dl_signal_error (ENOMEM, NULL, NULL,
+ 			      N_("cannot create cache for search path"));
+ 
+ 	  dirp->dirname = ((char *) dirp + sizeof (*dirp)
+ 			   + ncapstr * sizeof (enum r_dir_status));
+-	  *((char *) __mempcpy ((char *) dirp->dirname, cp, len)) = '\0';
+-	  dirp->dirnamelen = len;
++	  if (rpath_prefix_len == 0)
++	    {
++		  *((char *) __mempcpy ((char *) dirp->dirname, cp, len)) = '\0';
++	    }
++	  else
++	    {
++		char *prefixend;
++
++		prefixend = (char *) __mempcpy ((char *) dirp->dirname,
++				rpath_prefix, rpath_prefix_len);
++		if (*cp != '/')
++		  prefixend[-1] = '/'; /* replace \0 */
++		*((char *) __mempcpy (prefixend, cp, len)) = '\0';
++	    }
++	  dirp->dirnamelen = len + rpath_prefix_len;
+ 
+-	  if (len > max_dirnamelen)
+-	    max_dirnamelen = len;
++	  if ((len + rpath_prefix_len) > max_dirnamelen)
++	    max_dirnamelen = len + rpath_prefix_len;
+ 
+ 	  /* We have to make sure all the relative directories are
+ 	     never ignored.  The current directory might change and
+@@ -526,7 +564,8 @@ fillin_rpath (char *rpath, struct r_search_path_elem **result, const char *sep,
+ 
+ 	  dirp->what = what;
+ 	  if (__glibc_likely (where != NULL))
+-	    dirp->where = memcpy ((char *) dirp + sizeof (*dirp) + len + 1
++	    dirp->where = memcpy ((char *) dirp + sizeof (*dirp)
++				  + rpath_prefix_len + len + 1
+ 				  + (ncapstr * sizeof (enum r_dir_status)),
+ 				  where, where_len);
+ 	  else
+@@ -625,7 +664,7 @@ decompose_rpath (struct r_search_path_struct *sps,
+       _dl_signal_error (ENOMEM, NULL, NULL, errstring);
+     }
+ 
+-  fillin_rpath (copy, result, ":", what, where, l);
++  fillin_rpath (copy, result, ":", what, where, l, GLRO(dl_rpath_prefix));
+ 
+   /* Free the copied RPATH string.  `fillin_rpath' make own copies if
+      necessary.  */
+@@ -816,7 +855,7 @@ _dl_init_paths (const char *llp, const char *source,
+ 	}
+ 
+       (void) fillin_rpath (llp_tmp, __rtld_env_path_list.dirs, ":;",
+-			   source, NULL, l);
++			   source, NULL, l, NULL/*no prefix*/);
+ 
+       if (__rtld_env_path_list.dirs[0] == NULL)
+ 	{
+diff --git a/elf/dl-support.c b/elf/dl-support.c
+index e24b6012e4..359b898fcb 100644
+--- a/elf/dl-support.c
++++ b/elf/dl-support.c
+@@ -68,6 +68,9 @@ const char *_dl_inhibit_rpath;
+ /* flag: don't search default directories if set. */
+ int _dl_no_default_dirs = 0;
+ 
++/* prefix to be added to all RUNPATHs and RPATHs */
++const char *_dl_rpath_prefix = NULL;
++
+ /* The map for the object we will profile.  */
+ struct link_map *_dl_profile_map;
+ 
+diff --git a/elf/dl-usage.c b/elf/dl-usage.c
+index 8c07084f14..518e312de0 100644
+--- a/elf/dl-usage.c
++++ b/elf/dl-usage.c
+@@ -189,6 +189,8 @@ setting environment variables (which would be inherited by subprocesses).\n\
+   --inhibit-cache       Do not use " LD_SO_CACHE "\n\
+   --library-path PATH   use given PATH instead of content of the environment\n\
+                         variable LD_LIBRARY_PATH\n\
++  --rpath-prefix PREFIX add PREFIX to every RUNPATH and RPATH component\n\
++			unless it is a path under the /home tree\n\
+   --glibc-hwcaps-prepend LIST\n\
+                         search glibc-hwcaps subdirectories in LIST\n\
+   --glibc-hwcaps-mask LIST\n\
+diff --git a/elf/rtld.c b/elf/rtld.c
+index 24bdb75f43..b8fe109a5d 100644
+--- a/elf/rtld.c
++++ b/elf/rtld.c
+@@ -1399,6 +1399,14 @@ dl_main (const ElfW(Phdr) *phdr,
+ 	  {
+ 	    GLRO(dl_inhibit_rpath) = _dl_argv[2];
+ 
++	    _dl_argc -= 2;
++	    _dl_argv += 2;
++	  }
++	else if (! strcmp (_dl_argv[1], "--rpath-prefix")
++		 && _dl_argc > 2)
++	  {
++	    GLRO(dl_rpath_prefix) = _dl_argv[2];
++
+ 	    _dl_argc -= 2;
+ 	    _dl_argv += 2;
+ 	  }
+diff --git a/sysdeps/generic/ldsodefs.h b/sysdeps/generic/ldsodefs.h
+index 243a4fbba4..7ef60599a4 100644
+--- a/sysdeps/generic/ldsodefs.h
++++ b/sysdeps/generic/ldsodefs.h
+@@ -672,6 +672,12 @@ struct rtld_global_ro
+   /* List of auditing interfaces.  */
+   struct audit_ifaces *_dl_audit;
+   unsigned int _dl_naudit;
++#endif
++
++  /* prefix for RPATH + RUNPATH components.  */
++  EXTERN const char *_dl_rpath_prefix;
++
++#ifdef SHARED
+ };
+ # define __rtld_global_attribute__
+ # if IS_IN (rtld)

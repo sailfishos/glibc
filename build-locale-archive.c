@@ -2,6 +2,7 @@
 #include <assert.h>
 #include <dirent.h>
 #include <errno.h>
+#include <endian.h>
 #include <fcntl.h>
 #include <locale.h>
 #include <stdarg.h>
@@ -16,7 +17,7 @@
 #include "./locale/hashval.h"
 #define __LC_LAST 13
 #include "./locale/locarchive.h"
-#include "./crypt/md5.h"
+#include "./locale/programs/md5.h"
 
 const char *alias_file = DATADIR "/locale/locale.alias";
 const char *locar_file = PREFIX "/lib/locale/locale-archive";
