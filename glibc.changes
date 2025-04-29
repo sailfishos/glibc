@@ -1,3 +1,6 @@
+* Thu Jul 10 2025 Pami Ketolainen <pami.ketolainen@jolla.com> - 2.41+git2
+- Fix update order regarding libgcc. JB#63419
+
 * Sat Apr 12 2025 Matti Lehtimäki <matti.lehtimaki@jolla.com> - 2.41+git1
 - Update to version 2.41. Fixes JB#49501
 

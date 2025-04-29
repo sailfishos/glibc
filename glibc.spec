@@ -5,7 +5,7 @@
 Name: glibc
 
 Summary: GNU C library shared libraries
-Version: 2.41+git1
+Version: 2.41+git2
 Release: 0
 License: LGPLv2+ and LGPLv2+ with exceptions and GPLv2+
 URL: http://www.gnu.org/software/libc/
@@ -34,8 +34,6 @@ Provides: ld-linux.so.3(GLIBC_2.4)
 %endif
 
 BuildRequires: xz tar
-# Require libgcc in case some program calls pthread_cancel in its %%post
-Requires(pre): libgcc
 BuildRequires:  zlib-devel texinfo
 BuildRequires: sed >= 3.95, libcap-devel, gettext
 BuildRequires: gawk,  util-linux
