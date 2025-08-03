@@ -23,10 +23,10 @@ the "scratchboxed" environment but are present in the host).
  5 files changed, 18 insertions(+), 3 deletions(-)
 
 diff --git a/elf/dl-load.c b/elf/dl-load.c
-index f905578a65..a0e105a5a8 100644
+index 7355eef8e760ee9a2d07b2c8e166d91d72f578e2..402f1cab3f134bc0b1d5122d2d8ee4a16b7cf785 100644
 --- a/elf/dl-load.c
 +++ b/elf/dl-load.c
-@@ -2060,7 +2060,8 @@ _dl_map_object (struct link_map *loader, const char *name,
+@@ -2065,7 +2065,8 @@ _dl_map_new_object (struct link_map *loader, const char *name,
  
  	      /* If the loader has the DF_1_NODEFLIB flag set we must not
  		 use a cache entry from any of these directories.  */
@@ -36,7 +36,7 @@ index f905578a65..a0e105a5a8 100644
  		{
  		  const char *dirp = system_dirs;
  		  unsigned int cnt = 0;
-@@ -2099,7 +2100,8 @@ _dl_map_object (struct link_map *loader, const char *name,
+@@ -2104,7 +2105,8 @@ _dl_map_new_object (struct link_map *loader, const char *name,
        /* Finally, try the default path.  */
        if (fd == -1
  	  && ((l = loader ?: GL(dl_ns)[nsid]._ns_loaded) == NULL
@@ -46,7 +46,7 @@ index f905578a65..a0e105a5a8 100644
  	  && __rtld_search_dirs.dirs != (void *) -1)
  	fd = open_path (name, namelen, mode, &__rtld_search_dirs,
  			&realname, &fb, l, LA_SER_DEFAULT, &found_other_class);
-@@ -2279,7 +2281,7 @@ _dl_rtld_di_serinfo (struct link_map *loader, Dl_serinfo *si, bool counting)
+@@ -2295,7 +2297,7 @@ _dl_rtld_di_serinfo (struct link_map *loader, Dl_serinfo *si, bool counting)
       a way to indicate that in the results for Dl_serinfo.  */
  
    /* Finally, try the default path.  */
@@ -56,10 +56,10 @@ index f905578a65..a0e105a5a8 100644
  
    if (counting)
 diff --git a/elf/dl-support.c b/elf/dl-support.c
-index a7d5a5e8ab..e24b6012e4 100644
+index 7505e149e260e3e8955d40662b5de897533b7454..2c173923fffad8b2666f74d9c24c35da1239e3a4 100644
 --- a/elf/dl-support.c
 +++ b/elf/dl-support.c
-@@ -65,6 +65,9 @@ int _dl_verbose;
+@@ -64,6 +64,9 @@ int _dl_verbose;
     ignored.  */
  const char *_dl_inhibit_rpath;
  
@@ -70,10 +70,10 @@ index a7d5a5e8ab..e24b6012e4 100644
  struct link_map *_dl_profile_map;
  
 diff --git a/elf/dl-usage.c b/elf/dl-usage.c
-index c6d13ac2ee..8c07084f14 100644
+index a5bc1cb4ad56a3be3d25a07ca720896692198774..3dacc8c5c86573116074f7b2ee055d3c5dde3449 100644
 --- a/elf/dl-usage.c
 +++ b/elf/dl-usage.c
-@@ -185,6 +185,7 @@ setting environment variables (which would be inherited by subprocesses).\n\
+@@ -184,6 +184,7 @@ setting environment variables (which would be inherited by subprocesses).\n\
    --list                list all dependencies and how they are resolved\n\
    --verify              verify that given object really is a dynamically linked\n\
                          object we can handle\n\
@@ -82,10 +82,10 @@ index c6d13ac2ee..8c07084f14 100644
    --library-path PATH   use given PATH instead of content of the environment\n\
                          variable LD_LIBRARY_PATH\n\
 diff --git a/elf/rtld.c b/elf/rtld.c
-index 00bec15316..24bdb75f43 100644
+index 29e7a4ddfa49e100f8bb1b7632bfa18d0e79cfa5..7946cc47f40e306347ff83cf3b89d5b760380be8 100644
 --- a/elf/rtld.c
 +++ b/elf/rtld.c
-@@ -1378,6 +1378,13 @@ dl_main (const ElfW(Phdr) *phdr,
+@@ -1428,6 +1428,13 @@ dl_main (const ElfW(Phdr) *phdr,
  	    --_dl_argc;
  	    ++_dl_argv;
  	  }
@@ -100,10 +100,10 @@ index 00bec15316..24bdb75f43 100644
  		 && _dl_argc > 2)
  	  {
 diff --git a/sysdeps/generic/ldsodefs.h b/sysdeps/generic/ldsodefs.h
-index e871f27ff2..243a4fbba4 100644
+index 0fcc14999c25a10cdabb1c4eb1ebade89ad948cd..a4d2acd8fa59ffb3208fcbc1979a476d7eda1f45 100644
 --- a/sysdeps/generic/ldsodefs.h
 +++ b/sysdeps/generic/ldsodefs.h
-@@ -630,6 +630,8 @@ struct rtld_global_ro
+@@ -635,6 +635,8 @@ struct rtld_global_ro
  
    EXTERN enum dso_sort_algorithm _dl_dso_sort_algo;
  

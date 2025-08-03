@@ -17,10 +17,10 @@ This reverts commit 2c75b545de6fe3c44138799c68217a94bc669a88.
  delete mode 100644 elf/tst-dlopen-tlsmodid-pie.c
 
 diff --git a/elf/Makefile b/elf/Makefile
-index 4b1d0d8741..17aea99d79 100644
+index 01cc51636eee412b5877df183038504cdb2269e1..f5b899dc4aa5924bb1062b9f5bb891d8c23ff92f 100644
 --- a/elf/Makefile
 +++ b/elf/Makefile
-@@ -1132,15 +1132,10 @@ endif
+@@ -1166,15 +1166,10 @@ endif
  ifeq (yesyes,$(have-fpie)$(build-shared))
  modules-names += tst-piemod1
  tests += \
@@ -36,7 +36,7 @@ index 4b1d0d8741..17aea99d79 100644
    tst-pie1 \
    tst-pie2 \
    # tests-pie
-@@ -2078,7 +2073,6 @@ CFLAGS-tst-pie-address.c += $(pie-ccflag)
+@@ -2154,7 +2149,6 @@ CFLAGS-tst-pie-address.c += $(pie-ccflag)
  
  $(objpfx)tst-piemod1.so: $(libsupport)
  $(objpfx)tst-pie1: $(objpfx)tst-piemod1.so
@@ -45,10 +45,10 @@ index 4b1d0d8741..17aea99d79 100644
  ifeq (yes,$(build-shared))
  # NB: Please keep cet-built-dso in sysdeps/x86/Makefile in sync with
 diff --git a/elf/dl-load.c b/elf/dl-load.c
-index 3217935390..0217d9a40f 100644
+index a674354dcb77ecef4c7fbcb2b29221d19ab11f96..19252b49f9f33477ef66ed4a0e3efacc5d6c407c 100644
 --- a/elf/dl-load.c
 +++ b/elf/dl-load.c
-@@ -1317,19 +1317,22 @@ _dl_map_object_from_fd (const char *name, const char *origname, int fd,
+@@ -1311,19 +1311,22 @@ _dl_map_object_from_fd (const char *name, const char *origname, int fd,
    elf_get_dynamic_info (l, false, false);
  
    /* Make sure we are not dlopen'ing an object that has the
@@ -86,12 +86,12 @@ index 3217935390..0217d9a40f 100644
      {
 diff --git a/elf/tst-dlopen-pie.c b/elf/tst-dlopen-pie.c
 deleted file mode 100644
-index be482c8a1d..0000000000
+index 7b138244f8ec831b89b74c7292fd5f7e57df3e37..0000000000000000000000000000000000000000
 --- a/elf/tst-dlopen-pie.c
 +++ /dev/null
 @@ -1,49 +0,0 @@
 -/* dlopen test for PIE objects.
--   Copyright (C) 2019-2025 Free Software Foundation, Inc.
+-   Copyright (C) 2019-2026 Free Software Foundation, Inc.
 -   This file is part of the GNU C Library.
 -
 -   The GNU C Library is free software; you can redistribute it and/or
@@ -141,12 +141,12 @@ index be482c8a1d..0000000000
 -#include <support/test-driver.c>
 diff --git a/elf/tst-dlopen-self-pie.c b/elf/tst-dlopen-self-pie.c
 deleted file mode 100644
-index 3494e1343f..0000000000
+index d8c76573c4dc48bd4b2c15c6bc9614f032bb9ba9..0000000000000000000000000000000000000000
 --- a/elf/tst-dlopen-self-pie.c
 +++ /dev/null
 @@ -1,19 +0,0 @@
 -/* Check that dlopen'ing the executable itself fails (bug 24900); PIE version.
--   Copyright (C) 2014-2025 Free Software Foundation, Inc.
+-   Copyright (C) 2014-2026 Free Software Foundation, Inc.
 -   This file is part of the GNU C Library.
 -
 -   The GNU C Library is free software; you can redistribute it and/or
@@ -166,12 +166,12 @@ index 3494e1343f..0000000000
 -#include "tst-dlopen-self.c"
 diff --git a/elf/tst-dlopen-tlsmodid-pie.c b/elf/tst-dlopen-tlsmodid-pie.c
 deleted file mode 100644
-index 67ebcc55b6..0000000000
+index b5ec618041da606a5a12caca450ab1236891a881..0000000000000000000000000000000000000000
 --- a/elf/tst-dlopen-tlsmodid-pie.c
 +++ /dev/null
 @@ -1,20 +0,0 @@
 -/* Test case for BZ #16634.  PIE version.
--   Copyright (C) 2014-2025 Free Software Foundation, Inc.
+-   Copyright (C) 2014-2026 Free Software Foundation, Inc.
 -   This file is part of the GNU C Library.
 -
 -   The GNU C Library is free software; you can redistribute it and/or
@@ -191,10 +191,10 @@ index 67ebcc55b6..0000000000
 -#define TST_DLOPEN_TLSMODID_PATH "tst-dlopen-self-pie"
 -#include "tst-dlopen-tlsmodid.h"
 diff --git a/include/elf.h b/include/elf.h
-index 14ed67ff67..ab76aafb1e 100644
+index 1424982bb59073b878f347e5e178ff4c22ec6782..2ab73c607ba88606aad55174e92bd85098d73c68 100644
 --- a/include/elf.h
 +++ b/include/elf.h
-@@ -23,7 +23,7 @@
+@@ -36,7 +36,7 @@
  # endif
  # define DT_1_SUPPORTED_MASK \
     (DF_1_NOW | DF_1_NODELETE | DF_1_INITFIRST | DF_1_NOOPEN \

@@ -1,0 +1,30 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Matti=20Lehtim=C3=A4ki?= <matti.lehtimaki@jolla.com>
+Date: Tue, 27 Jan 2026 15:51:19 +0200
+Subject: [PATCH] linux: Fix build without linux/openat2.h
+
+---
+ sysdeps/unix/sysv/linux/bits/openat2.h | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/sysdeps/unix/sysv/linux/bits/openat2.h b/sysdeps/unix/sysv/linux/bits/openat2.h
+index 454d7699e72eadf3b9682e2f18ef31ce6f8c9f1f..239b24b8eb447c2ce486cd4f335da20dcf7b51fb 100644
+--- a/sysdeps/unix/sysv/linux/bits/openat2.h
++++ b/sysdeps/unix/sysv/linux/bits/openat2.h
+@@ -21,6 +21,8 @@
+ #endif
+ 
+ #ifndef __glibc_has_open_how
++#ifndef _UAPI_LINUX_OPENAT2_H
++#define _UAPI_LINUX_OPENAT2_H
+ /* Arguments for how openat2 should open the target path.  */
+ struct open_how
+ {
+@@ -28,6 +30,7 @@ struct open_how
+   __uint64_t mode;
+   __uint64_t resolve;
+ };
++#endif /* _UAPI_LINUX_OPENAT2_H */
+ #endif
+ 
+ /* how->resolve flags for openat2. */

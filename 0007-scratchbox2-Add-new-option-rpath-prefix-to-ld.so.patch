@@ -22,7 +22,7 @@ when the dynamic linker is started "automatically" by the kernel.
  5 files changed, 70 insertions(+), 12 deletions(-)
 
 diff --git a/elf/dl-load.c b/elf/dl-load.c
-index a0e105a5a8..3217935390 100644
+index 402f1cab3f134bc0b1d5122d2d8ee4a16b7cf785..a674354dcb77ecef4c7fbcb2b29221d19ab11f96 100644
 --- a/elf/dl-load.c
 +++ b/elf/dl-load.c
 @@ -440,7 +440,8 @@ static size_t max_dirnamelen;
@@ -142,10 +142,10 @@ index a0e105a5a8..3217935390 100644
        if (__rtld_env_path_list.dirs[0] == NULL)
  	{
 diff --git a/elf/dl-support.c b/elf/dl-support.c
-index e24b6012e4..359b898fcb 100644
+index 2c173923fffad8b2666f74d9c24c35da1239e3a4..ede7c418345ae4d0cad1bab2b44892acd04763e4 100644
 --- a/elf/dl-support.c
 +++ b/elf/dl-support.c
-@@ -68,6 +68,9 @@ const char *_dl_inhibit_rpath;
+@@ -67,6 +67,9 @@ const char *_dl_inhibit_rpath;
  /* flag: don't search default directories if set. */
  int _dl_no_default_dirs = 0;
  
@@ -156,10 +156,10 @@ index e24b6012e4..359b898fcb 100644
  struct link_map *_dl_profile_map;
  
 diff --git a/elf/dl-usage.c b/elf/dl-usage.c
-index 8c07084f14..518e312de0 100644
+index 3dacc8c5c86573116074f7b2ee055d3c5dde3449..2373dc15e43646837f1f4dd281b5eecaa4b9574a 100644
 --- a/elf/dl-usage.c
 +++ b/elf/dl-usage.c
-@@ -189,6 +189,8 @@ setting environment variables (which would be inherited by subprocesses).\n\
+@@ -188,6 +188,8 @@ setting environment variables (which would be inherited by subprocesses).\n\
    --inhibit-cache       Do not use " LD_SO_CACHE "\n\
    --library-path PATH   use given PATH instead of content of the environment\n\
                          variable LD_LIBRARY_PATH\n\
@@ -169,10 +169,10 @@ index 8c07084f14..518e312de0 100644
                          search glibc-hwcaps subdirectories in LIST\n\
    --glibc-hwcaps-mask LIST\n\
 diff --git a/elf/rtld.c b/elf/rtld.c
-index 24bdb75f43..b8fe109a5d 100644
+index 7946cc47f40e306347ff83cf3b89d5b760380be8..af7300d082a41dd83c5b61111157615c4d8eb996 100644
 --- a/elf/rtld.c
 +++ b/elf/rtld.c
-@@ -1399,6 +1399,14 @@ dl_main (const ElfW(Phdr) *phdr,
+@@ -1449,6 +1449,14 @@ dl_main (const ElfW(Phdr) *phdr,
  	  {
  	    GLRO(dl_inhibit_rpath) = _dl_argv[2];
  
@@ -188,10 +188,10 @@ index 24bdb75f43..b8fe109a5d 100644
  	    _dl_argv += 2;
  	  }
 diff --git a/sysdeps/generic/ldsodefs.h b/sysdeps/generic/ldsodefs.h
-index 243a4fbba4..7ef60599a4 100644
+index a4d2acd8fa59ffb3208fcbc1979a476d7eda1f45..ad5fe781ba36a837a3d154eda64eb7151f0b422b 100644
 --- a/sysdeps/generic/ldsodefs.h
 +++ b/sysdeps/generic/ldsodefs.h
-@@ -672,6 +672,12 @@ struct rtld_global_ro
+@@ -681,6 +681,12 @@ struct rtld_global_ro
    /* List of auditing interfaces.  */
    struct audit_ifaces *_dl_audit;
    unsigned int _dl_naudit;

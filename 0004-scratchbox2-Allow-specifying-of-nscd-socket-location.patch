@@ -12,7 +12,7 @@ configurable via an environment variable.
  3 files changed, 54 insertions(+), 8 deletions(-)
 
 diff --git a/nscd/connections.c b/nscd/connections.c
-index 744b27be2f..6225536c7a 100644
+index 28d1c5d9a6ae3896a2c9e21fcb4db52827efc38b..fe5d43397b0c6a903895b47ffad2fbe81dd261b2 100644
 --- a/nscd/connections.c
 +++ b/nscd/connections.c
 @@ -487,6 +487,20 @@ fail:
@@ -61,7 +61,7 @@ index 744b27be2f..6225536c7a 100644
    /* Set the socket up to accept connections.  */
    if (listen (sock, SOMAXCONN) < 0)
 diff --git a/nscd/nscd.c b/nscd/nscd.c
-index 6980e378ed..adcfce31a3 100644
+index 7a26f67b68b9dd23540e7544f1809ddba8b2e7f8..70c81e087b3011d899e171a30adc6f37bd47682a 100644
 --- a/nscd/nscd.c
 +++ b/nscd/nscd.c
 @@ -137,6 +137,8 @@ static struct argp argp =
@@ -117,7 +117,7 @@ index 6980e378ed..adcfce31a3 100644
    /* Clean up pid file.  */
    unlink (_PATH_NSCDPID);
 diff --git a/nscd/nscd_helper.c b/nscd/nscd_helper.c
-index 4082316a92..ea768f6e57 100644
+index 6319fde6f2d17183221289b838041aea94433d6b..3e97c96807b51f1833bf257a88fd7c8ec166e204 100644
 --- a/nscd/nscd_helper.c
 +++ b/nscd/nscd_helper.c
 @@ -162,6 +162,19 @@ __readvall (int fd, const struct iovec *iov, int iovcnt)
