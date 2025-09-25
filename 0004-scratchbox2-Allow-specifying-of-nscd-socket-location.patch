@@ -61,7 +61,7 @@ index 744b27be2f..6225536c7a 100644
    /* Set the socket up to accept connections.  */
    if (listen (sock, SOMAXCONN) < 0)
 diff --git a/nscd/nscd.c b/nscd/nscd.c
-index 13c0c898..40b7007e 100644
+index 6980e378ed..adcfce31a3 100644
 --- a/nscd/nscd.c
 +++ b/nscd/nscd.c
 @@ -137,6 +137,8 @@ static struct argp argp =

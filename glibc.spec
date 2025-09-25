@@ -5,7 +5,7 @@
 Name: glibc
 
 Summary: GNU C library shared libraries
-Version: 2.41+git2
+Version: 2.41+git3
 Release: 0
 License: LGPLv2+ and LGPLv2+ with exceptions and GPLv2+
 URL: http://www.gnu.org/software/libc/
@@ -21,6 +21,7 @@ Patch6: 0006-scratchbox2-Add-options-to-not-set-any-default-dirs-.patch
 Patch7: 0007-scratchbox2-Add-new-option-rpath-prefix-to-ld.so.patch
 Patch8: 0008-Define-bits-endian.h-instead-of-generating-it.patch
 Patch9: 0009-Revert-elf-Refuse-to-dlopen-PIE-objects-BZ-24323.patch
+Patch10: 0010-posix-Fix-double-free-after-allocation-failure-in-re.patch
 
 Provides: ldconfig
 # The dynamic linker supports DT_GNU_HASH
