@@ -1,3 +1,6 @@
+* Thu Sep 25 2025 Matti Lehtimäki <matti.lehtimaki@jolla.com> - 2.41+git3
+- Backport patch to fix a double-free issue. JB#63622
+
 * Thu Jul 10 2025 Pami Ketolainen <pami.ketolainen@jolla.com> - 2.41+git2
 - Fix update order regarding libgcc. JB#63419
 
