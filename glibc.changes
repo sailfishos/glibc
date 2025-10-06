@@ -1,3 +1,6 @@
+* Mon Oct 6 2025 Pami Ketolainen <pami.ketolainen@jolla.com> - 2.41+git4
+- Add libxcrypt in devel dependencies. JB#63702
+
 * Thu Sep 25 2025 Matti Lehtimäki <matti.lehtimaki@jolla.com> - 2.41+git3
 - Backport patch to fix a double-free issue. JB#63622
 
