@@ -1,3 +1,6 @@
+* Mon Oct 9 2025 Matti Viljanen <matti.viljanen@jolla.com> - 2.41+git5
+- Don't use hardcoded find-debuginfo path. JB#62519
+
 * Mon Oct 6 2025 Pami Ketolainen <pami.ketolainen@jolla.com> - 2.41+git4
 - Add libxcrypt in devel dependencies. JB#63702
 

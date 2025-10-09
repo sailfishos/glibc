@@ -5,7 +5,7 @@
 Name: glibc
 
 Summary: GNU C library shared libraries
-Version: 2.41+git4
+Version: 2.41+git5
 Release: 0
 License: LGPLv2+ and LGPLv2+ with exceptions and GPLv2+
 URL: http://www.gnu.org/software/libc/
@@ -218,7 +218,7 @@ build_CFLAGS="$BuildFlags -O3"
 OPT_FLAGS=`echo "$RPM_OPT_FLAGS" | sed -e "s/-O2\ //g" \
                    | sed -e "s/-fstack-protector\ //g" \
                    | sed -e "s/-Wp,-D_FORTIFY_SOURCE=2\ //g" \
-                   | sed -e "s/--param=ssp-buffer-size=4\ //g"` 
+                   | sed -e "s/--param=ssp-buffer-size=4\ //g"`
 
 build_CFLAGS="$build_CFLAGS $OPT_FLAGS"
 %endif
@@ -810,7 +810,7 @@ find_debuginfo_args="$find_debuginfo_args \
 	"
 %endif
 
-/usr/lib/rpm/find-debuginfo.sh $find_debuginfo_args -o debuginfo.filelist
+find-debuginfo $find_debuginfo_args -o debuginfo.filelist
 
 # List all of the *.a archives in the debug directory.
 list_debug_archives()
