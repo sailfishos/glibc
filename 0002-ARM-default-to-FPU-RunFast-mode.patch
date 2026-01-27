@@ -9,7 +9,7 @@ Subject: [PATCH] ARM: default to FPU RunFast mode
  2 files changed, 10 insertions(+), 3 deletions(-)
 
 diff --git a/csu/init-first.c b/csu/init-first.c
-index e35e4ce84f..c46fc1f892 100644
+index 2bc65d24ac1903da089f999318ab1747e3140657..79fa65a0a27b055675ab4ddda70559fc5e36608a 100644
 --- a/csu/init-first.c
 +++ b/csu/init-first.c
 @@ -57,6 +57,11 @@ _init_first (int argc, char **argv, char **envp)
@@ -25,7 +25,7 @@ index e35e4ce84f..c46fc1f892 100644
    __libc_argc = argc;
    __libc_argv = argv;
 diff --git a/sysdeps/arm/fpu_control.h b/sysdeps/arm/fpu_control.h
-index b647149133..c128bcc02b 100644
+index 53f2c143820560cb98e01ef67131e5acf2dddee5..fcc4e3cfd772693df56844aa14ac7b3f1e73fe60 100644
 --- a/sysdeps/arm/fpu_control.h
 +++ b/sysdeps/arm/fpu_control.h
 @@ -22,7 +22,8 @@

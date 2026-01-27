@@ -1,3 +1,6 @@
+* Tue Jan 27 2026 Matti Lehtimäki <matti.lehtimaki@jolla.com> - 2.43+git1
+- Update to version 2.43. JB#63834
+
 * Mon Oct 9 2025 Matti Viljanen <matti.viljanen@jolla.com> - 2.41+git5
 - Don't use hardcoded find-debuginfo path. JB#62519
 

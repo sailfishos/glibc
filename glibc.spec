@@ -1,15 +1,15 @@
-%global glibcsrcdir glibc-2.41
+%global glibcsrcdir glibc-2.43
 # Default: Always disable the benchtests.
 %bcond_with benchtests
 
 Name: glibc
 
 Summary: GNU C library shared libraries
-Version: 2.41+git5
+Version: 2.43+git1
 Release: 0
 License: LGPLv2+ and LGPLv2+ with exceptions and GPLv2+
 URL: http://www.gnu.org/software/libc/
-Source0: glibc-2.41.tar.xz
+Source0: glibc-2.43.tar.xz
 Source1: build-locale-archive.c
 
 Patch1: 0001-Fix-libc6-alignment-error-in-lib-ld-linux.so.3-on-ar.patch
@@ -21,7 +21,7 @@ Patch6: 0006-scratchbox2-Add-options-to-not-set-any-default-dirs-.patch
 Patch7: 0007-scratchbox2-Add-new-option-rpath-prefix-to-ld.so.patch
 Patch8: 0008-Define-bits-endian.h-instead-of-generating-it.patch
 Patch9: 0009-Revert-elf-Refuse-to-dlopen-PIE-objects-BZ-24323.patch
-Patch10: 0010-posix-Fix-double-free-after-allocation-failure-in-re.patch
+Patch10: 0010-linux-Fix-build-without-linux-openat2.h.patch
 
 Provides: ldconfig
 # The dynamic linker supports DT_GNU_HASH
@@ -1064,7 +1064,7 @@ fi
 %doc README NEWS INSTALL elf/rtld-debugger-interface.txt
 # If rpm doesn't support %%license, then use %%doc instead.
 %{!?_licensedir:%global license %%doc}
-%license COPYING COPYING.LIB LICENSES
+%license COPYINGv2 COPYING.LESSERv2 LICENSES
 
 %ifnarch %{auxarches}
 %files -f common.filelist common

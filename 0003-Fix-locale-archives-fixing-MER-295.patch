@@ -8,7 +8,7 @@ Subject: [PATCH] Fix locale archives, fixing MER#295
  1 file changed, 5 insertions(+), 5 deletions(-)
 
 diff --git a/locale/programs/locarchive.c b/locale/programs/locarchive.c
-index 2c19f4fd29..14d9bb12db 100644
+index 445f50b70f8986a3e25dcf7df683262252575a1a..5833c2878e7c347feddb7b7891f5d36aae236e03 100644
 --- a/locale/programs/locarchive.c
 +++ b/locale/programs/locarchive.c
 @@ -280,9 +280,9 @@ oldlocrecentcmp (const void *a, const void *b)
@@ -24,7 +24,7 @@ index 2c19f4fd29..14d9bb12db 100644
  
  
  static bool
-@@ -701,7 +701,7 @@ close_archive (struct locarhandle *ah)
+@@ -707,7 +707,7 @@ close_archive (struct locarhandle *ah)
  #include "../../intl/explodename.c"
  #include "../../intl/l10nflist.c"
  
@@ -33,7 +33,7 @@ index 2c19f4fd29..14d9bb12db 100644
  insert_name (struct locarhandle *ah,
  	     const char *name, size_t name_len, bool replace)
  {
-@@ -762,7 +762,7 @@ insert_name (struct locarhandle *ah,
+@@ -768,7 +768,7 @@ insert_name (struct locarhandle *ah,
    return &namehashtab[idx];
  }
  

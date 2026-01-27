@@ -10,7 +10,7 @@ Subject: [PATCH] Define bits/endian.h instead of generating it
  3 files changed, 57 insertions(+), 36 deletions(-)
 
 diff --git a/bits/endian.h b/bits/endian.h
-index 45afd4ae47..f49f6ab1c9 100644
+index 45afd4ae47708c0c1953a06ed95aa6f3a8da302f..f49f6ab1c9b3a108fad08e80063cb534ae79b049 100644
 --- a/bits/endian.h
 +++ b/bits/endian.h
 @@ -1,13 +1,10 @@
@@ -34,7 +34,7 @@ index 45afd4ae47..f49f6ab1c9 100644
 +#define __BYTE_ORDER __LITTLE_ENDIAN
 +#endif
 diff --git a/bits/errno.h b/bits/errno.h
-index 4439341979..4cb574f4bd 100644
+index bd7620a0eced2fa0cc4d1177bf20dac1b3df8676..e02c1fa02631793bfc5ed7360605b3ee1d40962a 100644
 --- a/bits/errno.h
 +++ b/bits/errno.h
 @@ -25,26 +25,52 @@
@@ -112,7 +112,7 @@ index 4439341979..4cb574f4bd 100644
  
  #endif /* bits/errno.h.  */
 diff --git a/bits/wordsize.h b/bits/wordsize.h
-index 53013a9275..fa31ec604f 100644
+index 53013a9275c7c81eccb0356ab956eb2688bcf512..fa31ec604faba1fc9f2b30fd0a6b5d97b0faffdc 100644
 --- a/bits/wordsize.h
 +++ b/bits/wordsize.h
 @@ -1,24 +1,22 @@
