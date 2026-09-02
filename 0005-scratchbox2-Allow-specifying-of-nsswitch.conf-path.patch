@@ -14,7 +14,7 @@ always read /etc/nsswitch.conf from the host.
  1 file changed, 10 insertions(+), 1 deletion(-)
 
 diff --git a/nss/nss_database.c b/nss/nss_database.c
-index 6997b5bb04ff52a750eb59131b192fe5e1e67670..225a7167c68682ed7590496f7c5161c0e1ed31af 100644
+index 076d5a63fecdefc6f183f5c28f817be753628031..ddcf8ccea973d27dc19de15d73e45938225bbc0d 100644
 --- a/nss/nss_database.c
 +++ b/nss/nss_database.c
 @@ -28,6 +28,7 @@
@@ -25,7 +25,7 @@ index 6997b5bb04ff52a750eb59131b192fe5e1e67670..225a7167c68682ed7590496f7c5161c0
  
  struct nss_database_state
  {
-@@ -294,7 +295,15 @@ static bool
+@@ -296,7 +297,15 @@ static bool
  nss_database_reload (struct nss_database_data *staging,
                       struct file_change_detection *initial)
  {

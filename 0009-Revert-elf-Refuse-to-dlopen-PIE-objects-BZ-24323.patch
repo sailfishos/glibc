@@ -17,10 +17,10 @@ This reverts commit 2c75b545de6fe3c44138799c68217a94bc669a88.
  delete mode 100644 elf/tst-dlopen-tlsmodid-pie.c
 
 diff --git a/elf/Makefile b/elf/Makefile
-index 01cc51636eee412b5877df183038504cdb2269e1..f5b899dc4aa5924bb1062b9f5bb891d8c23ff92f 100644
+index 94c5b7e6ed852fd80ed55321d71ce3556996809d..81f05a82e83d7e7de8a84e9f7c8b87c510658c4f 100644
 --- a/elf/Makefile
 +++ b/elf/Makefile
-@@ -1166,15 +1166,10 @@ endif
+@@ -1223,15 +1223,10 @@ endif
  ifeq (yesyes,$(have-fpie)$(build-shared))
  modules-names += tst-piemod1
  tests += \
@@ -36,7 +36,7 @@ index 01cc51636eee412b5877df183038504cdb2269e1..f5b899dc4aa5924bb1062b9f5bb891d8
    tst-pie1 \
    tst-pie2 \
    # tests-pie
-@@ -2154,7 +2149,6 @@ CFLAGS-tst-pie-address.c += $(pie-ccflag)
+@@ -2262,7 +2257,6 @@ CFLAGS-tst-pie-address.c += $(pie-ccflag)
  
  $(objpfx)tst-piemod1.so: $(libsupport)
  $(objpfx)tst-pie1: $(objpfx)tst-piemod1.so
@@ -45,10 +45,10 @@ index 01cc51636eee412b5877df183038504cdb2269e1..f5b899dc4aa5924bb1062b9f5bb891d8
  ifeq (yes,$(build-shared))
  # NB: Please keep cet-built-dso in sysdeps/x86/Makefile in sync with
 diff --git a/elf/dl-load.c b/elf/dl-load.c
-index a674354dcb77ecef4c7fbcb2b29221d19ab11f96..19252b49f9f33477ef66ed4a0e3efacc5d6c407c 100644
+index e8ffde4b25f80948cd30edf2bda230b88d812b2c..9ca5a77a9ae5e1cfb78aa4802b72bfc75e738f17 100644
 --- a/elf/dl-load.c
 +++ b/elf/dl-load.c
-@@ -1311,19 +1311,22 @@ _dl_map_object_from_fd (const char *name, const char *origname, int fd,
+@@ -1361,19 +1361,22 @@ _dl_map_object_from_fd (const char *name, const char *origname, int fd,
    elf_get_dynamic_info (l, false, false);
  
    /* Make sure we are not dlopen'ing an object that has the

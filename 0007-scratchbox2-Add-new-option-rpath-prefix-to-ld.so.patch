@@ -22,12 +22,12 @@ when the dynamic linker is started "automatically" by the kernel.
  5 files changed, 70 insertions(+), 12 deletions(-)
 
 diff --git a/elf/dl-load.c b/elf/dl-load.c
-index 402f1cab3f134bc0b1d5122d2d8ee4a16b7cf785..a674354dcb77ecef4c7fbcb2b29221d19ab11f96 100644
+index f9ef8591f65a2262c91e8428c753f144eef584be..e8ffde4b25f80948cd30edf2bda230b88d812b2c 100644
 --- a/elf/dl-load.c
 +++ b/elf/dl-load.c
-@@ -440,7 +440,8 @@ static size_t max_dirnamelen;
- 
- static struct r_search_path_elem **
+@@ -427,7 +427,8 @@ static size_t max_dirnamelen;
+    caller responsible for signaling any error.  */
+ static bool
  fillin_rpath (char *rpath, struct r_search_path_elem **result, const char *sep,
 -	      const char *what, const char *where, struct link_map *l)
 +	      const char *what, const char *where, struct link_map *l,
@@ -35,7 +35,7 @@ index 402f1cab3f134bc0b1d5122d2d8ee4a16b7cf785..a674354dcb77ecef4c7fbcb2b29221d1
  {
    char *cp;
    size_t nelems = 0;
-@@ -480,9 +481,24 @@ fillin_rpath (char *rpath, struct r_search_path_elem **result, const char *sep,
+@@ -467,9 +468,24 @@ fillin_rpath (char *rpath, struct r_search_path_elem **result, const char *sep,
  	}
  
        /* See if this directory is already known.  */
@@ -63,7 +63,7 @@ index 402f1cab3f134bc0b1d5122d2d8ee4a16b7cf785..a674354dcb77ecef4c7fbcb2b29221d1
  
        if (dirp != NULL)
  	{
-@@ -500,22 +516,44 @@ fillin_rpath (char *rpath, struct r_search_path_elem **result, const char *sep,
+@@ -487,11 +503,20 @@ fillin_rpath (char *rpath, struct r_search_path_elem **result, const char *sep,
  	  size_t cnt;
  	  enum r_dir_status init_val;
  	  size_t where_len = where ? strlen (where) + 1 : 0;
@@ -83,8 +83,9 @@ index 402f1cab3f134bc0b1d5122d2d8ee4a16b7cf785..a674354dcb77ecef4c7fbcb2b29221d1
 -		    + where_len + len + 1);
 +		    + where_len + rpath_prefix_len + len + 1);
  	  if (dirp == NULL)
- 	    _dl_signal_error (ENOMEM, NULL, NULL,
- 			      N_("cannot create cache for search path"));
+ 	    {
+ 	      free (to_free);
+@@ -500,11 +525,24 @@ fillin_rpath (char *rpath, struct r_search_path_elem **result, const char *sep,
  
  	  dirp->dirname = ((char *) dirp + sizeof (*dirp)
  			   + ncapstr * sizeof (enum r_dir_status));
@@ -113,7 +114,7 @@ index 402f1cab3f134bc0b1d5122d2d8ee4a16b7cf785..a674354dcb77ecef4c7fbcb2b29221d1
  
  	  /* We have to make sure all the relative directories are
  	     never ignored.  The current directory might change and
-@@ -526,7 +564,8 @@ fillin_rpath (char *rpath, struct r_search_path_elem **result, const char *sep,
+@@ -515,7 +553,8 @@ fillin_rpath (char *rpath, struct r_search_path_elem **result, const char *sep,
  
  	  dirp->what = what;
  	  if (__glibc_likely (where != NULL))
@@ -123,26 +124,26 @@ index 402f1cab3f134bc0b1d5122d2d8ee4a16b7cf785..a674354dcb77ecef4c7fbcb2b29221d1
  				  + (ncapstr * sizeof (enum r_dir_status)),
  				  where, where_len);
  	  else
-@@ -625,7 +664,7 @@ decompose_rpath (struct r_search_path_struct *sps,
+@@ -614,7 +653,7 @@ decompose_rpath (struct r_search_path_struct *sps,
        _dl_signal_error (ENOMEM, NULL, NULL, errstring);
      }
  
--  fillin_rpath (copy, result, ":", what, where, l);
-+  fillin_rpath (copy, result, ":", what, where, l, GLRO(dl_rpath_prefix));
+-  if (!fillin_rpath (copy, result, ":", what, where, l))
++  if (!fillin_rpath (copy, result, ":", what, where, l, GLRO(dl_rpath_prefix)))
+     {
+       free (copy);
+       free (result);
+@@ -819,7 +858,7 @@ _dl_init_paths (const char *llp, const char *source,
+       char *llp_tmp = memcpy (scratch.data, llp, llp_len + 1);
  
-   /* Free the copied RPATH string.  `fillin_rpath' make own copies if
-      necessary.  */
-@@ -816,7 +855,7 @@ _dl_init_paths (const char *llp, const char *source,
- 	}
+       bool ok = fillin_rpath (llp_tmp, __rtld_env_path_list.dirs, ":;",
+-			      source, NULL, l);
++			      source, NULL, l, NULL/*no prefix*/);
  
-       (void) fillin_rpath (llp_tmp, __rtld_env_path_list.dirs, ":;",
--			   source, NULL, l);
-+			   source, NULL, l, NULL/*no prefix*/);
+       dl_scratch_buffer_free (&scratch);
  
-       if (__rtld_env_path_list.dirs[0] == NULL)
- 	{
 diff --git a/elf/dl-support.c b/elf/dl-support.c
-index 2c173923fffad8b2666f74d9c24c35da1239e3a4..ede7c418345ae4d0cad1bab2b44892acd04763e4 100644
+index 44a7c7ab44bb81ebd796ad8eccb914d27c4e49e5..eaaf0cee96d41566b57bb4e8f3005195f418ae60 100644
 --- a/elf/dl-support.c
 +++ b/elf/dl-support.c
 @@ -67,6 +67,9 @@ const char *_dl_inhibit_rpath;
@@ -169,10 +170,10 @@ index 3dacc8c5c86573116074f7b2ee055d3c5dde3449..2373dc15e43646837f1f4dd281b5eeca
                          search glibc-hwcaps subdirectories in LIST\n\
    --glibc-hwcaps-mask LIST\n\
 diff --git a/elf/rtld.c b/elf/rtld.c
-index 7946cc47f40e306347ff83cf3b89d5b760380be8..af7300d082a41dd83c5b61111157615c4d8eb996 100644
+index 98cf0e9237ffcfe4675975aff3ca3e2357bbb502..3ccb5ec78cc8cfbbd5ee8cc698fd35ee24dd3ae5 100644
 --- a/elf/rtld.c
 +++ b/elf/rtld.c
-@@ -1449,6 +1449,14 @@ dl_main (const ElfW(Phdr) *phdr,
+@@ -1439,6 +1439,14 @@ dl_main (const ElfW(Phdr) *phdr,
  	  {
  	    GLRO(dl_inhibit_rpath) = _dl_argv[2];
  
@@ -188,10 +189,10 @@ index 7946cc47f40e306347ff83cf3b89d5b760380be8..af7300d082a41dd83c5b61111157615c
  	    _dl_argv += 2;
  	  }
 diff --git a/sysdeps/generic/ldsodefs.h b/sysdeps/generic/ldsodefs.h
-index a4d2acd8fa59ffb3208fcbc1979a476d7eda1f45..ad5fe781ba36a837a3d154eda64eb7151f0b422b 100644
+index 8172bc1f466c7d8f7ec999ad63efb11e859b7165..3227162bf43b56dff05e388bc7bcff1c137915c7 100644
 --- a/sysdeps/generic/ldsodefs.h
 +++ b/sysdeps/generic/ldsodefs.h
-@@ -681,6 +681,12 @@ struct rtld_global_ro
+@@ -687,6 +687,12 @@ struct rtld_global_ro
    /* List of auditing interfaces.  */
    struct audit_ifaces *_dl_audit;
    unsigned int _dl_naudit;

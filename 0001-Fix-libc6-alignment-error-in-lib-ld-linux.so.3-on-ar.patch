@@ -11,10 +11,10 @@ https://sourceware.org/legacy-ml/crossgcc/2009-11/msg00008.html
  1 file changed, 11 insertions(+), 2 deletions(-)
 
 diff --git a/sysdeps/arm/dl-machine.h b/sysdeps/arm/dl-machine.h
-index e0065ce73c81ee137c15137c68387a89bfb5cb70..49698c7e3859b5e1fb8efd5af51c4053c901d0a0 100644
+index 15cced693e38c2721b4207e1d88e3fbcf4d27dc2..a89eece83a7d6cee7fe6cd6e56f0eda27b4a1461 100644
 --- a/sysdeps/arm/dl-machine.h
 +++ b/sysdeps/arm/dl-machine.h
-@@ -442,13 +442,22 @@ elf_machine_rel (struct link_map *map, struct r_scope_elem *scope[],
+@@ -443,13 +443,22 @@ elf_machine_rel (struct link_map *map, struct r_scope_elem *scope[],
  }
  
  
