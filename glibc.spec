@@ -5,7 +5,7 @@
 Name: glibc
 
 Summary: GNU C library shared libraries
-Version: 2.41+git5
+Version: 2.41+git6
 Release: 0
 License: LGPLv2+ and LGPLv2+ with exceptions and GPLv2+
 URL: http://www.gnu.org/software/libc/
@@ -160,6 +160,19 @@ libraries, as well as national language (locale) support.
 %undefine __brp_ldconfig
 
 ######################################################################
+
+%package locale-source
+Summary: The sources for the locales
+Requires: %{name} = %{version}-%{release}
+Requires: %{name}-common = %{version}-%{release}
+
+# This subpackage contains gzip compressed charmaps
+Requires: gzip
+
+%description locale-source
+The sources for all locales provided in the language packs.
+If you are building custom locales you will most likely use
+these sources as the basis for your new locale.
 
 %package -n nscd
 Summary: A Name Service Caching Daemon (nscd)
@@ -724,9 +737,11 @@ grep '%{_prefix}/sbin' master.filelist \
 # Exceptions:
 # - The actual share directory, not owned by us.
 # - The info files which go in devel, and the info directory.
+# - The locale sources go to local-sources
 grep '%{_prefix}/share' master.filelist \
 	| grep -v \
 	-e '%{_prefix}/share/info/libc.info.*' \
+	-e '%{_prefix}/share/i18n' \
 	-e '%%dir %{prefix}/share/info' \
 	-e '%%dir %{prefix}/share' \
 	>> common.filelist
@@ -1069,6 +1084,10 @@ fi
 %ifnarch %{auxarches}
 %files -f common.filelist common
 %doc documentation/README.timezone
+
+%files locale-source
+%{_datarootdir}/i18n/locales
+%{_datarootdir}/i18n/charmaps
 
 %files -f devel.filelist devel
 
