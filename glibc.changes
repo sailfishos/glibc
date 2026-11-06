@@ -1,3 +1,6 @@
+* Thu Nov 5 2026 Matti Lehtimäki <matti.lehtimaki@jolla.com> - 2.41+git6
+- Split locale sources to separate package. JB#65840
+
 * Mon Oct 9 2025 Matti Viljanen <matti.viljanen@jolla.com> - 2.41+git5
 - Don't use hardcoded find-debuginfo path. JB#62519
 
